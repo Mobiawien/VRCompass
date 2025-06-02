@@ -1,0 +1,190 @@
+{
+  "nomeBarca": "La Casa di Hilde",
+  "classificaVsrAttuale": "66393",
+  "gareSalvate": [
+    {
+      "id": 1747432640623,
+      "data": "2024-05-15",
+      "livello": "LIV3",
+      "nome": "Around Alone",
+      "classificaFinale": 22,
+      "puntiVSR": 2039
+    },
+    {
+      "id": 1747432697684,
+      "data": "2025-01-17",
+      "livello": "LIV3",
+      "nome": "Regata Costiera Club #1",
+      "classificaFinale": 8,
+      "puntiVSR": 2313
+    },
+    {
+      "id": 1747432790415,
+      "data": "2023-07-04",
+      "livello": "LIV2",
+      "nome": "Solitaire du Figaro",
+      "classificaFinale": 18,
+      "puntiVSR": 3484
+    },
+    {
+      "id": 1747503455384,
+      "data": "2024-06-06",
+      "livello": "VGLOBE",
+      "nome": "Vendée Globe",
+      "classificaFinale": 100,
+      "puntiVSR": 8435
+    },
+    {
+      "id": 1747503684005,
+      "data": "2023-06-12",
+      "livello": "LIV3",
+      "nome": "Antigua Sailing Week",
+      "classificaFinale": 40,
+      "puntiVSR": 1892
+    },
+    {
+      "id": 1747503868957,
+      "data": "2022-11-22",
+      "livello": "LIV1",
+      "nome": "Volvo Ocean Race Leg",
+      "classificaFinale": 7,
+      "puntiVSR": 7841
+    },
+    {
+      "id": 1747504222602,
+      "data": "2025-03-13",
+      "livello": "LIV3",
+      "nome": "Regata Costiera Club #2",
+      "classificaFinale": 5,
+      "puntiVSR": 2453
+    },
+    {
+      "id": 1747504777536,
+      "data": "2024-12-20",
+      "livello": "LIV3",
+      "nome": "Campionato Invernale",
+      "classificaFinale": 12,
+      "puntiVSR": 2199
+    },
+    {
+      "id": 1747505621128,
+      "data": "2024-10-11",
+      "livello": "LIV2",
+      "nome": "Trofeo Accademia Navale",
+      "classificaFinale": 25,
+      "puntiVSR": 3344
+    },
+    {
+      "id": 1747506623171,
+      "data": "2024-03-08",
+      "livello": "LIV2",
+      "nome": "Giraglia Rolex Cup",
+      "classificaFinale": 33,
+      "puntiVSR": 3230
+    },
+    {
+      "id": 1747507114684,
+      "data": "2025-04-09",
+      "livello": "LIV1",
+      "nome": "Transat Jacques Vabre",
+      "classificaFinale": 5,
+      "puntiVSR": 8178
+    },
+    {
+      "id": 1747507261924,
+      "data": "2025-02-09",
+      "livello": "LIV2",
+      "nome": "Rolex Fastnet",
+      "classificaFinale": 12,
+      "puntiVSR": 3665
+    },
+    {
+      "id": 1747507370177,
+      "data": "2024-11-10",
+      "livello": "LIV1",
+      "nome": "Sydney Hobart",
+      "classificaFinale": 3,
+      "puntiVSR": 8717
+    },
+    {
+      "id": 1747507416535,
+      "data": "2024-09-07",
+      "livello": "LIV3",
+      "nome": "Mini Transat",
+      "classificaFinale": 25,
+      "puntiVSR": 2006
+    },
+    {
+      "id": 1747507465430,
+      "data": "2024-07-12",
+      "livello": "LIV1",
+      "nome": "Route du Rhum",
+      "classificaFinale": 8,
+      "puntiVSR": 7711
+    },
+    {
+      "id": 1747507540784,
+      "data": "2024-06-12",
+      "livello": "LIV2",
+      "nome": "Ocean Race Leg",
+      "classificaFinale": 15,
+      "puntiVSR": 3564
+    },
+    {
+      "id": 1747507613240,
+      "data": "2024-04-07",
+      "livello": "LIV1",
+      "nome": "Vendée Artique",
+      "classificaFinale": 10,
+      "puntiVSR": 7499
+    },
+    {
+      "id": 1747508325047,
+      "data": "2024-02-03",
+      "livello": "LIV2",
+      "nome": "Transpac",
+      "classificaFinale": 20,
+      "puntiVSR": 3438
+    },
+    {
+      "id": 1747508432982,
+      "data": "2023-11-04",
+      "livello": "LIV3",
+      "nome": "Middle Sea Race",
+      "classificaFinale": 30,
+      "puntiVSR": 1961
+    },
+    {
+      "id": 1747509021366,
+      "data": "2024-09-06",
+      "livello": "LIV3",
+      "nome": "Brest Atlantiques",
+      "classificaFinale": 4,
+      "puntiVSR": 2523
+    },
+    {
+      "id": 1747517874207,
+      "data": "2024-08-03",
+      "livello": "HC",
+      "nome": "prova HC",
+      "classificaFinale": 2,
+      "puntiVSR": 13755
+    },
+    {
+      "id": 1747945059861,
+      "data": "2025-03-22",
+      "livello": "LIV3",
+      "nome": "3 liv per prova",
+      "classificaFinale": 354,
+      "puntiVSR": 1440
+    },
+    {
+      "id": 1747945145395,
+      "data": "2025-01-24",
+      "livello": "LIV3",
+      "nome": "3 liv per prova n. 2",
+      "classificaFinale": 54,
+      "puntiVSR": 1822
+    }
+  ]
+}

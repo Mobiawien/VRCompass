@@ -1,0 +1,28 @@
+url: ""
+baseurl: "/VRCompass"
+```
+
+3. In fondo alla pagina:
+   - Nel messaggio di commit scrivi: "Aggiunto config per GitHub Pages"
+   - Clicca "Commit new file"
+
+Questo dovrebbe forzare GitHub Pages a:
+1. Usare il branch "main"
+2. Configurare correttamente i percorsi
+3. Pubblicare il sito
+
+Vuoi che proviamo questo approccio?# filepath: /Users/biagiomorrone/Desktop/VRCompass/_config.yml
+url: ""
+baseurl: "/VRCompass"
+```
+
+3. In fondo alla pagina:
+   - Nel messaggio di commit scrivi: "Aggiunto config per GitHub Pages"
+   - Clicca "Commit new file"
+
+Questo dovrebbe forzare GitHub Pages a:
+1. Usare il branch "main"
+2. Configurare correttamente i percorsi
+3. Pubblicare il sito
+
+Vuoi che proviamo questo approccio?

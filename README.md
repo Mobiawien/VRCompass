@@ -1,8 +1,6 @@
 # VRCompass
-App web per gestire la classifica di Virtual Regatta Offshore
-# VRCompass
 
-VRCompass è un'applicazione web per Virtual Regatta Offshore che aiuta i giocatori a:
+App web per gestire la classifica di Virtual Regatta Offshore che aiuta i giocatori a:
 - Gestire la classifica VSR
 - Calcolare i crediti di gioco
 - Analizzare le strategie di regata

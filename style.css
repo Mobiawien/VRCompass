@@ -664,17 +664,41 @@ td.calculated-result-cell {
     font-size: 0.85em;
     padding: 6px 8px;
 }
-#tabella-gare-salvate button.delete-btn {
-    background-color: #dc3545;
+/* Rimosso lo stile per #tabella-gare-salvate button.delete-btn perché non ci sono pulsanti elimina visibili in quella tabella */
+
+/* Stili per i pulsanti di azione nella tabella storico VSR (#tabella-classifica-vsr) */
+/* Pulsante Elimina */
+#tabella-classifica-vsr button.delete-btn {
+    background-color: #f28b82; /* Rosso più tenue */
     color: white;
     border: none;
-    padding: 3px 8px;
+    padding: 4px 10px;
     border-radius: 3px;
     cursor: pointer;
-    font-size: 0.9em;
+    font-size: 0.85em;
+    margin: 2px; /* Piccolo margine per non toccare i bordi della cella e separare dai pulsanti adiacenti */
+    transition: background-color 0.2s ease;
 }
-#tabella-gare-salvate button.delete-btn:hover {
-    background-color: #c82333;
+
+#tabella-classifica-vsr button.delete-btn:hover {
+    background-color: #e17055; /* Rosso tenue più scuro per hover */
+}
+
+/* Pulsante Modifica */
+#tabella-classifica-vsr button.edit-btn {
+    background-color: #ffd966; /* Giallo più tenue */
+    color: #212529; /* Testo scuro per contrasto con giallo */
+    border: none;
+    padding: 4px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.85em;
+    margin: 2px;
+    transition: background-color 0.2s ease;
+}
+
+#tabella-classifica-vsr button.edit-btn:hover {
+    background-color: #f9c74f; /* Giallo tenue più scuro per hover */
 }
 
 /* Layout per la sezione Gestione Classifica VSR */

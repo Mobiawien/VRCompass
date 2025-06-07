@@ -1075,22 +1075,24 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             cellaStatoPunti.textContent = testoStato;
 
-            const cellaAzioni = row.insertCell(6);
             if (vistaStoricoAttuale !== 'valide') { // Mostra azioni per 'tutte' e per i filtri 'storico_X'
+                const cellaAzioni = row.insertCell(6); // Crea la cella solo se necessario
                 // la visibilità della colonna intera è gestita da 'headerAzioni.style.display'
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = 'Elimina';
-                deleteButton.classList.add('elimina-gara-btn');
+                deleteButton.classList.add('delete-btn'); // Usa la classe corretta per lo stile
                 deleteButton.dataset.id = gara.id;
                 cellaAzioni.appendChild(deleteButton);
 
                 const editButton = document.createElement('button');
                 editButton.textContent = 'Modifica';
-                editButton.classList.add('modifica-gara-btn', 'ml-5'); // ml-5 per un po' di margine
+                editButton.classList.add('edit-btn'); // Usa la classe corretta per lo stile
+                // Aggiungi un piccolo margine se necessario tramite CSS o un'altra classe helper se preferisci
+                // editButton.style.marginLeft = '5px'; // Esempio di margine inline
                 editButton.dataset.id = gara.id;
                 cellaAzioni.appendChild(editButton);
             } else {
-                // Non fare nulla qui, la colonna intera è nascosta
+                // Non creare la cellaAzioni se la vista è 'valide'
             }
         });
     }

@@ -37,6 +37,7 @@ nav {
     border-bottom: 1px solid #dee2e6;
     margin-bottom: 20px;
     display: flex;
+    align-items: center; /* Aggiunto per allineare verticalmente gli item */
     gap: 10px;
     position: sticky; /* Rende la barra di navigazione appiccicosa */
     top: 0;           /* Si attacca alla parte superiore della viewport */

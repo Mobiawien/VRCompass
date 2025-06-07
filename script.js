@@ -1644,8 +1644,8 @@ document.addEventListener('DOMContentLoaded', () => {
             "LIV1": {
                 nomeBreve: "Livello 1",
                 iconaAzione: "🎯",
-                testoSlotVuoto: (numGareDaAggiungere100, puntiEsempio, nomeCategoria, numGareCheSiDimezzano) => {
-                    let baseText = `<strong>Azione ${nomeCategoria}:</strong> Per ottimizzare la tua fascia 100%, dovresti aggiungere ${numGareDaAggiungere100 > 1 ? `${numGareDaAggiungere100} nuove gare` : 'una nuova gara'}. ${puntiEsempio ? `Un 10° posto potrebbe dare circa ${formatNumber(puntiEsempio,0)} pts.` : ''}`;
+                testoSlotVuoto: (numGareDaAggiungere100, puntiEsempio, nomeCategoria, numGareCheSiDimezzano) => { // Modificato riferimento al piazzamento
+                    let baseText = `<strong>Azione ${nomeCategoria}:</strong> Per ottimizzare la tua fascia 100%, dovresti aggiungere ${numGareDaAggiungere100 > 1 ? `${numGareDaAggiungere100} nuove gare` : 'una nuova gara'}. ${puntiEsempio ? `Un 50° posto potrebbe dare circa ${formatNumber(puntiEsempio,0)} pts.` : ''}`;
                     if (numGareCheSiDimezzano > 0) {
                         baseText += ` <strong class='text-info'>Questo suggerimento considera che ${numGareCheSiDimezzano > 1 ? `${numGareCheSiDimezzano} delle tue gare` : 'una delle tue gare'} al 100% passer${
                                      numGareCheSiDimezzano > 1 ? 'anno' : 'à'} presto al 50% (vedi "Monitoraggio Scadenze").</strong>`;
@@ -1668,8 +1668,8 @@ document.addEventListener('DOMContentLoaded', () => {
             "LIV2": {
                 nomeBreve: "Livello 2",
                 iconaAzione: "🎯",
-                testoSlotVuoto: (numGareDaAggiungere100, puntiEsempio, nomeCategoria, numGareCheSiDimezzano) => {
-                    let baseText = `<strong>Azione ${nomeCategoria}:</strong> Per ottimizzare la tua fascia 100%, dovresti aggiungere ${numGareDaAggiungere100 > 1 ? `${numGareDaAggiungere100} nuove gare` : 'una nuova gara'}. ${puntiEsempio ? `Un 10° posto potrebbe dare circa ${formatNumber(puntiEsempio,0)} pts.` : ''}`;
+                testoSlotVuoto: (numGareDaAggiungere100, puntiEsempio, nomeCategoria, numGareCheSiDimezzano) => { // Modificato riferimento al piazzamento
+                    let baseText = `<strong>Azione ${nomeCategoria}:</strong> Per ottimizzare la tua fascia 100%, dovresti aggiungere ${numGareDaAggiungere100 > 1 ? `${numGareDaAggiungere100} nuove gare` : 'una nuova gara'}. ${puntiEsempio ? `Un 50° posto potrebbe dare circa ${formatNumber(puntiEsempio,0)} pts.` : ''}`;
                     if (numGareCheSiDimezzano > 0) {
                         baseText += ` <strong class='text-info'>Questo suggerimento considera che ${numGareCheSiDimezzano > 1 ? `${numGareCheSiDimezzano} delle tue gare` : 'una delle tue gare'} al 100% passer${
                                      numGareCheSiDimezzano > 1 ? 'anno' : 'à'} presto al 50% (vedi "Monitoraggio Scadenze").</strong>`;
@@ -1692,8 +1692,8 @@ document.addEventListener('DOMContentLoaded', () => {
             "LIV3": {
                 nomeBreve: "Livello 3",
                 iconaAzione: "🎯",
-                testoSlotVuoto: (numGareDaAggiungere100, puntiEsempio, nomeCategoria, numGareCheSiDimezzano) => {
-                    let baseText = `<strong>Azione ${nomeCategoria}:</strong> Per ottimizzare la tua fascia 100%, dovresti aggiungere ${numGareDaAggiungere100 > 1 ? `${numGareDaAggiungere100} nuove gare` : 'una nuova gara'}. ${puntiEsempio ? `Un 10° posto potrebbe dare circa ${formatNumber(puntiEsempio,0)} pts.` : ''}`;
+                testoSlotVuoto: (numGareDaAggiungere100, puntiEsempio, nomeCategoria, numGareCheSiDimezzano) => { // Modificato riferimento al piazzamento
+                    let baseText = `<strong>Azione ${nomeCategoria}:</strong> Per ottimizzare la tua fascia 100%, dovresti aggiungere ${numGareDaAggiungere100 > 1 ? `${numGareDaAggiungere100} nuove gare` : 'una nuova gara'}. ${puntiEsempio ? `Un 50° posto potrebbe dare circa ${formatNumber(puntiEsempio,0)} pts.` : ''}`;
                     if (numGareCheSiDimezzano > 0) {
                         baseText += ` <strong class='text-info'>Questo suggerimento considera che ${numGareCheSiDimezzano > 1 ? `${numGareCheSiDimezzano} delle tue gare` : 'una delle tue gare'} al 100% passer${
                                      numGareCheSiDimezzano > 1 ? 'anno' : 'à'} presto al 50% (vedi "Monitoraggio Scadenze").</strong>`;
@@ -1740,7 +1740,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (gareCat.length < limiteGareContributive) { // Meno gare contributive del limite
                 let puntiEsempio = null;
                 if (livelloValoreNumerico) {
-                    puntiEsempio = calcolaPuntiPerClassifica(livelloValoreNumerico, 10); // Esempio per 10° posto
+                    puntiEsempio = calcolaPuntiPerClassifica(livelloValoreNumerico, 50); // Esempio per 50° posto
                 }
                 
                 // Calcola quante gare aggiungere per la fascia 100%, tenendo conto dei dimezzamenti

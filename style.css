@@ -121,27 +121,6 @@ nav {
     box-sizing: border-box;
 }
 
-/* Stili per il footer */
-#dashboard-footer-notes {
-    position: relative; /* Cambiato da fixed a relative */
-    bottom: auto;     /* Rimosso il posizionamento bottom */
-    left: auto;       /* Rimosso il posizionamento left */
-    transform: none;  /* Rimossa la trasformazione */
-    padding: 4px 12px;
-    margin: 10px auto; /* Aggiunto margine automatico */
-    font-size: 0.7em; /* Ridotto ulteriormente */
-    color: #6c757d;
-    text-align: center;
-    background-color: rgba(255, 255, 255, 0.95);
-    border: 1px solid #e9ecef;
-    border-radius: 4px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-    z-index: 1;      /* Ridotto z-index */
-    max-width: 95%; /* Aumentato da 80% a 95% */
-    width: auto;
-    white-space: normal; /* Permette il wrapping del testo */
-}
-
 /* Stili per la view della dashboard */
 #dashboard-view {
     padding: 0;
@@ -149,27 +128,6 @@ nav {
     display: flex;
     flex-direction: column;
     position: relative;
-}
-
-/* Stili per il footer della dashboard */
-#dashboard-footer-notes {
-    position: relative; /* Cambiato da fixed a relative */
-    bottom: auto;     /* Rimosso il posizionamento bottom */
-    left: auto;       /* Rimosso il posizionamento left */
-    transform: none;  /* Rimossa la trasformazione */
-    padding: 4px 12px;
-    margin: 10px auto; /* Aggiunto margine automatico */
-    font-size: 0.7em; /* Ridotto ulteriormente */
-    color: #6c757d;
-    text-align: center;
-    background-color: rgba(255, 255, 255, 0.95);
-    border: 1px solid #e9ecef;
-    border-radius: 4px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-    z-index: 1;      /* Ridotto z-index */
-    max-width: 80%;
-    width: auto;
-    white-space: normal; /* Permette il wrapping del testo */
 }
 
 /* Modifica il layout per dare più spazio all'immagine */

@@ -606,12 +606,12 @@ document.addEventListener('DOMContentLoaded', () => {
         livelloGaraVsrStoricoSelect.addEventListener('change', calcolaEPopolaPuntiVSRStorico);
         classificaFinaleStoricoInput.addEventListener('input', calcolaEPopolaPuntiVSRStorico);
         classificaVsrtbody.addEventListener('click', (event) => {
-            if (event.target.classList.contains('elimina-gara-btn')) {
+            if (event.target.classList.contains('delete-btn')) { // Corretta classe per il pulsante elimina
                 const idGara = parseInt(event.target.dataset.id);
                 if (!isNaN(idGara)) {
                     eliminaGara(idGara);
                 }
-            } else if (event.target.classList.contains('modifica-gara-btn')) {
+            } else if (event.target.classList.contains('edit-btn')) { // Corretta classe per il pulsante modifica
                 const idGara = parseInt(event.target.dataset.id);
                 if (!isNaN(idGara)) {
                     popolaFormPerModifica(idGara);

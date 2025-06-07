@@ -36,6 +36,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Pulsanti Filtro Storico Gare
     const btnMostraTutteGare = document.getElementById('btn-mostra-tutte-gare');
     const btnMostraGareValide = document.getElementById('btn-mostra-gare-valide');
+    const btnStoricoHC = document.getElementById('btn-storico-hc');
+    const btnStoricoLiv1 = document.getElementById('btn-storico-liv1');
+    const btnStoricoLiv2 = document.getElementById('btn-storico-liv2');
+    const btnStoricoLiv3 = document.getElementById('btn-storico-liv3');
+
     // Titoli dinamici
     const titoloFormGara = document.getElementById('titolo-form-gara');
 
@@ -51,24 +56,44 @@ document.addEventListener('DOMContentLoaded', () => {
     const hcPuntiAttuali = document.getElementById('hc-punti-attuali');
     const hcGareSlot = document.getElementById('hc-gare-slot');
     const hcProgressBar = document.getElementById('hc-progress-bar');
+    // Nuovi elementi per la barra dei punti HC
+    const hcStackedPointsBarContainer = document.getElementById('hc-stacked-points-bar-container');
+    const hcPointsBar100 = document.getElementById('hc-points-bar-100');
+    const hcPointsBar50 = document.getElementById('hc-points-bar-50');
+    const hcPointsBarEmpty = document.getElementById('hc-points-bar-empty');
 
     const liv1Occupati = document.getElementById('liv1-occupati');
     const liv1PuntiCategoria = document.getElementById('liv1-punti-categoria'); // Nuovo
     const liv1MinPunti = document.getElementById('liv1-min-punti');
     const liv1GareSlot = document.getElementById('liv1-gare-slot');
     const liv1ProgressBar = document.getElementById('liv1-progress-bar');
+    // Nuovi elementi per la barra dei punti Liv1
+    const liv1StackedPointsBarContainer = document.getElementById('liv1-stacked-points-bar-container');
+    const liv1PointsBar100 = document.getElementById('liv1-points-bar-100');
+    const liv1PointsBar50 = document.getElementById('liv1-points-bar-50');
+    const liv1PointsBarEmpty = document.getElementById('liv1-points-bar-empty');
 
     const liv2Occupati = document.getElementById('liv2-occupati');
     const liv2PuntiCategoria = document.getElementById('liv2-punti-categoria'); // Nuovo
     const liv2MinPunti = document.getElementById('liv2-min-punti');
     const liv2GareSlot = document.getElementById('liv2-gare-slot');
     const liv2ProgressBar = document.getElementById('liv2-progress-bar');
+    // Nuovi elementi per la barra dei punti Liv2
+    const liv2StackedPointsBarContainer = document.getElementById('liv2-stacked-points-bar-container');
+    const liv2PointsBar100 = document.getElementById('liv2-points-bar-100');
+    const liv2PointsBar50 = document.getElementById('liv2-points-bar-50');
+    const liv2PointsBarEmpty = document.getElementById('liv2-points-bar-empty');
 
     const liv3Occupati = document.getElementById('liv3-occupati');
     const liv3PuntiCategoria = document.getElementById('liv3-punti-categoria'); // Nuovo
     const liv3MinPunti = document.getElementById('liv3-min-punti');
     const liv3GareSlot = document.getElementById('liv3-gare-slot');
     const liv3ProgressBar = document.getElementById('liv3-progress-bar');
+    // Nuovi elementi per la barra dei punti Liv3
+    const liv3StackedPointsBarContainer = document.getElementById('liv3-stacked-points-bar-container');
+    const liv3PointsBar100 = document.getElementById('liv3-points-bar-100');
+    const liv3PointsBar50 = document.getElementById('liv3-points-bar-50');
+    const liv3PointsBarEmpty = document.getElementById('liv3-points-bar-empty');
 
     const listaSuggerimentiSlot = document.getElementById('lista-suggerimenti-slot');
     // Elementi DOM per Monitoraggio Scadenze (ora gestiti dalla sezione Strategia ma gli ID sono gli stessi)
@@ -103,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let bonusBase = 0;
     let spesaAttrezzature = 0;
     let bonusExtra = 0;
-    let livelloGara = null; // Manterrà il valore numerico del livello gara (es. 15000, 10000) o null
+    let livelloGara = null; // Manterrà il valore numerico del livello gara (es. 15000, 10000) or null
     let classificaFinale = 0; // Stato per la classifica finale inserita o calcolata
     let classificaFinaleModificataManualmente = false;
     let vistaStoricoAttuale = 'valide';
@@ -112,21 +137,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Mappa per i livelli VSR della sezione Storico
     const livelliVsrStoricoMap = {
         "0": { testo: "Seleziona Livello VSR", valoreNumerico: null, tipo: "N/D" },
-        "VGLOBE": { testo: "Vendée Globe FC", valoreNumerico: 15000, tipo: "VGLOBE" },
         "HC": { testo: "Fuori Categoria", valoreNumerico: 15000, tipo: "HC" },
         "LIV1": { testo: "Livello 1", valoreNumerico: 10000, tipo: "LIV1" },
         "LIV2": { testo: "Livello 2", valoreNumerico: 5000, tipo: "LIV2" },
         "LIV3": { testo: "Livello 3", valoreNumerico: 3000, tipo: "LIV3" }
     };
 
-    // Costante per i limiti delle gare per categoria VSR
-    // I 'key' qui ora corrispondono ai 'tipo' in livelliVsrStoricoMap
+    // Costante per i limiti delle gare per categoria VSR *per fascia temporale*
+    // Il numero totale di slot per categoria è il valore qui * 2
     const LIMITI_GARE_PER_CATEGORIA = {
-        "VGLOBE": 1, // Solo la Vendée Globe può occupare lo slot HC valido
-        "HC": 0,     // Le HC Generiche non contribuiscono al punteggio VSR (limite 0)
-        "LIV1": 3,
-        "LIV2": 6,
-        "LIV3": 10
+        "HC": 1,     // 1 gara per fascia temporale (totale 2)
+        "LIV1": 3,    // 3 gare per fascia temporale (totale 6)
+        "LIV2": 6,    // 6 gare per fascia temporale (totale 12)
+        "LIV3": 10   // 10 gare per fascia temporale (totale 20)
     };
 
     // Variabili per il Grafico a Torta accessibili dalla callback del tooltip
@@ -136,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Mappa per tradurre il testo della label del grafico al tipoGara (usato nel tooltip)
     const mappaTestoLabelGraficoATipoGara = {};
     for (const key in livelliVsrStoricoMap) {
-        if (livelliVsrStoricoMap[key].testo && livelliVsrStoricoMap[key].tipo && livelliVsrStoricoMap[key].valoreNumerico !== null) {
+        if (key !== "0" && livelliVsrStoricoMap[key].testo && livelliVsrStoricoMap[key].tipo && livelliVsrStoricoMap[key].valoreNumerico !== null) {
             // Usiamo il testo che viene effettivamente usato nelle label del grafico a torta
             mappaTestoLabelGraficoATipoGara[livelliVsrStoricoMap[key].testo] = livelliVsrStoricoMap[key].tipo;
         }
@@ -159,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let cellaPuntiTab3Ref = null;
 
     // --- Funzioni Helper Globali per Calcoli VSR ---
-    // Spostate qui per essere accessibili da più funzioni
+    // Spostate qui per essere accessibile da più funzioni
     function calcolaPuntiPerClassifica(livelloValoreNumerico, classifica) {
         if (!livelloValoreNumerico || classifica <= 0) {
             return 0;
@@ -253,6 +276,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 vistaStoricoAttuale = 'valide';
                 if (btnMostraGareValide) btnMostraGareValide.classList.add('active');
                 if (btnMostraTutteGare) btnMostraTutteGare.classList.remove('active');
+                // Disattiva anche i nuovi pulsanti di filtro per livello
+                if (btnStoricoHC) btnStoricoHC.classList.remove('active');
+                if (btnStoricoLiv1) btnStoricoLiv1.classList.remove('active');
+                if (btnStoricoLiv2) btnStoricoLiv2.classList.remove('active');
+                if (btnStoricoLiv3) btnStoricoLiv3.classList.remove('active');
                 if (tabellaClassificaVsr) tabellaClassificaVsr.classList.remove('vista-tutte-attiva');
                 // Nascondi il form di aggiunta gara quando si è in vista 'valide'
                 if (formAggiungiGara) {
@@ -289,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
         aggiornaTabella2();
         aggiornaTabella3();
         setupCalcolatriceListeners();
-        if (btnMostraTutteGare && btnMostraGareValide) {
+        if (btnMostraTutteGare && btnMostraGareValide && btnStoricoHC && btnStoricoLiv1 && btnStoricoLiv2 && btnStoricoLiv3) {
             setupFiltriStoricoListeners();
         }
         setupClassificaListeners();
@@ -495,7 +523,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const opzioniLivelloGara = [
             { testo: "Seleziona", valore: "" }, // Modificato
             // Usiamo i valori stringa come nell'HTML per coerenza
-            { testo: "Vendée Globe FC", valore: "VGLOBE" },
+            // { testo: "Vendée Globe FC", valore: "VGLOBE" }, // VGLOBE rimosso
             { testo: "Fuori Categoria", valore: "HC" },
             { testo: "Livello 1", valore: "LIV1" },
             { testo: "Livello 2", valore: "LIV2" },
@@ -609,50 +637,62 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setupFiltriStoricoListeners() {
-        btnMostraTutteGare.addEventListener('click', () => {
-            vistaStoricoAttuale = 'tutte';
-            btnMostraTutteGare.classList.add('active');
-            btnMostraGareValide.classList.remove('active');
-            if (formAggiungiGara) { // Mostra il form
-                formAggiungiGara.style.display = 'block'; // o il suo display di default
-            }
-            // Resetta il form e il titolo del pulsante submit
+        const tuttiIBottoniFiltro = [
+            btnMostraGareValide, btnMostraTutteGare,
+            btnStoricoHC, btnStoricoLiv1, btnStoricoLiv2, btnStoricoLiv3
+        ];
+
+        function impostaFiltro(nuovaVista, bottoneAttivo) {
+            vistaStoricoAttuale = nuovaVista;
+
+            tuttiIBottoniFiltro.forEach(btn => btn.classList.remove('active'));
+            if (bottoneAttivo) bottoneAttivo.classList.add('active');
+
+            rimuoviEvidenziazioneTutteLeRighe();
             if (formAggiungiGara) formAggiungiGara.reset();
             if (puntiVsrCalcolatiInput) puntiVsrCalcolatiInput.value = '';
             idGaraInModifica = null;
-            rimuoviEvidenziazioneTutteLeRighe(); // Rimuovi evidenziazione
             const submitButton = formAggiungiGara.querySelector('button[type="submit"]');
             if (submitButton) submitButton.textContent = 'Aggiungi Gara';
 
-            if (titoloFormGara) {
-                titoloFormGara.style.display = 'block'; // Mostra titolo form
-                // Se non siamo in modalità modifica, il titolo deve essere quello di aggiunta
-                if (idGaraInModifica === null) {
-                    titoloFormGara.textContent = 'Aggiungi Risultato Regata';
+
+            if (nuovaVista === 'valide') {
+                if (formAggiungiGara) formAggiungiGara.style.display = 'none';
+                if (titoloFormGara) titoloFormGara.style.display = 'none';
+                const headerAzioni = document.getElementById('header-colonna-azioni');
+                if (headerAzioni) headerAzioni.style.display = 'none';
+                if (tabellaClassificaVsr) tabellaClassificaVsr.classList.remove('vista-tutte-attiva');
+            } else { // Per 'tutte' e per i filtri per livello
+                if (formAggiungiGara) formAggiungiGara.style.display = 'block';
+                if (titoloFormGara) {
+                    titoloFormGara.style.display = 'block';
+                    titoloFormGara.textContent = 'Aggiungi Risultato Regata'; // Titolo di default per aggiunta
                 }
+                const headerAzioni = document.getElementById('header-colonna-azioni');
+                if (headerAzioni) headerAzioni.style.display = '';
+                if (tabellaClassificaVsr) tabellaClassificaVsr.classList.add('vista-tutte-attiva');
             }
-            const headerAzioni = document.getElementById('header-colonna-azioni');
-            if (headerAzioni) headerAzioni.style.display = ''; // Mostra colonna azioni (ripristina display default)
+            aggiornaTabellaGare();
+        }
 
-            if (tabellaClassificaVsr) tabellaClassificaVsr.classList.add('vista-tutte-attiva');
-            aggiornaTabellaGare(); // Riattivato
-        });
-
-        btnMostraGareValide.addEventListener('click', () => {
-            vistaStoricoAttuale = 'valide';
-            btnMostraGareValide.classList.add('active');
-            btnMostraTutteGare.classList.remove('active');
-            rimuoviEvidenziazioneTutteLeRighe(); // Rimuovi evidenziazione anche qui per sicurezza
-            if (formAggiungiGara) { // Nascondi il form
-                formAggiungiGara.style.display = 'none';
-            }
-            if (titoloFormGara) titoloFormGara.style.display = 'none'; // Nascondi titolo form
-            const headerAzioni = document.getElementById('header-colonna-azioni');
-            if (headerAzioni) headerAzioni.style.display = 'none'; // Nascondi colonna azioni
-
-            if (tabellaClassificaVsr) tabellaClassificaVsr.classList.remove('vista-tutte-attiva');
-            aggiornaTabellaGare(); // Riattivato
-        });
+        if (btnMostraGareValide) {
+            btnMostraGareValide.addEventListener('click', () => impostaFiltro('valide', btnMostraGareValide));
+        }
+        if (btnMostraTutteGare) {
+            btnMostraTutteGare.addEventListener('click', () => impostaFiltro('tutte', btnMostraTutteGare));
+        }
+        if (btnStoricoHC) {
+            btnStoricoHC.addEventListener('click', () => impostaFiltro('storico_hc', btnStoricoHC));
+        }
+        if (btnStoricoLiv1) {
+            btnStoricoLiv1.addEventListener('click', () => impostaFiltro('storico_liv1', btnStoricoLiv1));
+        }
+        if (btnStoricoLiv2) {
+            btnStoricoLiv2.addEventListener('click', () => impostaFiltro('storico_liv2', btnStoricoLiv2));
+        }
+        if (btnStoricoLiv3) {
+            btnStoricoLiv3.addEventListener('click', () => impostaFiltro('storico_liv3', btnStoricoLiv3));
+        }
     }
 
     function calcolaEPopolaPuntiVSRStorico() {
@@ -676,12 +716,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const garaDaModificare = gareSalvate.find(g => g.id === idGara);
 
         if (garaDaModificare) {
-            // Se la vista non è 'tutte', cambiala programmaticamente
-            // senza innescare il reset completo di idGaraInModifica fatto dal click handler.
-            if (vistaStoricoAttuale !== 'tutte') {
-                vistaStoricoAttuale = 'tutte';
-                btnMostraTutteGare.classList.add('active');
-                btnMostraGareValide.classList.remove('active');
+            // Se la vista non è 'valide', la impostiamo su 'tutte' per mostrare il form e la colonna azioni.
+            // Se è già 'tutte' o un filtro per livello, non cambiamo la vistaStoricoAttuale qui,
+            // ma ci assicuriamo che il form e le azioni siano visibili.
+            if (vistaStoricoAttuale === 'valide') {
+                // Passa a 'tutte' se eravamo in 'valide'
+                vistaStoricoAttuale = 'tutte'; // o il filtro specifico della gara, ma 'tutte' è più semplice
+                const tuttiIBottoniFiltro = [btnMostraGareValide, btnMostraTutteGare, btnStoricoHC, btnStoricoLiv1, btnStoricoLiv2, btnStoricoLiv3];
+                tuttiIBottoniFiltro.forEach(btn => btn.classList.remove('active'));
+                if (btnMostraTutteGare) btnMostraTutteGare.classList.add('active'); // Attiva 'Storico Regate'
+            }
+            // Assicura che form e azioni siano visibili se non siamo in 'valide'
+            if (vistaStoricoAttuale !== 'valide') {
+                // Non è necessario rimuovere 'active' dagli altri bottoni qui,
+                // perché se siamo già in una vista 'tutte' o 'storico_X', il bottone corretto è già attivo.
 
                 if (formAggiungiGara) formAggiungiGara.style.display = 'block';
                 if (titoloFormGara) {
@@ -691,9 +739,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const headerAzioni = document.getElementById('header-colonna-azioni');
                 if (headerAzioni) headerAzioni.style.display = '';
                 if (tabellaClassificaVsr) tabellaClassificaVsr.classList.add('vista-tutte-attiva');
-                // Non chiamare aggiornaTabellaGare() qui per evitare sfarfallio,
-                // l'evidenziazione verrà applicata sulla tabella esistente.
-                // Se la riga non fosse visibile (improbabile), si potrebbe riconsiderare.
+                aggiornaTabellaGare(); // Ricarica la tabella per assicurare che la riga sia visibile e le classi corrette
             }
 
             idGaraInModifica = idGara; // Imposta l'ID della gara in modifica
@@ -793,51 +839,82 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Funzione helper centralizzata per selezionare le gare contributive
     function selezionaGareContributivePerClassifica(gareSalvateRaw) {
-        const gareValideConPuntiEffettivi = [];
+        const gareRecenti = []; // < 12 mesi
+        const gareMenoRecenti = []; // 12 a < 24 mesi
+
         gareSalvateRaw.forEach(gara => {
             const mesiTrascorsi = calcolaMesiTrascorsi(gara.data);
             let fattoreDecadimento = 0;
             if (mesiTrascorsi < 12) fattoreDecadimento = 1.0;
             else if (mesiTrascorsi < 24) fattoreDecadimento = 0.5;
 
-            // gara.livello è la chiave stringa (es. "VGLOBE", "LIV1")
             const infoLivello = livelliVsrStoricoMap[gara.livello];
 
-            if (fattoreDecadimento > 0 && gara.puntiVSR > 0 && infoLivello) { // Assicurati che infoLivello esista
-                gareValideConPuntiEffettivi.push({
+            if (fattoreDecadimento > 0 && gara.puntiVSR > 0 && infoLivello) {
+                const garaConPuntiEffettivi = {
                     ...gara,
                     puntiEffettivi: Math.round(gara.puntiVSR * fattoreDecadimento),
                     fattoreDecadimento: fattoreDecadimento,
                     mesiTrascorsi: mesiTrascorsi,
-                    tipoGara: infoLivello.tipo // Usa il tipo dalla mappa
-                });
+                    tipoGara: infoLivello.tipo
+                };
+
+                if (mesiTrascorsi < 12) {
+                    gareRecenti.push(garaConPuntiEffettivi);
+                } else { // 12 a < 24 mesi
+                    gareMenoRecenti.push(garaConPuntiEffettivi);
+                }
             }
         });
 
-        // Le chiavi qui DEVONO corrispondere ai 'tipo' definiti in livelliVsrStoricoMap
-        const gareRaggruppatePerTipo = { "VGLOBE": [], "HC": [], "LIV1": [], "LIV2": [], "LIV3": [] };
+        // Inizializza gareRaggruppatePerTipo dinamicamente dai tipi validi in livelliVsrStoricoMap
+        const gareRecentiRaggruppate = {};
+        const gareMenoRecentiRaggruppate = {};
+        Object.values(livelliVsrStoricoMap).filter(l => l.tipo !== "N/D").forEach(l => gareRecentiRaggruppate[l.tipo] = []);
+        Object.values(livelliVsrStoricoMap).filter(l => l.tipo !== "N/D").forEach(l => gareMenoRecentiRaggruppate[l.tipo] = []);
 
-        // Raggruppa per tipoGara
-        gareValideConPuntiEffettivi.forEach(gara => {
-            if (gareRaggruppatePerTipo.hasOwnProperty(gara.tipoGara)) {
-                gareRaggruppatePerTipo[gara.tipoGara].push(gara);
+        // Raggruppa gare recenti per tipoGara
+        gareRecenti.forEach(gara => {
+            if (gareRecentiRaggruppate.hasOwnProperty(gara.tipoGara)) {
+                gareRecentiRaggruppate[gara.tipoGara].push(gara);
             } else {
-                // Questo non dovrebbe succedere se i tipi sono ben definiti
-                console.warn("Tipo gara non riconosciuto durante il raggruppamento:", gara.tipoGara, gara);
+                console.warn("Tipo gara non riconosciuto durante il raggruppamento (recenti):", gara.tipoGara, gara);
             }
         });
 
-        const gareContributiveFinali = {}; // Inizializza come oggetto vuoto
+        // Raggruppa gare meno recenti per tipoGara
+        gareMenoRecenti.forEach(gara => {
+            if (gareMenoRecentiRaggruppate.hasOwnProperty(gara.tipoGara)) {
+                gareMenoRecentiRaggruppate[gara.tipoGara].push(gara);
+            } else {
+                console.warn("Tipo gara non riconosciuto durante il raggruppamento (meno recenti):", gara.tipoGara, gara);
+            }
+        });
 
-        // Ordina e applica i limiti
-        for (const tipo in gareRaggruppatePerTipo) {
-            if (gareRaggruppatePerTipo.hasOwnProperty(tipo)) {
-                gareRaggruppatePerTipo[tipo].sort((a, b) => b.puntiEffettivi - a.puntiEffettivi);
-                const limite = LIMITI_GARE_PER_CATEGORIA[tipo]; // Usa il 'tipo' come chiave
-                gareContributiveFinali[tipo] = gareRaggruppatePerTipo[tipo].slice(0, limite);
+        const gareContributiveFinali = {};
+        Object.values(livelliVsrStoricoMap).filter(l => l.tipo !== "N/D").forEach(l => gareContributiveFinali[l.tipo] = []);
+
+        // Ordina e applica i limiti per ogni fascia temporale e tipo
+        for (const tipo in LIMITI_GARE_PER_CATEGORIA) {
+            if (LIMITI_GARE_PER_CATEGORIA.hasOwnProperty(tipo)) {
+                const limite = LIMITI_GARE_PER_CATEGORIA[tipo]; // Limite *per fascia*
+
+                // Seleziona le migliori gare recenti per questo tipo
+                const miglioriRecenti = (gareRecentiRaggruppate[tipo] || []).sort((a, b) => b.puntiEffettivi - a.puntiEffettivi).slice(0, limite);
+
+                // Seleziona le migliori gare meno recenti per questo tipo
+                const miglioriMenoRecenti = (gareMenoRecentiRaggruppate[tipo] || []).sort((a, b) => b.puntiEffettivi - a.puntiEffettivi).slice(0, limite);
+
+                gareContributiveFinali[tipo] = miglioriRecenti.concat(miglioriMenoRecenti); // Combina le gare selezionate
             }
         }
-        // Le gare HC generiche (tipo "HC") avranno limite 0 e quindi non contribuiranno.
+
+        // Ordina le gare finali per ogni tipo per punti effettivi (per visualizzazione e calcoli successivi)
+        for (const tipo in gareContributiveFinali) {
+             if (gareContributiveFinali.hasOwnProperty(tipo)) {
+                 gareContributiveFinali[tipo].sort((a, b) => b.puntiEffettivi - a.puntiEffettivi);
+             }
+        }
         return gareContributiveFinali;
     }
 
@@ -849,8 +926,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const gareContributive = selezionaGareContributivePerClassifica(gareSalvate);
         const contributingIds = new Set();
-        for (const tipoGara in gareContributive) {
-            if (gareContributive.hasOwnProperty(tipoGara)) {
+        // Itera sui tipi di gara definiti in LIMITI_GARE_PER_CATEGORIA per garantire l'ordine
+        for (const tipoGara in LIMITI_GARE_PER_CATEGORIA) {
+             if (gareContributive.hasOwnProperty(tipoGara)) { // Assicurati che il tipo esista nel risultato
                 gareContributive[tipoGara].forEach(gara => contributingIds.add(gara.id));
             }
         }
@@ -865,13 +943,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const headerAzioni = document.getElementById('header-colonna-azioni');
 
         if (tabellaClassificaVsr) {
-            if (vistaStoricoAttuale === 'tutte') {
+            // La classe 'vista-tutte-attiva' e la visibilità di headerAzioni
+            // sono ora gestite da setupFiltriStoricoListeners e popolaFormPerModifica
+            if (vistaStoricoAttuale === 'valide') {
+                tabellaClassificaVsr.classList.remove('vista-tutte-attiva');
+                if (headerAzioni) headerAzioni.style.display = 'none';
+            } else { // 'tutte' o 'storico_hc', 'storico_liv1', etc.
                 tabellaClassificaVsr.classList.add('vista-tutte-attiva');
                 if (headerAzioni) headerAzioni.style.display = ''; // Mostra
             }
-            else tabellaClassificaVsr.classList.remove('vista-tutte-attiva');
-            if (headerAzioni && vistaStoricoAttuale === 'valide') headerAzioni.style.display = 'none'; // Nascondi
-
         }
 
         let contributingGareIds = new Set();
@@ -880,21 +960,29 @@ document.addEventListener('DOMContentLoaded', () => {
             const gareContributivePerClassifica = selezionaGareContributivePerClassifica(gareDaMostrare);
             let gareFiltrateEOrdinate = [];
             // Ordine di visualizzazione desiderato per le categorie
-            const ordineVisualizzazioneTipi = ["VGLOBE", "HC", "LIV1", "LIV2", "LIV3"];
+            const ordineVisualizzazioneTipi = ["HC", "LIV1", "LIV2", "LIV3"];
 
             ordineVisualizzazioneTipi.forEach(tipoGara => {
                 if (gareContributivePerClassifica.hasOwnProperty(tipoGara)) {
                     // Le gare sono già ordinate per puntiEffettivi e limitate dalla funzione helper
-                    // Tuttavia, le HC generiche (tipo "HC") avranno limite 0, quindi non dovrebbero apparire qui
-                    // a meno che non si voglia mostrarle esplicitamente anche se non contribuiscono.
-                    // Per ora, se il limite è 0, non verranno mostrate.
-                    gareFiltrateEOrdinate = gareFiltrateEOrdinate.concat(
-                        gareContributivePerClassifica[tipoGara]
-                    );
+                    gareFiltrateEOrdinate = gareFiltrateEOrdinate.concat(gareContributivePerClassifica[tipoGara]);
                 }
             });
             gareDaMostrare = gareFiltrateEOrdinate;
+            contributingGareIds = getContributingGareIds(); // Necessario per la colorazione
+        } else if (vistaStoricoAttuale === 'tutte') {
+            gareDaMostrare.sort((a, b) => new Date(b.data) - new Date(a.data));
+            contributingGareIds = getContributingGareIds();
+        } else if (vistaStoricoAttuale.startsWith('storico_')) {
+            const tipoFiltro = vistaStoricoAttuale.split('_')[1].toUpperCase(); // es. HC, LIV1
+            gareDaMostrare = gareDaMostrare.filter(gara => {
+                const infoLivello = livelliVsrStoricoMap[gara.livello];
+                return infoLivello && infoLivello.tipo === tipoFiltro;
+            });
+            gareDaMostrare.sort((a, b) => new Date(b.data) - new Date(a.data));
+            contributingGareIds = getContributingGareIds(); // Necessario per la colorazione
         } else {
+            // Fallback o caso non gestito, mostra tutto ordinato per data
             gareDaMostrare.sort((a, b) => new Date(b.data) - new Date(a.data));
             contributingGareIds = getContributingGareIds();
         }
@@ -902,7 +990,7 @@ document.addEventListener('DOMContentLoaded', () => {
         gareDaMostrare.forEach(gara => {
             const row = classificaVsrtbody.insertRow();
 
-            // gara.livello è la chiave per livelliVsrStoricoMap (es. "VGLOBE", "LIV1")
+            // gara.livello è la chiave per livelliVsrStoricoMap (es. "HC", "LIV1")
             const infoLivelloGara = livelliVsrStoricoMap[gara.livello];
             const tipoGaraCorrente = infoLivelloGara ? infoLivelloGara.tipo : 'N/D';
 
@@ -937,11 +1025,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 classeStato = "stato-scaduta";
             }
 
-            // Se la gara è HC generica, e siamo in vista 'tutte', la marchiamo come "scaduta" ai fini della classifica
-            // perché non contribuisce mai.
-            if (vistaStoricoAttuale === 'tutte' && tipoGaraCorrente === 'HC' && classeStato !== "stato-scaduta") {
-                 // Non la marchiamo scaduta, ma la logica successiva per il colore e lo stato gestirà la sua non contribuzione
-            } else if (vistaStoricoAttuale === 'tutte' && classeStato !== "stato-scaduta" && contributingGareIds && !contributingGareIds.has(gara.id)) {
+            // Applica lo stato "scaduta" visivo se non contribuisce e siamo in una vista di tipo "storico"
+            if (vistaStoricoAttuale !== 'valide' && classeStato !== "stato-scaduta" && contributingGareIds && !contributingGareIds.has(gara.id)) {
                 classeStato = "stato-scaduta"; // Se non contribuisce ed è in vista 'tutte', la consideriamo "scaduta" ai fini visivi
                 row.classList.remove('in-preavviso');
                 inPreavvisoTesto = "";
@@ -955,10 +1040,6 @@ document.addEventListener('DOMContentLoaded', () => {
             row.insertCell(1).textContent = gara.nome;
 
             let testoLivello = infoLivelloGara ? infoLivelloGara.testo : gara.livello; // Usa il testo dalla mappa
-            // Aggiungi nota per HC generiche che non contribuiscono
-            if (tipoGaraCorrente === 'HC' && (vistaStoricoAttuale === 'valide' || (vistaStoricoAttuale === 'tutte' && !contributingGareIds.has(gara.id)))) {
-                // Non aggiungiamo "(Non contrib.)" qui, lo stato lo indicherà
-            }
             row.insertCell(2).textContent = testoLivello;
             row.insertCell(3).textContent = gara.classificaFinale;
 
@@ -967,17 +1048,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (vistaStoricoAttuale === 'valide') {
                 puntiDaMostrare = gara.puntiEffettivi;
-                // Le HC generiche non appaiono in 'valide' a causa del limite 0, quindi non serve controllo specifico qui
                 if (gara.fattoreDecadimento === 0.5 || puntiDaMostrare < 0) {
                      colorePunti = 'red';
                 } else if (puntiDaMostrare >= 0) {
                      colorePunti = 'green';
                 }
-            } else { // vistaStoricoAttuale === 'tutte'
-                puntiDaMostrare = gara.puntiVSR;
-                if (tipoGaraCorrente === 'HC') { // Le HC generiche non contribuiscono mai
-                    colorePunti = ''; // Nessun colore specifico per i punti base delle HC generiche
-                } else if (classeStato !== "stato-scaduta" && puntiDaMostrare >= 0) {
+            } else { // vistaStoricoAttuale è una delle viste "storico"
+                puntiDaMostrare = gara.puntiVSR; // Mostra i punti base in vista 'tutte'
+                if (classeStato !== "stato-scaduta" && puntiDaMostrare >= 0) {
                     colorePunti = 'green';
                 } else if (puntiDaMostrare < 0 && classeStato !== "stato-scaduta") { // Evita rosso se già "scaduta" visivamente
                     colorePunti = 'red';
@@ -992,16 +1070,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const cellaStatoPunti = row.insertCell(5);
             let testoStato = (vistaStoricoAttuale === 'valide' ? statoPunti : '') + inPreavvisoTesto.trim();
-            // Se è una HC generica e siamo in vista 'tutte', e non contribuisce (lo stato 'scaduta' già lo copre se non contribuisce)
-            // O se è HC generica e siamo in vista 'valide' (non dovrebbe succedere per il limite 0)
-            if (tipoGaraCorrente === 'HC' && (vistaStoricoAttuale === 'valide' || (vistaStoricoAttuale === 'tutte' && classeStato !== 'stato-scaduta'))) {
-                testoStato = "Non Contribuisce";
+            if (vistaStoricoAttuale !== 'valide' && classeStato === 'stato-scaduta' && !contributingGareIds.has(gara.id)) {
+                 testoStato = "Non Contribuisce"; // Aggiungi questa nota solo se non contribuisce e siamo in vista 'tutte'
             }
             cellaStatoPunti.textContent = testoStato;
 
             const cellaAzioni = row.insertCell(6);
-            if (vistaStoricoAttuale === 'tutte') {
-                cellaAzioni.style.display = ''; // Assicura che la cella sia visibile
+            if (vistaStoricoAttuale !== 'valide') { // Mostra azioni per 'tutte' e per i filtri 'storico_X'
+                // la visibilità della colonna intera è gestita da 'headerAzioni.style.display'
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = 'Elimina';
                 deleteButton.classList.add('elimina-gara-btn');
@@ -1014,7 +1090,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 editButton.dataset.id = gara.id;
                 cellaAzioni.appendChild(editButton);
             } else {
-                cellaAzioni.style.display = 'none'; // Nascondi la cella azioni in vista 'valide'
+                // Non fare nulla qui, la colonna intera è nascosta
             }
         });
     }
@@ -1049,11 +1125,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         for (const tipoGara in gareContributive) {
             if (gareContributive.hasOwnProperty(tipoGara)) {
-                // La funzione selezionaGareContributivePerClassifica ha già:
-                // 1. Filtrato per validità e calcolato puntiEffettivi (arrotondati)
-                // 2. Per VGLOBE, selezionato la migliore (se esiste)
-                // 3. Per HC generica, applicato limite 0 (non contribuisce)
-                // 4. Per gli altri livelli, ordinato e preso il numero corretto di gare
+                // La funzione selezionaGareContributivePerClassifica ha già filtrato per validità, calcolato puntiEffettivi,
+                // ordinato e preso il numero corretto di gare.
                 // Quindi possiamo semplicemente sommare i puntiEffettivi delle gare restituite.
                 gareContributive[tipoGara].forEach(gara => {
                     punteggioFinaleTotale += gara.puntiEffettivi;
@@ -1143,21 +1216,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getGareContributiveConDettagli() {
         const gareSalvateRaw = JSON.parse(localStorage.getItem('gareSalvate')) || [];
-        // Restituisce un oggetto con chiavi VGLOBE, HC, LIV1, LIV2, LIV3
+        // Restituisce un oggetto con chiavi HC, LIV1, LIV2, LIV3
         return selezionaGareContributivePerClassifica(gareSalvateRaw);
     }
 
     function aggiornaPanoramicaSlotVSR() {
         const gareContributive = getGareContributiveConDettagli();
         const suggerimenti = [];
+        const gareConScadenze = getGareConScadenzeImminenti(); // Ottieni gare con scadenze per l'analisi
+        const idsGareConScadenze = new Set(gareConScadenze.map(g => g.id)); // Set di ID per lookup veloce
+
 
         // SOGLIA_DEBOLEZZA è ora definita a livello di script e accessibile qui
         // Le funzioni calcolaPuntiPerClassifica e calcolaClassificaPerPuntiTarget
         // sono ora definite a livello di script e accessibili qui.
 
-        // tipoGara qui sarà il 'tipo' della gara (VGLOBE, HC, LIV1, etc.)
-        function popolaCategoriaSlot(tipoGara, gareCat, maxSlot, elOccupati, elMinPunti, elGareSlot, elProgressBar, nomeCatBreve, elPuntiCategoria) {
-            elOccupati.textContent = gareCat.length; // Questa riga imposta il numero di slot occupati
+        // tipoGara qui sarà il 'tipo' della gara (HC, LIV1, etc.)
+        function popolaCategoriaSlot(tipoGara, gareCat, maxSlotPerFascia, elOccupati, elMinPunti, elGareSlot, elProgressBar, nomeCatBreve, elPuntiCategoria, elStackedPointsBarContainer, elPointsBar100, elPointsBar50, elPointsBarEmpty) {
+            const totaleSlotCategoria = maxSlotPerFascia * 2; // Totale slot per categoria (entrambe le fasce)
+            elOccupati.textContent = gareCat.length; // Numero di slot effettivamente occupati
             // Verifica che elGareSlot esista prima di tentare di modificarne l'innerHTML
             if (elGareSlot) {
                 elGareSlot.innerHTML = ''; // Pulisci
@@ -1166,19 +1243,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.warn(`[VRCompass] Elemento DOM elGareSlot (es. hc-gare-slot, liv1-gare-slot, ecc.) non trovato per la categoria '${nomeCatBreve}'. Controlla l'ID corrispondente nel tuo file HTML (VRCompass.html).`);
             }
             let idContainerBase;
-            if (tipoGara === 'VGLOBE') idContainerBase = 'hc'; // VGLOBE usa il container 'hc'
-            else if (tipoGara === 'LIV1') idContainerBase = 'liv1';
+            if (tipoGara === 'HC' || tipoGara === 'LIV1') idContainerBase = tipoGara.toLowerCase(); // HC e LIV1 usano i loro ID
             else if (tipoGara === 'LIV2') idContainerBase = 'liv2';
             else if (tipoGara === 'LIV3') idContainerBase = 'liv3';
             else {
                 // console.warn("Tipo gara non gestito per idContainerBase:", tipoGara);
-                return; // Non popolare slot per tipi non riconosciuti (es. HC generica)
+                return; // Non popolare slot per tipi non riconosciuti
             }
             const slotCategoriaContainer = document.getElementById(`slot-${idContainerBase}-container`);
 
             if (slotCategoriaContainer) {
                 slotCategoriaContainer.classList.remove('slot-debole'); // Rimuovi eventuale classe precedente
                 slotCategoriaContainer.classList.remove('slot-con-opportunita'); // Rimuovi eventuale classe precedente
+                slotCategoriaContainer.classList.remove('slot-con-preavviso'); // Rimuovi eventuale classe precedente
             }
 
             // Trova la chiave corrispondente al tipoGara per accedere a valoreNumerico
@@ -1199,15 +1276,47 @@ document.addEventListener('DOMContentLoaded', () => {
                 elPuntiCategoria.textContent = formatNumber(totalePuntiCategoria, 0);
             }
 
+            // Calcola e aggiorna la barra dei punti VSR per fascia
+            if (elStackedPointsBarContainer && elPointsBar100 && elPointsBar50 && elPointsBarEmpty && livelloValoreNumerico) {
+                let punti100 = 0;
+                let punti50 = 0;
+                gareCat.forEach(g => {
+                    if (g.fattoreDecadimento === 1.0) {
+                        punti100 += g.puntiEffettivi;
+                    } else if (g.fattoreDecadimento === 0.5) {
+                        punti50 += g.puntiEffettivi;
+                    }
+                });
+
+                const potenzialeMaxPuntiCategoria = livelloValoreNumerico * totaleSlotCategoria; // Max punti per la categoria (es. 15000 * 2 per HC)
+
+                let perc100 = 0;
+                let perc50 = 0;
+                let percEmpty = 100;
+
+                if (potenzialeMaxPuntiCategoria > 0) {
+                    perc100 = (punti100 / potenzialeMaxPuntiCategoria) * 100;
+                    perc50 = (punti50 / potenzialeMaxPuntiCategoria) * 100;
+                    percEmpty = Math.max(0, 100 - perc100 - perc50); // Assicura che non sia negativo
+                }
+
+                elPointsBar100.style.width = `${perc100}%`;
+                elPointsBar50.style.width = `${perc50}%`;
+                elPointsBarEmpty.style.width = `${percEmpty}%`;
+
+                // Tooltip per la barra dei punti
+                const tooltipPuntiText = `Punti 100%: ${formatNumber(punti100,0)}\nPunti 50%: ${formatNumber(punti50,0)}\nPotenziale Max: ${formatNumber(potenzialeMaxPuntiCategoria,0)}`;
+                elStackedPointsBarContainer.setAttribute('title', tooltipPuntiText);
+            }
+
 
             // Aggiorna la barra di progresso e il suo colore in base alla qualità
-            const percentualeRiempimento = maxSlot > 0 ? (gareCat.length / maxSlot) * 100 : 0;
             if (elProgressBar) {
-                elProgressBar.style.width = `${percentualeRiempimento}%`;
+                elProgressBar.style.width = `${(gareCat.length / totaleSlotCategoria) * 100}%`; // Percentuale sul totale di slot (es. 2, 6, 12, 20)
                 // Resetta classi di qualità precedenti
                 elProgressBar.classList.remove('progress-bar-good', 'progress-bar-medium', 'progress-bar-low', 'progress-bar-empty');
-
-                let tooltipText = `Slot ${nomeCatBreve}: ${gareCat.length}/${maxSlot} gare. `;
+                // Aggiornato il tooltip per mostrare il totale slot corretto
+                let tooltipText = `Slot ${nomeCatBreve}: ${gareCat.length}/${totaleSlotCategoria} gare. `;
 
                 if (gareCat.length > 0 && livelloValoreNumerico && livelloValoreNumerico > 0) {
                     let sommaQualitaPercentuale = 0;
@@ -1237,22 +1346,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (gareCat.length > 0) {
                 if (elMinPunti) { // Solo per Liv1, Liv2, Liv3
+                    // Il punteggio minimo contributivo è l'ultimo nella lista ordinata per punti effettivi
                     elMinPunti.textContent = formatNumber(gareCat[gareCat.length - 1].puntiEffettivi, 0);
-                } else if (tipoGara === "VGLOBE" && hcPuntiAttuali) { // Specifico per VGLOBE (che occupa lo slot HC)
-                    hcPuntiAttuali.textContent = formatNumber(gareCat[0].puntiEffettivi, 0); // La Vendée Globe è unica
+                } else if (tipoGara === "HC" && hcPuntiAttuali) { // Specifico per HC
+                    // Per HC, mostriamo il punteggio della gara con più punti (la prima nella lista ordinata)
+                    hcPuntiAttuali.textContent = formatNumber(gareCat[0].puntiEffettivi, 0);
                 }
 
                 gareCat.forEach(g => {
                     if (elGareSlot) { // Controlla di nuovo prima di usare appendChild
                         const p = document.createElement('p');
                         p.classList.add('gara-dettaglio');
-                        p.textContent = `${g.nome}: ${formatNumber(g.puntiEffettivi, 0)} pts (Data: ${new Date(g.data).toLocaleDateString('it-IT')})`;
+                        // Aggiungi indicazione 100% o 50%
+                        const statoPercentuale = g.fattoreDecadimento === 1.0 ? '100%' : '50%';
+                        p.textContent = `${g.nome}: ${formatNumber(g.puntiEffettivi, 0)} pts (${statoPercentuale}, Data: ${new Date(g.data).toLocaleDateString('it-IT')})`;
                         elGareSlot.appendChild(p);
                     }
                 });
 
-                if (gareCat.length < maxSlot) {
-                    const slotLiberi = maxSlot - gareCat.length;
+                if (gareCat.length < totaleSlotCategoria) { // Confronta con il totale slot per la categoria
+                    const slotLiberi = totaleSlotCategoria - gareCat.length;
                     let suggerimentoSlotLiberi = "";
                     if (slotCategoriaContainer && slotLiberi > 0) { // Evidenzia se ci sono slot liberi
                         slotCategoriaContainer.classList.add('slot-con-opportunita');
@@ -1261,102 +1374,99 @@ document.addEventListener('DOMContentLoaded', () => {
                     // La parte "Ad esempio, un 10° posto..." non viene aggiunta per la sezione Analisi.
                     if (suggerimentoSlotLiberi) suggerimenti.push(suggerimentoSlotLiberi.trim());
                 } else {
-                    // Slot pieno, valutiamo la situazione
-                    const puntiDaBattere = (tipoGara === "VGLOBE" && gareCat.length > 0) ? gareCat[0].puntiEffettivi : gareCat[gareCat.length - 1].puntiEffettivi;
+                    // Tutti gli slot per questa categoria sono pieni, valutiamo la situazione
+                    // Il punteggio da battere è quello della gara con meno punti effettivi (l'ultima nella lista ordinata)
+                    const puntiDaBattere = gareCat[gareCat.length - 1].puntiEffettivi;
+
                     let suggerimentoTestoCompleto = ""; // Questo conterrà il testo del suggerimento per la lista
                     const classificaTarget = livelloValoreNumerico ? calcolaClassificaPerPuntiTarget(livelloValoreNumerico, puntiDaBattere + 1) : null;
 
+                    // La soglia di debolezza si applica al punteggio della gara con meno punti
                     const isDeboleSecondoSoglia = livelloValoreNumerico && SOGLIA_DEBOLEZZA[livelloValoreNumerico.toString()] && puntiDaBattere < (livelloValoreNumerico * SOGLIA_DEBOLEZZA[livelloValoreNumerico.toString()]);
 
                     if (isDeboleSecondoSoglia) {
                         if (slotCategoriaContainer) slotCategoriaContainer.classList.add('slot-debole');
                         let testoBaseDebole = "";
 
-                        if (tipoGara === "VGLOBE") {
-                            const garaSpecifica = gareCat[0];
-                            const mesiTrascorsi = calcolaMesiTrascorsi(garaSpecifica.data);
-                            let eventoTesto = null;
-                            let dataEventoStr = null;
-                            let perditaPuntiStimata = 0;
-                            const dataGaraDate = new Date(garaSpecifica.data);
+                        // Trova la gara specifica con il punteggio più basso per controllare le scadenze
+                        const garaDebole = gareCat[gareCat.length - 1];
 
-                            if (mesiTrascorsi >= 9 && mesiTrascorsi < 12) { // Preavviso dimezzamento
-                                eventoTesto = "dimezzamento";
-                                const dataDimezzamento = new Date(dataGaraDate); dataDimezzamento.setMonth(dataGaraDate.getMonth() + 12);
-                                dataEventoStr = dataDimezzamento.toLocaleDateString('it-IT');
-                                perditaPuntiStimata = Math.round(garaSpecifica.puntiVSR * 0.5);
-                            } else if (mesiTrascorsi >= 21 && mesiTrascorsi < 24) { // Preavviso scadenza
-                                eventoTesto = "azzeramento per scadenza";
-                                const dataScadenza = new Date(dataGaraDate); dataScadenza.setMonth(dataGaraDate.getMonth() + 24);
-                                dataEventoStr = dataScadenza.toLocaleDateString('it-IT');
-                                perditaPuntiStimata = Math.round(puntiDaBattere); // I puntiEffettivi attuali (puntiDaBattere) sono già al 50% dei puntiVSR, quindi si perdono tutti quelli.
-                            }
+                        if (garaDebole && idsGareConScadenze.has(garaDebole.id)) {
+                            const garaInScadenza = gareConScadenze.find(g => g.id === garaDebole.id);
+                            if (garaInScadenza && garaInScadenza.isUrgente) { // Caso URGENTE e DEBOLE
+                                const evento = garaInScadenza.tipoEvento.toLowerCase();
+                                const dataEvento = garaInScadenza.dataEvento;
+                                const [day, month, year] = dataEvento.split('/');
+                                const dataEventoDate = new Date(`${year}-${month}-${day}`);
+                                const giorniRimanenti = calcolaGiorniTraDate(new Date(), dataEventoDate);
+                                const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
+                                const testoGiorni = `tra ${giorniRimanenti} ${pluraleGiorni} (${dataEvento})`;
 
-                            if (eventoTesto) {
-                                testoBaseDebole = `<strong>Attenzione ${nomeCatBreve}!</strong> Il tuo risultato di ${formatNumber(puntiDaBattere, 0)} punti (già considerato migliorabile per questa categoria) sta anche per subire un ${eventoTesto} il ${dataEventoStr}, con una perdita stimata di ${formatNumber(perditaPuntiStimata, 0)} punti.`;
-                                if (classificaTarget) testoBaseDebole += ` Per migliorare, punta a un piazzamento di ${classificaTarget}° o migliore.`;
-                            } else {
-                                testoBaseDebole = `<strong>${nomeCatBreve} Migliorabile:</strong> Il tuo risultato di ${formatNumber(puntiDaBattere, 0)} punti è sotto la soglia ottimale per questa categoria.`;
-                                if (classificaTarget) testoBaseDebole += ` Punta a un piazzamento di ${classificaTarget}° o migliore.`;
+                                if (evento === "scadenza") {
+                                    testoBaseDebole = `<strong>Azione Urgentissima ${nomeCatBreve}:</strong> Il tuo risultato meno performante (${formatNumber(puntiDaBattere, 0)} punti) scadrà ${testoGiorni}. Questo slot si azzererà a breve. <em>Trova una nuova gara ${nomeCatBreve} per sostituire questo punteggio.</em>`;
+                                } else { // Dimezzamento
+                                    const puntiPersiStimati = Math.round(garaDebole.puntiVSR * (garaDebole.fattoreDecadimento - 0.5)); // Punti che verranno persi con il dimezzamento
+                                    testoBaseDebole = `<strong>Azione Urgentissima ${nomeCatBreve}:</strong> Il tuo risultato meno performante (${formatNumber(puntiDaBattere, 0)} punti) si dimezzerà ${testoGiorni}. Questo slot perderà ${formatNumber(puntiPersiStimati, 0)} punti a breve. <em>Valuta la possibilità di partecipare a una nuova gara ${nomeCatBreve} per migliorare questo slot.</em>`;
+                                }
+                                if (slotCategoriaContainer) slotCategoriaContainer.classList.add('slot-con-preavviso');
+                            } else { // Caso DEBOLE ma NON URGENTE (o senza preavviso specifico)
+                                testoBaseDebole = `<strong>${nomeCatBreve} Migliorabile:</strong> Il tuo risultato meno performante ha ${formatNumber(puntiDaBattere, 0)} punti, sotto la soglia ottimale per questa categoria.`;
                             }
-                        } else { // Altre categorie deboli
-                            testoBaseDebole = `<strong>Slot Debole!</strong> In ${nomeCatBreve}, la gara meno performante ha ${formatNumber(puntiDaBattere, 0)} punti.`;
-                            if (classificaTarget) testoBaseDebole += ` Punta a un piazzamento di ${classificaTarget}° o migliore.`;
+                        } else { // Caso DEBOLE ma senza preavviso di scadenza/dimezzamento imminente
+                            testoBaseDebole = `<strong>${nomeCatBreve} Migliorabile:</strong> Il tuo risultato meno performante ha ${formatNumber(puntiDaBattere, 0)} punti, sotto la soglia ottimale per questa categoria.`;
                         }
+
+                        if (classificaTarget) testoBaseDebole += ` <strong>Strategia consigliata:</strong> Punta a un piazzamento di ${classificaTarget}° o migliore per sostituire la gara meno performante.`;
                         suggerimentoTestoCompleto = `<span class="warning-triangle">⚠️</span> ${testoBaseDebole}`;
-                        // La parte "Punta a un piazzamento..." è ora inclusa se classificaTarget è disponibile.
+
                     } else { // Slot pieno MA NON debole secondo la soglia
                         let testoBaseNonDebole = "";
                         let icona = ""; // Nessuna icona di default se non c'è preavviso
 
-                        if (tipoGara === "VGLOBE") {
-                            const garaSpecifica = gareCat[0];
-                            const mesiTrascorsi = calcolaMesiTrascorsi(garaSpecifica.data);
-                            let eventoTesto = null;
-                            let dataEventoStr = null;
-                            const dataGaraDate = new Date(garaSpecifica.data);
+                        // Controlla se la gara meno performante è in preavviso
+                        const garaMenoPerformante = gareCat[gareCat.length - 1];
+                         if (garaMenoPerformante && idsGareConScadenze.has(garaMenoPerformante.id)) {
+                            const garaInScadenza = gareConScadenze.find(g => g.id === garaMenoPerformante.id);
+                            if (garaInScadenza) {
+                                const evento = garaInScadenza.tipoEvento.toLowerCase();
+                                const dataEvento = garaInScadenza.dataEvento;
+                                const [day, month, year] = dataEvento.split('/');
+                                const dataEventoDate = new Date(`${year}-${month}-${day}`);
+                                const giorniRimanenti = calcolaGiorniTraDate(new Date(), dataEventoDate);
+                                const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
+                                const testoGiorni = `tra ${giorniRimanenti} ${pluraleGiorni} (${dataEvento})`;
 
-                            if (mesiTrascorsi >= 9 && mesiTrascorsi < 12) {
-                                eventoTesto = "dimezzamento";
-                                const dataDimezzamento = new Date(dataGaraDate); dataDimezzamento.setMonth(dataGaraDate.getMonth() + 12);
-                                dataEventoStr = dataDimezzamento.toLocaleDateString('it-IT');
-                            } else if (mesiTrascorsi >= 21 && mesiTrascorsi < 24) {
-                                eventoTesto = "azzeramento per scadenza";
-                                const dataScadenza = new Date(dataGaraDate); dataScadenza.setMonth(dataGaraDate.getMonth() + 24);
-                                dataEventoStr = dataScadenza.toLocaleDateString('it-IT');
+                                icona = `<span class="info-icon">ℹ️</span> `;
+                                if (evento === "scadenza") {
+                                    testoBaseNonDebole = `<strong>${nomeCatBreve} - Preavviso:</strong> La gara meno performante (${formatNumber(puntiDaBattere, 0)} punti) scadrà ${testoGiorni}.`;
+                                } else { // Dimezzamento
+                                    const puntiPersiStimati = Math.round(garaMenoPerformante.puntiVSR * (garaMenoPerformante.fattoreDecadimento - 0.5));
+                                    testoBaseNonDebole = `<strong>${nomeCatBreve} - Preavviso:</strong> La gara meno performante (${formatNumber(puntiDaBattere, 0)} punti) si dimezzerà ${testoGiorni}, perdendo ${formatNumber(puntiPersiStimati, 0)} punti.`;
+                                }
+                                testoBaseNonDebole += ` <em>Monitora le prossime gare ${nomeCatBreve} per una potenziale sostituzione.</em>`;
+                                if (slotCategoriaContainer) slotCategoriaContainer.classList.add('slot-con-preavviso');
                             }
-
-                            if (eventoTesto) {
-                                icona = `<span class="info-icon">ℹ️</span> `; // Icona informativa per preavviso
-                                testoBaseNonDebole = `<strong>${nomeCatBreve} - Preavviso:</strong> Il tuo risultato di ${formatNumber(puntiDaBattere, 0)} punti è valido, ma subirà un ${eventoTesto} il ${dataEventoStr}.`;
-                                if (slotCategoriaContainer) slotCategoriaContainer.classList.add('slot-con-preavviso'); // Per styling opzionale
-                            } else {
-                                testoBaseNonDebole = `Lo slot ${nomeCatBreve} è in buono stato.`;
-                                if (classificaTarget) testoBaseNonDebole += ` Per migliorarlo ulteriormente, punta a un piazzamento di ${classificaTarget}° o migliore.`;
-                            }
-                        } else { // Altre categorie piene e non deboli
+                        } else { // Non debole, non in preavviso -> OK
                             testoBaseNonDebole = `Lo slot ${nomeCatBreve} è in buono stato.`;
                             if (classificaTarget) testoBaseNonDebole += ` Per migliorarlo ulteriormente, punta a un piazzamento di ${classificaTarget}° o migliore.`;
                         }
                         suggerimentoTestoCompleto = `${icona}${testoBaseNonDebole}`;
-                        // La parte "Punta a un piazzamento..." è ora inclusa se classificaTarget è disponibile
-                        // e non si tratta solo di un preavviso VGLOBE senza menzione di miglioramento.
                     }
                     if (suggerimentoTestoCompleto) suggerimenti.push(suggerimentoTestoCompleto.trim());
                 }
             } else {
                 if (elMinPunti) {
                     elMinPunti.textContent = 'N/A';
-                } else if (tipoGara === "VGLOBE" && hcPuntiAttuali) { // Specifico per VGLOBE
-                    hcPuntiAttuali.textContent = 'N/A';
+                } else if (tipoGara === "HC" && hcPuntiAttuali) { // Specifico per HC
+                    hcPuntiAttuali.textContent = 'N/A'; // Se lo slot HC è vuoto (entrambe le fasce)
                 }
                 if (elGareSlot) { // Controlla di nuovo prima di impostare innerHTML
                     elGareSlot.innerHTML = '<p class="no-data">Nessuna gara valida in questo slot.</p>';
                 }
                 let suggerimentoSlotVuoti = "";
-                if (slotCategoriaContainer && maxSlot > 0) { // Evidenzia se la categoria è completamente vuota ma ha slot
+                if (slotCategoriaContainer && totaleSlotCategoria > 0) { // Evidenzia se la categoria è completamente vuota ma ha slot
                     slotCategoriaContainer.classList.add('slot-con-opportunita');
-                    suggerimentoSlotVuoti = `<span class="warning-triangle">⚠️</span> <strong>Opportunità!</strong> Hai ${maxSlot} slot liber${maxSlot > 1 ? 'i' : 'o'} in ${nomeCatBreve}. `;
+                    suggerimentoSlotVuoti = `<span class="warning-triangle">⚠️</span> <strong>Opportunità!</strong> Hai ${totaleSlotCategoria} slot liber${totaleSlotCategoria > 1 ? 'i' : 'o'} in ${nomeCatBreve}. `;
                 }
                 // Per slot vuoti, potremmo indicare una classifica target per ottenere un punteggio "base"
                 if (livelloValoreNumerico) {
@@ -1372,22 +1482,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Popola le categorie
-        popolaCategoriaSlot("VGLOBE", gareContributive["VGLOBE"] || [], LIMITI_GARE_PER_CATEGORIA["VGLOBE"], hcOccupati, null, hcGareSlot, hcProgressBar, "Vendée Globe FC", hcPuntiCategoria);
-        popolaCategoriaSlot("LIV1", gareContributive["LIV1"] || [], LIMITI_GARE_PER_CATEGORIA["LIV1"], liv1Occupati, liv1MinPunti, liv1GareSlot, liv1ProgressBar, "Livello 1", liv1PuntiCategoria);
-        popolaCategoriaSlot("LIV2", gareContributive["LIV2"] || [], LIMITI_GARE_PER_CATEGORIA["LIV2"], liv2Occupati, liv2MinPunti, liv2GareSlot, liv2ProgressBar, "Livello 2", liv2PuntiCategoria);
-        popolaCategoriaSlot("LIV3", gareContributive["LIV3"] || [], LIMITI_GARE_PER_CATEGORIA["LIV3"], liv3Occupati, liv3MinPunti, liv3GareSlot, liv3ProgressBar, "Livello 3", liv3PuntiCategoria);
-        
+        popolaCategoriaSlot("HC", gareContributive["HC"] || [], LIMITI_GARE_PER_CATEGORIA["HC"], hcOccupati, null, hcGareSlot, hcProgressBar, "Fuori Categoria", hcPuntiCategoria, hcStackedPointsBarContainer, hcPointsBar100, hcPointsBar50, hcPointsBarEmpty);
+        popolaCategoriaSlot("LIV1", gareContributive["LIV1"] || [], LIMITI_GARE_PER_CATEGORIA["LIV1"], liv1Occupati, liv1MinPunti, liv1GareSlot, liv1ProgressBar, "Livello 1", liv1PuntiCategoria, liv1StackedPointsBarContainer, liv1PointsBar100, liv1PointsBar50, liv1PointsBarEmpty);
+        popolaCategoriaSlot("LIV2", gareContributive["LIV2"] || [], LIMITI_GARE_PER_CATEGORIA["LIV2"], liv2Occupati, liv2MinPunti, liv2GareSlot, liv2ProgressBar, "Livello 2", liv2PuntiCategoria, liv2StackedPointsBarContainer, liv2PointsBar100, liv2PointsBar50, liv2PointsBarEmpty);
+        popolaCategoriaSlot("LIV3", gareContributive["LIV3"] || [], LIMITI_GARE_PER_CATEGORIA["LIV3"], liv3Occupati, liv3MinPunti, liv3GareSlot, liv3ProgressBar, "Livello 3", liv3PuntiCategoria, liv3StackedPointsBarContainer, liv3PointsBar100, liv3PointsBar50, liv3PointsBarEmpty);
+
         // Popola suggerimenti, solo se l'elemento listaSuggerimentiSlot esiste
         if (listaSuggerimentiSlot) {
-            listaSuggerimentiSlot.innerHTML = ''; 
+            listaSuggerimentiSlot.innerHTML = '';
             if (suggerimenti.length > 0) {
                 suggerimenti.forEach(sugg => {
                     const li = document.createElement('li');
                     li.innerHTML = sugg; // innerHTML per interpretare <strong>, <span> etc.
-                    if (sugg.trim() !== "") listaSuggerimentiSlot.appendChild(li); 
+                    if (sugg.trim() !== "") listaSuggerimentiSlot.appendChild(li);
                 });
             } else {
-                listaSuggerimentiSlot.innerHTML = '<li class="no-data">Analisi in corso o nessuna gara presente.</li>'; 
+                listaSuggerimentiSlot.innerHTML = '<li class="no-data">Analisi in corso o nessuna gara presente.</li>';
             }
         } else {
             // Se l'elemento non esiste, logga un avviso (opzionale, ma utile per il debug)
@@ -1411,29 +1521,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Controllo Dimezzamento (tra 9 e <12 mesi)
             if (mesiTrascorsi >= 9 && mesiTrascorsi < 12) {
-                const tipoGaraCorrente = livelliVsrStoricoMap[gara.livello] ? livelliVsrStoricoMap[gara.livello].tipo : null;
-                if (tipoGaraCorrente === 'HC') { // Le HC generiche non si dimezzano ai fini del punteggio
-                    return;
-                }
                 const dataDimezzamento = new Date(dataGaraDate);
                 dataDimezzamento.setMonth(dataGaraDate.getMonth() + 12);
-                const impatto = Math.round(gara.puntiVSR * 0.5);
+                const impatto = Math.round(gara.puntiVSR * 0.5); // Punti persi = 50% dei punti originali
                 isUrgente = (mesiTrascorsi === 11);
                 tipoEventoPerLista = "Dimezzamento";
                 gareInDimezzamento.push({ ...gara, dataEvento: dataDimezzamento.toLocaleDateString('it-IT'), impattoPunti: impatto, isUrgente, tipoEvento: tipoEventoPerLista });
             }
 
             // Controllo Scadenza (tra 21 e <24 mesi)
-            const tipoGaraCorrente = livelliVsrStoricoMap[gara.livello] ? livelliVsrStoricoMap[gara.livello].tipo : null;
-            if (tipoGaraCorrente === 'HC') { // Le HC generiche non scadono ai fini del punteggio
-                 return;
-            }
-
             if (mesiTrascorsi >= 21 && mesiTrascorsi < 24) {
                 const dataScadenza = new Date(dataGaraDate);
                 dataScadenza.setMonth(dataGaraDate.getMonth() + 24);
-                // L'impatto è sui punti che la gara sta attualmente fornendo (che sono già al 50% o 100%)
-                const impatto = Math.round(gara.puntiVSR * (mesiTrascorsi < 12 ? 1.0 : 0.5)); // Corretto impatto per scadenza
+                // L'impatto è sui punti che la gara sta attualmente fornendo (che sono al 50%)
+                const impatto = Math.round(gara.puntiVSR * 0.5); // Punti persi = 50% dei punti originali (quelli che rimangono)
                 isUrgente = (mesiTrascorsi === 23);
                 tipoEventoPerLista = "Scadenza";
                 gareInScadenza.push({ ...gara, dataEvento: dataScadenza.toLocaleDateString('it-IT'), impattoPunti: impatto, isUrgente, tipoEvento: tipoEventoPerLista });
@@ -1477,24 +1578,6 @@ document.addEventListener('DOMContentLoaded', () => {
         aggiornaValutazioneStrategicaSlot();
     }
 
-    // Funzione helper per generare l'HTML dell'avviso di scadenza
-    function generaAvvisoScadenzaHTML(garaSpecifica, idsGareConScadenze, gareConScadenze) {
-        let avvisoScadenza = '';
-        if (garaSpecifica && idsGareConScadenze.has(garaSpecifica.id)) {
-            const garaInScadenza = gareConScadenze.find(g => g.id === garaSpecifica.id);
-            if (garaInScadenza) {
-                avvisoScadenza = ` <strong class="text-danger">Importante: questa gara è in ${garaInScadenza.tipoEvento} il ${garaInScadenza.dataEvento}!</strong>`;
-                if (garaInScadenza.isUrgente) {
-                    const [day, month, year] = garaInScadenza.dataEvento.split('/');
-                    const dataEventoDate = new Date(`${year}-${month}-${day}`);
-                    const giorniRimanenti = calcolaGiorniTraDate(new Date(), dataEventoDate);
-                    const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
-                    avvisoScadenza = ` <strong class="text-danger">❗URGENTE: Mancan${Math.abs(giorniRimanenti) === 1 ? 'o' : 'o'} ${giorniRimanenti} ${pluraleGiorni} alla ${garaInScadenza.tipoEvento.toLowerCase()} di questa gara (${garaInScadenza.dataEvento})!</strong>`;
-                }
-            }
-        }
-        return avvisoScadenza;
-    }
     // Funzione helper per ottenere le gare in scadenza o dimezzamento con dettagli utili
     function getGareConScadenzeImminenti() {
         const gareSalvate = JSON.parse(localStorage.getItem('gareSalvate')) || [];
@@ -1511,24 +1594,15 @@ document.addEventListener('DOMContentLoaded', () => {
             let impattoPuntiStimato = 0;
 
             if (mesiTrascorsi >= 9 && mesiTrascorsi < 12) { // Dimezzamento imminente
-                const tipoGaraCorrente = livelliVsrStoricoMap[gara.livello] ? livelliVsrStoricoMap[gara.livello].tipo : null;
-                if (tipoGaraCorrente === 'HC') { // Le HC generiche non si dimezzano ai fini del punteggio
-                    return;
-                }
-
                 tipoEvento = "Dimezzamento";
                 dataEventoObj = new Date(dataGaraDate); dataEventoObj.setMonth(dataGaraDate.getMonth() + 12);
                 isUrgente = (mesiTrascorsi === 11);
-                impattoPuntiStimato = Math.round(gara.puntiVSR * 0.5);
+                impattoPuntiStimato = Math.round(gara.puntiVSR * 0.5); // Punti persi = 50% dei punti originali
             } else if (mesiTrascorsi >= 21 && mesiTrascorsi < 24) { // Scadenza imminente
-                const tipoGaraCorrente = livelliVsrStoricoMap[gara.livello] ? livelliVsrStoricoMap[gara.livello].tipo : null; // Aggiunto per coerenza
-                if (tipoGaraCorrente === 'HC') { // Le HC generiche non scadono ai fini del punteggio
-                    return;
-                }
                 tipoEvento = "Scadenza";
                 dataEventoObj = new Date(dataGaraDate); dataEventoObj.setMonth(dataGaraDate.getMonth() + 24);
                 isUrgente = (mesiTrascorsi === 23);
-                impattoPuntiStimato = Math.round(gara.puntiVSR * (mesiTrascorsi < 12 ? 1.0 : 0.5)); // Punti che verranno persi
+                impattoPuntiStimato = Math.round(gara.puntiVSR * 0.5); // Punti persi = 50% dei punti originali (quelli che rimangono)
             }
             if (tipoEvento && dataEventoObj) {
                 scadenze.push({ ...gara, tipoEvento, dataEvento: dataEventoObj.toLocaleDateString('it-IT'), isUrgente, impattoPunti: impattoPuntiStimato });
@@ -1537,85 +1611,114 @@ document.addEventListener('DOMContentLoaded', () => {
         return scadenze;
     }
 
+
     function aggiornaValutazioneStrategicaSlot() {
         if (!listaSuggerimentiStrategiciSlot) return;
 
         const gareContributive = getGareContributiveConDettagli();
         const suggerimentiStrategici = [];
         const gareConScadenze = getGareConScadenzeImminenti(); // Ottieni gare con scadenze
-        const idsGareConScadenze = new Set(gareConScadenze.map(g => g.id));
+        const idsGareConScadenze = new Set(gareConScadenze.map(g => g.id)); // Set di ID per lookup veloce
 
         // Definizioni strategiche per categoria
         const strategiePerCategoria = {
-            "VGLOBE": { // Vendée Globe
-                nomeBreve: "Vendée Globe FC",
+            "HC": {
+                nomeBreve: "Fuori Categoria",
                 iconaAzione: "🎯",
-                testoSlotLibero: "<strong>Opportunità a Lungo Termine Vendée Globe FC:</strong> Lo slot è libero. La Vendée Globe è un evento quadriennale cruciale. Quando la prossima edizione sarà annunciata, la partecipazione sarà fondamentale per un VSR competitivo. <em>Nel frattempo, ottimizza al massimo gli slot di Livello 1, 2 e 3.</em>",
-                testoSlotDebole: (punti, classificaTarget, garaSpecifica) => { // classificaTarget può essere meno rilevante nel testo finale
-                    const puntiAttualiFormattati = formatNumber(punti, 0);
-                    let messaggioStrategico = "";
-
-                    if (garaSpecifica && idsGareConScadenze.has(garaSpecifica.id)) {
-                        const garaInScadenza = gareConScadenze.find(g => g.id === garaSpecifica.id);
-                        if (garaInScadenza && garaInScadenza.isUrgente) { // Caso URGENTE e DEBOLE
-                            const evento = garaInScadenza.tipoEvento.toLowerCase();
-                            const dataEvento = garaInScadenza.dataEvento;
-                            const [day, month, year] = dataEvento.split('/');
-                            const dataEventoDate = new Date(`${year}-${month}-${day}`);
-                            const giorniRimanenti = calcolaGiorniTraDate(new Date(), dataEventoDate);
-                            const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
-                            const testoGiorni = `tra ${giorniRimanenti} ${pluraleGiorni} (${dataEvento})`;
-
-                            if (evento === "scadenza") {
-                                messaggioStrategico = `<strong>Azione Urgentissima Vendée Globe FC:</strong> Il tuo risultato attuale di ${puntiAttualiFormattati} punti scadrà ${testoGiorni}. Questo slot si azzererà a breve.`;
-                            } else { // Dimezzamento
-                                const puntiPersiFormattati = formatNumber(garaInScadenza.impattoPunti, 0);
-                                messaggioStrategico = `<strong>Azione Urgentissima Vendée Globe FC:</strong> Il tuo risultato attuale di ${puntiAttualiFormattati} punti si dimezzerà ${testoGiorni}. Questo slot perderà ${puntiPersiFormattati} punti a breve.`;
-                            }
-                        } else { // Caso DEBOLE ma NON URGENTE (o senza preavviso specifico)
-                            messaggioStrategico = `<strong>Azione Critica Vendée Globe FC:</strong> Il tuo risultato attuale di ${puntiAttualiFormattati} punti è sotto la soglia ottimale.`;
-                        }
-                    } else { // Caso DEBOLE ma senza preavviso di scadenza/dimezzamento imminente
-                        messaggioStrategico = `<strong>Azione Critica Vendée Globe FC:</strong> Il tuo risultato attuale di ${puntiAttualiFormattati} punti è sotto la soglia ottimale.`;
-                    }
-                    return `${messaggioStrategico} Data la natura quadriennale della Vendée Globe, è improbabile poter migliorare questo slot a breve. <strong>Strategia consigliata:</strong> Concentrati sul massimizzare i tuoi punteggi negli slot di Livello 1, 2 e 3 per compensare questa situazione e migliorare il tuo VSR complessivo.`;
+                testoSlotVuoto: "<strong>Opportunità Fuori Categoria:</strong> Lo slot contributivo è vuoto. Le gare HC offrono molti punti. Partecipare a una gara di questo tipo è fondamentale per un VSR competitivo. <em>Identifica la prossima gara HC nel calendario e pianifica la tua partecipazione. Nel frattempo, ottimizza al massimo gli slot di Livello 1, 2 e 3.</em>",
+                testoSlotPienoDeboleBase: (punti) => `<strong>Azione Critica Fuori Categoria:</strong> Il tuo risultato attuale di ${formatNumber(punti, 0)} punti è sotto la soglia ottimale.`,
+                testoSlotPienoOKBase: (punti) => `✅ <strong>Stato Fuori Categoria Ottimale:</strong> Slot coperto con ${formatNumber(punti, 0)} punti.`,
+                testoAzioneMiglioramento: () => `Punta a un risultato migliore nella prossima gara HC disponibile.`,
+                testoPreavviso: (dataEvento, tipoEvento, impattoPunti) => ` <strong class="text-danger">Importante: questa gara è in ${tipoEvento} il ${dataEvento}!</strong>`,
+                testoUrgenzaDimezzamento: (dataEvento, giorniRimanenti, impattoPunti) => {
+                    const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
+                    return ` <strong class="text-danger">❗URGENTE: Mancan${Math.abs(giorniRimanenti) === 1 ? 'o' : 'o'} ${giorniRimanenti} ${pluraleGiorni} alla ${tipoEvento.toLowerCase()} di questa gara (${dataEvento})! Perderai ${formatNumber(impattoPunti,0)} punti.</strong>`;
                 },
-                testoSlotPienoOK: (punti) => `✅ <strong>Stato Vendée Globe FC Ottimale:</strong> Slot coperto con ${formatNumber(punti, 0)} punti. <em>Ottimo lavoro! Monitora eventuali preavvisi di dimezzamento/scadenza futuri.</em>`
+                testoUrgenzaScadenza: (dataEvento, giorniRimanenti, impattoPunti) => {
+                     const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
+                     return ` <strong class="text-danger">❗URGENTE: Mancan${Math.abs(giorniRimanenti) === 1 ? 'o' : 'o'} ${giorniRimanenti} ${pluraleGiorni} alla ${tipoEvento.toLowerCase()} di questa gara (${dataEvento})! Questo slot si azzererà.</strong>`;
+                }
             },
-            "LIV1": { // Livello 1
+            "LIV1": {
                 nomeBreve: "Livello 1",
                 iconaAzione: "🎯",
-                testoSlotLibero: (slotLiberi, puntiEsempio) => `<strong>Azione Livello 1:</strong> Hai ${slotLiberi} slot liber${slotLiberi > 1 ? 'i' : 'o'}. ${puntiEsempio ? `Un 10° posto potrebbe dare circa ${formatNumber(puntiEsempio,0)} pts.` : ''} <em>Questa categoria offre un buon bilanciamento punti/accessibilità. Riempi questi slot con risultati solidi.</em>`,
-                testoSlotDebole: (punti, classificaTarget, garaSpecifica) => {
-                    const avvisoScadenza = generaAvvisoScadenzaHTML(garaSpecifica, idsGareConScadenze, gareConScadenze);
-                    return `<strong>Azione Livello 1:</strong> Migliora il tuo risultato meno performante (${formatNumber(punti, 0)} punti, obiettivo: ${classificaTarget}° posto). <em>Sostituire gare deboli qui è efficace per il VSR, data la frequenza degli eventi.</em>${avvisoScadenza}`;
+                testoSlotVuoto: (numGareDaAggiungere100, puntiEsempio, nomeCategoria, numGareCheSiDimezzano) => {
+                    let baseText = `<strong>Azione ${nomeCategoria}:</strong> Per ottimizzare la tua fascia 100%, dovresti aggiungere ${numGareDaAggiungere100 > 1 ? `${numGareDaAggiungere100} nuove gare` : 'una nuova gara'}. ${puntiEsempio ? `Un 10° posto potrebbe dare circa ${formatNumber(puntiEsempio,0)} pts.` : ''}`;
+                    if (numGareCheSiDimezzano > 0) {
+                        baseText += ` <strong class='text-info'>Questo suggerimento considera che ${numGareCheSiDimezzano > 1 ? `${numGareCheSiDimezzano} delle tue gare` : 'una delle tue gare'} al 100% passer${
+                                     numGareCheSiDimezzano > 1 ? 'anno' : 'à'} presto al 50% (vedi "Monitoraggio Scadenze").</strong>`;
+                    }
+                    return `${baseText} <em>Questa categoria offre un buon bilanciamento punti/accessibilità. Punta a risultati solidi.</em>`;
+                },
+                testoSlotPienoDeboleBase: (punti) => `<strong>Azione Livello 1:</strong> Migliora il tuo risultato meno performante (${formatNumber(punti, 0)} punti).`,
+                testoSlotPienoOKBase: (punti) => `✅ <strong>Stato Livello 1 Ottimale:</strong> Slot coperto con risultati solidi (minimo ${formatNumber(punti, 0)} punti).`,
+                testoAzioneMiglioramento: (classificaTarget) => `Punta a un piazzamento di ${classificaTarget}° o migliore per sostituire la gara meno performante.`,
+                testoPreavviso: (dataEvento, tipoEvento, impattoPunti) => ` <strong class="text-danger">Importante: questa gara è in ${tipoEvento} il ${dataEvento}! Perderà ${formatNumber(impattoPunti,0)} punti.</strong>`,
+                testoUrgenzaDimezzamento: (dataEvento, giorniRimanenti, impattoPunti) => {
+                    const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
+                    return ` <strong class="text-danger">❗URGENTE: Mancan${Math.abs(giorniRimanenti) === 1 ? 'o' : 'o'} ${giorniRimanenti} ${pluraleGiorni} alla ${tipoEvento.toLowerCase()} di questa gara (${dataEvento})! Perderai ${formatNumber(impattoPunti,0)} punti.</strong>`;
+                },
+                testoUrgenzaScadenza: (dataEvento, giorniRimanenti, impattoPunti) => {
+                     const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
+                     return ` <strong class="text-danger">❗URGENTE: Mancan${Math.abs(giorniRimanenti) === 1 ? 'o' : 'o'} ${giorniRimanenti} ${pluraleGiorni} alla ${tipoEvento.toLowerCase()} di questa gara (${dataEvento})! Questo slot si azzererà.</strong>`;
                 }
             },
-            "LIV2": { // Livello 2
+            "LIV2": {
                 nomeBreve: "Livello 2",
                 iconaAzione: "🎯",
-                testoSlotLibero: (slotLiberi, puntiEsempio) => `<strong>Azione Livello 2:</strong> Hai ${slotLiberi} slot liber${slotLiberi > 1 ? 'i' : 'o'}. ${puntiEsempio ? `Un 10° posto potrebbe dare circa ${formatNumber(puntiEsempio,0)} pts.` : ''} <em>Utili per completare la classifica e fare "volume". Non trascurarle.</em>`,
-                testoSlotDebole: (punti, classificaTarget, garaSpecifica) => {
-                    const avvisoScadenza = generaAvvisoScadenzaHTML(garaSpecifica, idsGareConScadenze, gareConScadenze);
-                    return `<strong>Azione Livello 2:</strong> Migliora il tuo risultato meno performante (${formatNumber(punti, 0)} punti, obiettivo: ${classificaTarget}° posto). <em>Data l'alta frequenza, ottimizza costantemente questa categoria.</em>${avvisoScadenza}`;
+                testoSlotVuoto: (numGareDaAggiungere100, puntiEsempio, nomeCategoria, numGareCheSiDimezzano) => {
+                    let baseText = `<strong>Azione ${nomeCategoria}:</strong> Per ottimizzare la tua fascia 100%, dovresti aggiungere ${numGareDaAggiungere100 > 1 ? `${numGareDaAggiungere100} nuove gare` : 'una nuova gara'}. ${puntiEsempio ? `Un 10° posto potrebbe dare circa ${formatNumber(puntiEsempio,0)} pts.` : ''}`;
+                    if (numGareCheSiDimezzano > 0) {
+                        baseText += ` <strong class='text-info'>Questo suggerimento considera che ${numGareCheSiDimezzano > 1 ? `${numGareCheSiDimezzano} delle tue gare` : 'una delle tue gare'} al 100% passer${
+                                     numGareCheSiDimezzano > 1 ? 'anno' : 'à'} presto al 50% (vedi "Monitoraggio Scadenze").</strong>`;
+                    }
+                    return `${baseText} <em>Utile per completare la classifica e fare "volume". Non trascurarla e punta a risultati solidi.</em>`;
+                },
+                testoSlotPienoDeboleBase: (punti) => `<strong>Azione Livello 2:</strong> Migliora il tuo risultato meno performante (${formatNumber(punti, 0)} punti).`,
+                testoSlotPienoOKBase: (punti) => `✅ <strong>Stato Livello 2 Ottimale:</strong> Slot coperto con risultati solidi (minimo ${formatNumber(punti, 0)} punti).`,
+                testoAzioneMiglioramento: (classificaTarget) => `Punta a un piazzamento di ${classificaTarget}° o migliore per sostituire la gara meno performante.`,
+                testoPreavviso: (dataEvento, tipoEvento, impattoPunti) => ` <strong class="text-danger">Importante: questa gara è in ${tipoEvento} il ${dataEvento}! Perderà ${formatNumber(impattoPunti,0)} punti.</strong>`,
+                testoUrgenzaDimezzamento: (dataEvento, giorniRimanenti, impattoPunti) => {
+                    const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
+                    return ` <strong class="text-danger">❗URGENTE: Mancan${Math.abs(giorniRimanenti) === 1 ? 'o' : 'o'} ${giorniRimanenti} ${pluraleGiorni} alla ${tipoEvento.toLowerCase()} di questa gara (${dataEvento})! Perderai ${formatNumber(impattoPunti,0)} punti.</strong>`;
+                },
+                testoUrgenzaScadenza: (dataEvento, giorniRimanenti, impattoPunti) => {
+                     const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
+                     return ` <strong class="text-danger">❗URGENTE: Mancan${Math.abs(giorniRimanenti) === 1 ? 'o' : 'o'} ${giorniRimanenti} ${pluraleGiorni} alla ${tipoEvento.toLowerCase()} di questa gara (${dataEvento})! Questo slot si azzererà.</strong>`;
                 }
             },
-            "LIV3": { // Livello 3
+            "LIV3": {
                 nomeBreve: "Livello 3",
                 iconaAzione: "🎯",
-                testoSlotLibero: (slotLiberi, puntiEsempio) => `<strong>Azione Livello 3:</strong> Hai ${slotLiberi} slot liber${slotLiberi > 1 ? 'i' : 'o'}. ${puntiEsempio ? `Un 10° posto potrebbe dare circa ${formatNumber(puntiEsempio,0)} pts.` : ''} <em>L'obiettivo primario è riempire tutti i 10 slot. Anche punteggi modesti contribuiscono.</em>`,
-                testoSlotDebole: (punti, classificaTarget, garaSpecifica) => {
-                    const avvisoScadenza = generaAvvisoScadenzaHTML(garaSpecifica, idsGareConScadenze, gareConScadenze);
-                    return `<strong>Azione Livello 3:</strong> Migliora il tuo risultato meno performante (${formatNumber(punti, 0)} punti, obiettivo: ${classificaTarget}° posto). <em>Data l'abbondanza di gare, "pulire" i punteggi bassi qui è semplice.</em>${avvisoScadenza}`;
+                testoSlotVuoto: (numGareDaAggiungere100, puntiEsempio, nomeCategoria, numGareCheSiDimezzano) => {
+                    let baseText = `<strong>Azione ${nomeCategoria}:</strong> Per ottimizzare la tua fascia 100%, dovresti aggiungere ${numGareDaAggiungere100 > 1 ? `${numGareDaAggiungere100} nuove gare` : 'una nuova gara'}. ${puntiEsempio ? `Un 10° posto potrebbe dare circa ${formatNumber(puntiEsempio,0)} pts.` : ''}`;
+                    if (numGareCheSiDimezzano > 0) {
+                        baseText += ` <strong class='text-info'>Questo suggerimento considera che ${numGareCheSiDimezzano > 1 ? `${numGareCheSiDimezzano} delle tue gare` : 'una delle tue gare'} al 100% passer${
+                                     numGareCheSiDimezzano > 1 ? 'anno' : 'à'} presto al 50% (vedi "Monitoraggio Scadenze").</strong>`;
+                    }
+                    return `${baseText} <em>L'obiettivo primario è avere ${LIMITI_GARE_PER_CATEGORIA["LIV3"]*2} gare che contribuiscono. Anche punteggi modesti sono utili.</em>`;
+                },
+                testoSlotPienoDeboleBase: (punti) => `<strong>Azione Livello 3:</strong> Migliora il tuo risultato meno performante (${formatNumber(punti, 0)} punti).`,
+                testoSlotPienoOKBase: (punti) => `✅ <strong>Stato Livello 3 Ottimale:</strong> Slot coperto con risultati solidi (minimo ${formatNumber(punti, 0)} punti).`,
+                testoAzioneMiglioramento: (classificaTarget) => `Punta a un piazzamento di ${classificaTarget}° o migliore per sostituire la gara meno performante.`,
+                testoPreavviso: (dataEvento, tipoEvento, impattoPunti) => ` <strong class="text-danger">Importante: questa gara è in ${tipoEvento} il ${dataEvento}! Perderà ${formatNumber(impattoPunti,0)} punti.</strong>`,
+                testoUrgenzaDimezzamento: (dataEvento, giorniRimanenti, impattoPunti) => {
+                    const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
+                    return ` <strong class="text-danger">❗URGENTE: Mancan${Math.abs(giorniRimanenti) === 1 ? 'o' : 'o'} ${giorniRimanenti} ${pluraleGiorni} alla ${tipoEvento.toLowerCase()} di questa gara (${dataEvento})! Perderai ${formatNumber(impattoPunti,0)} punti.</strong>`;
+                },
+                testoUrgenzaScadenza: (dataEvento, giorniRimanenti, impattoPunti) => {
+                     const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
+                     return ` <strong class="text-danger">❗URGENTE: Mancan${Math.abs(giorniRimanenti) === 1 ? 'o' : 'o'} ${giorniRimanenti} ${pluraleGiorni} alla ${tipoEvento.toLowerCase()} di questa gara (${dataEvento})! Questo slot si azzererà.</strong>`;
                 }
             }
         };
 
-        const ordineTipiPerStrategia = ["VGLOBE", "LIV1", "LIV2", "LIV3"]; // HC generiche non hanno strategia attiva
+        const ordineTipiPerStrategia = ["HC", "LIV1", "LIV2", "LIV3"];
 
         ordineTipiPerStrategia.forEach(tipoGara => {
             const gareCat = gareContributive[tipoGara] || [];
-            const maxSlot = LIMITI_GARE_PER_CATEGORIA[tipoGara];
+            const infoStrategia = strategiePerCategoria[tipoGara];
+
             // Trova la chiave corrispondente al tipoGara per accedere a valoreNumerico
             let chiaveMappaPerValoreNumerico = null;
             for (const key in livelliVsrStoricoMap) {
@@ -1624,96 +1727,110 @@ document.addEventListener('DOMContentLoaded', () => {
             const infoLivelloDaMappa = chiaveMappaPerValoreNumerico ? livelliVsrStoricoMap[chiaveMappaPerValoreNumerico] : null;
             const livelloValoreNumerico = infoLivelloDaMappa ? infoLivelloDaMappa.valoreNumerico : null;
 
-            const infoStrategia = strategiePerCategoria[tipoGara];
-
-            if (!infoStrategia || !livelloValoreNumerico) { // Aggiunto controllo per livelloValoreNumerico
-                // console.warn("Info strategia o valore numerico livello non trovati per tipoGara:", tipoGara);
+            if (!infoStrategia || !livelloValoreNumerico) {
                 return;
             }
 
             let icona = infoStrategia.iconaAzione ? `<span class="warning-triangle">${infoStrategia.iconaAzione}</span>` : `<span class="warning-triangle">⚠️</span>`;
+            let suggerimentoTestoCompleto = "";
+            const limiteGareContributive = LIMITI_GARE_PER_CATEGORIA[tipoGara] * 2; // Totale slot contributivi (es. 2 per HC, 6 per LIV1)
 
-            if (gareCat.length < maxSlot) { // Ci sono slot liberi
-                const slotLiberi = maxSlot - gareCat.length;
+            if (gareCat.length < limiteGareContributive) { // Meno gare contributive del limite
                 let puntiEsempio = null;
                 if (livelloValoreNumerico) {
-                    puntiEsempio = calcolaPuntiPerClassifica(livelloValoreNumerico, 10);
+                    puntiEsempio = calcolaPuntiPerClassifica(livelloValoreNumerico, 10); // Esempio per 10° posto
                 }
-                let testoSuggerimento = "";
-                if (tipoGara === "VGLOBE") {
-                    testoSuggerimento = infoStrategia.testoSlotLibero;
-                } else {
-                    testoSuggerimento = infoStrategia.testoSlotLibero(slotLiberi, puntiEsempio);
-                }
-                suggerimentiStrategici.push(`${icona} ${testoSuggerimento}`);
+                
+                // Calcola quante gare aggiungere per la fascia 100%, tenendo conto dei dimezzamenti
+                const gare100Attuali = gareCat.filter(g => g.fattoreDecadimento === 1.0);
+                const numGare100Attuali = gare100Attuali.length;
+                const gare100InDimezzamentoImminente = gare100Attuali.filter(g => g.mesiTrascorsi >= 9 && g.mesiTrascorsi < 12).length;
+                
+                // Numero di slot attualmente vuoti nella fascia 100%
+                const slotAttualmenteVuoti100 = LIMITI_GARE_PER_CATEGORIA[tipoGara] - numGare100Attuali;
+                // Numero totale di gare da aggiungere per la fascia 100% (slot vuoti + quelli che si libereranno)
+                const numGareDaAggiungere100 = slotAttualmenteVuoti100 + gare100InDimezzamentoImminente;
 
-            } else { // Tutti gli slot sono pieni, controlliamo se sono deboli
-                const puntiDaBattere = (tipoGara === "VGLOBE" && gareCat.length > 0) ? gareCat[0].puntiEffettivi : gareCat[gareCat.length - 1].puntiEffettivi;
+                if (tipoGara === "HC" && typeof infoStrategia.testoSlotVuoto === 'string') {
+                    suggerimentoTestoCompleto = `${icona} ${infoStrategia.testoSlotVuoto}`;
+                } else if (typeof infoStrategia.testoSlotVuoto === 'function') {
+                    // Passa il numero di gare da aggiungere per la fascia 100% e il numero di quelle che si dimezzano
+                    suggerimentoTestoCompleto = `${icona} ${infoStrategia.testoSlotVuoto(numGareDaAggiungere100, puntiEsempio, infoStrategia.nomeBreve, gare100InDimezzamentoImminente)}`;
+                }
+
+            } else { // Tutti gli slot contributivi sono pieni (gareCat.length === limiteGareContributive)
+                const puntiDaBattere = gareCat[gareCat.length - 1].puntiEffettivi;
                 const isDebole = livelloValoreNumerico && SOGLIA_DEBOLEZZA[livelloValoreNumerico.toString()] && puntiDaBattere < (livelloValoreNumerico * SOGLIA_DEBOLEZZA[livelloValoreNumerico.toString()]);
+                const garaMenoPerformante = gareCat[gareCat.length - 1];
 
                 if (isDebole) {
-                    // Slot debole
                     const classificaTarget = calcolaClassificaPerPuntiTarget(livelloValoreNumerico, puntiDaBattere + 1);
-                    const garaDebole = (tipoGara === "VGLOBE" && gareCat.length > 0) ? gareCat[0] : gareCat[gareCat.length - 1];
-                    suggerimentiStrategici.push(`${icona} ${infoStrategia.testoSlotDebole(puntiDaBattere, classificaTarget, garaDebole)}`);
-                } else { // Slot pieno E NON debole
-                    if (tipoGara === "VGLOBE") {
-                        const garaSpecifica = gareCat[0]; // C'è solo una gara VGLOBE
-                        const puntiAttualiFormattati = formatNumber(garaSpecifica.puntiEffettivi, 0);
-                        let messaggioStrategicoVGlobeNonDebole = "";
-                        let preavvisoAttivo = false;
+                    suggerimentoTestoCompleto = `${icona} ${infoStrategia.testoSlotPienoDeboleBase(puntiDaBattere)}`;
+                    if (infoStrategia.testoAzioneMiglioramento) {
+                        suggerimentoTestoCompleto += ` ${infoStrategia.testoAzioneMiglioramento(classificaTarget)}`;
+                    }
+                } else { // Non debole
+                    suggerimentoTestoCompleto = `${infoStrategia.testoSlotPienoOKBase(puntiDaBattere)}`;
+                    const classificaTarget = calcolaClassificaPerPuntiTarget(livelloValoreNumerico, puntiDaBattere + 1);
+                     if (classificaTarget && infoStrategia.testoAzioneMiglioramento && tipoGara !== "HC") { // Non aggiungere azione miglioramento per HC se OK
+                        suggerimentoTestoCompleto += ` ${infoStrategia.testoAzioneMiglioramento(classificaTarget)}`;
+                     } else if (tipoGara === "HC" && infoStrategia.testoSlotPienoOKBase) { // Per HC, se OK, aggiungi solo il testo di monitoraggio
+                         suggerimentoTestoCompleto = infoStrategia.testoSlotPienoOKBase(puntiDaBattere); // Assicura che il testo OK sia usato
+                     }
+                }
 
-                        if (idsGareConScadenze.has(garaSpecifica.id)) {
-                            const garaInScadenza = gareConScadenze.find(g => g.id === garaSpecifica.id);
-                            if (garaInScadenza) {
-                                const evento = garaInScadenza.tipoEvento.toLowerCase();
-                                const dataEvento = garaInScadenza.dataEvento;
+                // Aggiungi avviso di scadenza/dimezzamento se presente per la gara meno performante
+                if (garaMenoPerformante && idsGareConScadenze.has(garaMenoPerformante.id)) {
+                    const garaInScadenza = gareConScadenze.find(g => g.id === garaMenoPerformante.id);
+                    if (garaInScadenza) {
+                        const tipoEvento = garaInScadenza.tipoEvento;
+                        const dataEvento = garaInScadenza.dataEvento;
+                        const impattoPunti = garaInScadenza.impattoPunti;
+                        const [day, month, year] = dataEvento.split('/');
+                        const dataEventoDate = new Date(`${year}-${month}-${day}`);
+                        const giorniRimanenti = calcolaGiorniTraDate(new Date(), dataEventoDate);
 
-                                if (garaInScadenza.isUrgente) {
-                                    preavvisoAttivo = true; // Solo se urgente mostriamo il messaggio specifico
-                                    const [day, month, year] = dataEvento.split('/');
-                                    const dataEventoDate = new Date(`${year}-${month}-${day}`);
-                                    const giorniRimanenti = calcolaGiorniTraDate(new Date(), dataEventoDate);
-                                    const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
-                                    const testoGiorni = `tra ${giorniRimanenti} ${pluraleGiorni} (${dataEvento})`;
-
-                                    if (evento === "scadenza") {
-                                        messaggioStrategicoVGlobeNonDebole = `<span class="info-icon">ℹ️</span> <strong class="text-danger">❗URGENTE:</strong> Il tuo risultato Vendée Globe FC di ${puntiAttualiFormattati} punti scadrà ${testoGiorni}. Questo slot si azzererà a breve.`;
-                                    } else { // Dimezzamento
-                                        const puntiPersiFormattati = formatNumber(garaInScadenza.impattoPunti, 0);
-                                        messaggioStrategicoVGlobeNonDebole = `<span class="info-icon">ℹ️</span> <strong class="text-danger">❗URGENTE:</strong> Il tuo risultato Vendée Globe FC di ${puntiAttualiFormattati} punti si dimezzerà ${testoGiorni}, perdendo ${puntiPersiFormattati} punti.`;
-                                    }
-                                    messaggioStrategicoVGlobeNonDebole += ` Poiché la prossima Vendée Globe non è imminente, è saggio rafforzare il VSR attraverso gli slot di Livello 1, 2 e 3.`;
-                                } else { // Preavviso NON urgente
-                                    preavvisoAttivo = true;
-                                    messaggioStrategicoVGlobeNonDebole = `<span class="info-icon">ℹ️</span> <strong>Preavviso Vendée Globe FC:</strong> Il tuo risultato di ${puntiAttualiFormattati} punti subirà un ${evento} il ${dataEvento}. Poiché la prossima Vendée Globe non è imminente, è saggio rafforzare il VSR attraverso gli slot di Livello 1, 2 e 3.`;
-                                }
+                        if (garaInScadenza.isUrgente) {
+                            if (tipoEvento === "Dimezzamento" && infoStrategia.testoUrgenzaDimezzamento) {
+                                suggerimentoTestoCompleto += infoStrategia.testoUrgenzaDimezzamento(dataEvento, giorniRimanenti, impattoPunti);
+                            } else if (tipoEvento === "Scadenza" && infoStrategia.testoUrgenzaScadenza) {
+                                suggerimentoTestoCompleto += infoStrategia.testoUrgenzaScadenza(dataEvento, giorniRimanenti, impattoPunti);
                             }
+                        } else if (infoStrategia.testoPreavviso) { // Preavviso non urgente
+                            suggerimentoTestoCompleto += infoStrategia.testoPreavviso(dataEvento, tipoEvento, impattoPunti);
                         }
-
-                        if (preavvisoAttivo) {
-                            suggerimentiStrategici.push(messaggioStrategicoVGlobeNonDebole);
-                        } else if (infoStrategia.testoSlotPienoOK) { // Non debole, non in preavviso -> OK
-                            suggerimentiStrategici.push(infoStrategia.testoSlotPienoOK(puntiAttualiFormattati));
-                        }
-                    } else {
-                        // Per LIV1, LIV2, LIV3 pieni e non deboli, attualmente non viene dato un suggerimento specifico.
-                        // Potremmo aggiungere un messaggio "Slot [NomeLivello] in buono stato. Mantieni così!" o simile se necessario.
+                    }
+                } else if (!isDebole && tipoGara === "HC" && infoStrategia.testoSlotPienoOKBase) {
+                    // Caso HC OK senza preavvisi, assicurati che il testo di monitoraggio sia presente
+                    // Questo è un po' ridondante se testoSlotPienoOKBase già lo include, ma per sicurezza.
+                    if (!suggerimentoTestoCompleto.includes("Monitora")) { // Evita duplicati
+                         suggerimentoTestoCompleto = infoStrategia.testoSlotPienoOKBase(puntiDaBattere);
                     }
                 }
             }
+            if (suggerimentoTestoCompleto) suggerimentiStrategici.push(suggerimentoTestoCompleto);
         });
+
 
         // Aggiungi un suggerimento generale se ci sono scadenze importanti
         if (gareConScadenze.length > 0) {
             let testoScadenzeImportanti = "Ricorda di monitorare le tue gare in scadenza/dimezzamento. Sostituirle tempestivamente è cruciale, specialmente se contribuiscono significativamente al tuo VSR.";
-            const gareHCoL1InScadenza = gareConScadenze.filter(g => {
-                const tipoGara = livelliVsrStoricoMap[g.livello] ? livelliVsrStoricoMap[g.livello].tipo : null;
-                return tipoGara === "VGLOBE" || tipoGara === "LIV1";
+            const gareHCoL1InScadenza = gareConScadenze.filter(g => { // Filtra per HC o LIV1
+                const tipoGara = livelliVsrStoricoMap[g.livello] ? livelliVsrStoricoMap[g.livello].tipo : null; // Usa il tipo dalla mappa
+                return tipoGara === "HC" || tipoGara === "LIV1";
             });
 
             if (gareHCoL1InScadenza.length > 0) {
-                testoScadenzeImportanti = `<strong>Priorità Scadenze:</strong> Hai gare importanti (HC/Liv.1) in ${gareHCoL1InScadenza[0].tipoEvento} il ${gareHCoL1InScadenza[0].dataEvento}. La loro sostituzione dovrebbe essere una priorità alta per non perdere punti preziosi! Controlla il "Monitoraggio Scadenze" per i dettagli.`;
+                // Trova la scadenza più imminente tra HC/L1
+                 gareHCoL1InScadenza.sort((a,b) => new Date(a.dataEvento.split('/').reverse().join('-')) - new Date(b.dataEvento.split('/').reverse().join('-')));
+                 const scadenzaPiuImminente = gareHCoL1InScadenza[0]; // La prima dopo l'ordinamento è la più imminente
+                 const [day, month, year] = scadenzaPiuImminente.dataEvento.split('/');
+                 const dataEventoDate = new Date(`${year}-${month}-${day}`);
+                 const giorniRimanenti = calcolaGiorniTraDate(new Date(), dataEventoDate);
+                 const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
+                 const testoGiorni = `tra ${giorniRimanenti} ${pluraleGiorni} (${scadenzaPiuImminente.dataEvento})`;
+
+                testoScadenzeImportanti = `<strong>Priorità Scadenze:</strong> Hai gare importanti (HC/Liv.1) in ${scadenzaPiuImminente.tipoEvento} ${testoGiorni}. La loro sostituzione dovrebbe essere una priorità alta per non perdere punti preziosi! Controlla il "Monitoraggio Scadenze" per i dettagli.`;
             }
             suggerimentiStrategici.unshift(`<span class="warning-triangle calendar-icon">🗓️</span> ${testoScadenzeImportanti}`);
         }
@@ -1726,11 +1843,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 listaSuggerimentiStrategiciSlot.appendChild(li);
             });
         } else {
-            // Se non ci sono suggerimenti specifici (es. tutti gli slot sono pieni e forti, tranne HC)
-            // Potremmo mettere un messaggio generico o lasciare vuoto.
-            // Per ora, se non ci sono debolezze o opportunità chiare, non mostriamo nulla di specifico.
-            // Un caso potrebbe essere se tutti gli slot sono pieni e con punteggi "buoni".
-            // In alternativa, un messaggio di "Situazione VSR stabile."
              listaSuggerimentiStrategiciSlot.innerHTML = '<li class="no-data">Nessuna azione strategica prioritaria identificata per gli slot. Controlla le scadenze.</li>';
         }
     }
@@ -1749,7 +1861,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Calcola i punti VSR attuali per ogni categoria per il tooltip
         const puntiAttualiPerCategoriaGrafico = {};
-        const categorieOrdineTooltip = ["VGLOBE", "LIV1", "LIV2", "LIV3"]; // Stesso ordine del grafico
+        const categorieOrdineTooltip = ["HC", "LIV1", "LIV2", "LIV3"]; // Stesso ordine del grafico
         categorieOrdineTooltip.forEach(tipoGara => {
             const gareCat = gareContributive[tipoGara] || [];
             let sommaPunti = 0;
@@ -1758,10 +1870,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         // Calcola il potenziale massimo di punti per ogni categoria e il totale
         const potenzialePuntiCategoria = {
-            "VGLOBE": (livelliVsrStoricoMap["VGLOBE"]?.valoreNumerico || 0) * LIMITI_GARE_PER_CATEGORIA["VGLOBE"],
-            "LIV1": (livelliVsrStoricoMap["LIV1"]?.valoreNumerico || 0) * LIMITI_GARE_PER_CATEGORIA["LIV1"],
-            "LIV2": (livelliVsrStoricoMap["LIV2"]?.valoreNumerico || 0) * LIMITI_GARE_PER_CATEGORIA["LIV2"],
-            "LIV3": (livelliVsrStoricoMap["LIV3"]?.valoreNumerico || 0) * LIMITI_GARE_PER_CATEGORIA["LIV3"]
+            "HC": (livelliVsrStoricoMap["HC"]?.valoreNumerico || 0) * LIMITI_GARE_PER_CATEGORIA["HC"] * 2, // Limite * 2
+            "LIV1": (livelliVsrStoricoMap["LIV1"]?.valoreNumerico || 0) * LIMITI_GARE_PER_CATEGORIA["LIV1"] * 2, // Limite * 2
+            "LIV2": (livelliVsrStoricoMap["LIV2"]?.valoreNumerico || 0) * LIMITI_GARE_PER_CATEGORIA["LIV2"] * 2, // Limite * 2
+            "LIV3": (livelliVsrStoricoMap["LIV3"]?.valoreNumerico || 0) * LIMITI_GARE_PER_CATEGORIA["LIV3"] * 2 // Limite * 2
         };
 
         let totalPotentialPoints = 0;
@@ -1781,17 +1893,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const borderWidths = []; // Array per gli spessori dei bordi
 
         // Definisci l'ordine e i colori per le categorie
-        const categorieOrdine = ["VGLOBE", "LIV1", "LIV2", "LIV3"];
+        const categorieOrdine = ["HC", "LIV1", "LIV2", "LIV3"];
         const colori = {
-            "VGLOBE": { good: 'rgba(220, 53, 69, 0.8)', needsImprovement: 'rgba(220, 53, 69, 0.3)' },   // Rosso Bootstrap (danger)
-            "LIV1": { good: 'rgba(25, 135, 84, 0.8)', needsImprovement: 'rgba(25, 135, 84, 0.3)' },    // Verde Bootstrap (success)
+            "HC":   { good: 'rgba(220, 53, 69, 0.8)', needsImprovement: 'rgba(220, 53, 69, 0.3)' },   // Rosso Bootstrap (danger) per HC
+            "LIV1": { good: 'rgba(25, 135, 84, 0.8)', needsImprovement: 'rgba(25, 135, 84, 0.3)' },   // Verde Bootstrap (success)
             "LIV2": { good: 'rgba(255, 193, 7, 0.8)', needsImprovement: 'rgba(255, 193, 7, 0.3)' },   // Giallo Bootstrap (warning)
             "LIV3": { good: 'rgba(13, 110, 253, 0.8)', needsImprovement: 'rgba(13, 110, 253, 0.3)' }   // Blu Bootstrap (primary)
         };
 
         categorieOrdine.forEach(tipoGara => {
             const gareCat = gareContributive[tipoGara] || [];
-            const maxSlot = LIMITI_GARE_PER_CATEGORIA[tipoGara];
+            const maxSlotPerFascia = LIMITI_GARE_PER_CATEGORIA[tipoGara];
+            const totaleSlotCategoria = maxSlotPerFascia * 2; // Totale slot per categoria
 
             // Trova il valore numerico del livello dalla mappa
             let chiaveMappaPerValoreNumerico = null;
@@ -1802,18 +1915,43 @@ document.addEventListener('DOMContentLoaded', () => {
             const livelloValoreNumerico = infoLivelloDaMappa ? infoLivelloDaMappa.valoreNumerico : null;
             const nomeCatBreve = infoLivelloDaMappa ? infoLivelloDaMappa.testo : tipoGara;
 
-            if (maxSlot === 0 || !livelloValoreNumerico) {
-                 // Non includere categorie senza slot o senza valore numerico (es. HC generica)
+            if (totaleSlotCategoria === 0 || !livelloValoreNumerico) {
+                 // Non includere categorie senza slot o senza valore numerico
                  return;
             }
 
-            const punteggioSalute = calcolaPunteggioSaluteCategoria(gareCat, maxSlot, livelloValoreNumerico); // 0-100
+            // Calcola il punteggio salute basato sul riempimento e sulla qualità media
+            const percentualeRiempimento = (gareCat.length / totaleSlotCategoria); // Valore da 0 a 1 sul totale di 40
+            let qualitaMediaPunti = 0; // Valore da 0 a 1
+            if (gareCat.length > 0 && livelloValoreNumerico > 0) {
+                 let sommaQualitaPercentuale = 0;
+                 gareCat.forEach(g => sommaQualitaPercentuale += (g.puntiEffettivi / livelloValoreNumerico));
+                 qualitaMediaPunti = sommaQualitaPercentuale / gareCat.length; // Media dei rapporti puntiEffettivi/puntiMaxGara
+            }
+
+            // Pesi per il punteggio salute (stessi usati nel radar)
+            let pesoRiempimento = 0.5;
+            let pesoQualita = 0.5;
+            if (maxSlotPerFascia === 1) { // HC (totale 2 slot)
+                pesoRiempimento = 0.4;
+                pesoQualita = 0.6;
+            } else if (maxSlotPerFascia === 3) { // LIV1 (totale 6 slot)
+                pesoRiempimento = 0.45;
+                pesoQualita = 0.55;
+            } else if (maxSlotPerFascia === 10) { // LIV3 (totale 20 slot)
+                pesoRiempimento = 0.6;
+                pesoQualita = 0.4;
+            }
+            // LIV2 usa i pesi di default 0.5/0.5
+
+            const punteggioSalute = (percentualeRiempimento * pesoRiempimento) + (qualitaMediaPunti * pesoQualita);
+            const punteggioSalutePercent = Math.min(1, Math.max(0, punteggioSalute)) * 100; // Risultato da 0 a 100
 
             // Calcola la dimensione delle fette in base al POTENZIALE DI PUNTEGGIO della categoria e al punteggio di salute
             const pesoPuntiCategoria = potenzialePuntiCategoria[tipoGara] / totalPotentialPoints; // Peso della categoria sul totale dei punti potenziali (0-1)
 
-            const dimensioneBuona = pesoPuntiCategoria * (punteggioSalute / 100);
-            const dimensioneMigliorabile = pesoPuntiCategoria * (1 - (punteggioSalute / 100));
+            const dimensioneBuona = pesoPuntiCategoria * (punteggioSalutePercent / 100);
+            const dimensioneMigliorabile = pesoPuntiCategoria * (1 - (punteggioSalutePercent / 100));
 
             // Aggiungi i dati per la fetta "Buona"
             if (dimensioneBuona > 0.001) { // Aggiungi solo se la dimensione è > 0 per evitare fette invisibili e problemi di rendering
@@ -1932,35 +2070,38 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Funzioni Grafico Radar Dashboard ---
-    function calcolaPunteggioSaluteCategoria(gareCat, maxSlot, valoreMaxPuntiGara) {
-        if (maxSlot === 0) return 0; // Categorie come HC generiche non contribuiscono
+    // Questa funzione calcola un punteggio di "salute" per categoria,
+    // combinando riempimento slot e qualità media dei punti.
+    function calcolaPunteggioSaluteCategoria(gareCat, maxSlotPerFascia, valoreMaxPuntiGara) {
+        const totaleSlotCategoria = maxSlotPerFascia * 2; // Totale slot per categoria (es. 2 per HC, 6 per Liv1)
+        if (totaleSlotCategoria === 0) return 0; // Categorie senza slot non contribuiscono
 
-        const percentualeRiempimento = (gareCat.length / maxSlot); // Valore da 0 a 1
+        const percentualeRiempimento = (gareCat.length / totaleSlotCategoria); // Valore da 0 a 1 sul totale di 40 slot
 
         let qualitaMediaPunti = 0; // Valore da 0 a 1
         if (gareCat.length > 0 && valoreMaxPuntiGara > 0) {
             let sommaQualitaPercentuale = 0;
             gareCat.forEach(g => {
-                sommaQualitaPercentuale += (g.puntiEffettivi / valoreMaxPuntiGara); // Rapporto da 0 a 1
+                sommaQualitaPercentuale += (g.puntiEffettivi / valoreMaxPuntiGara); // Rapporto puntiEffettivi / PuntiMaxGaraOriginale
             });
-            qualitaMediaPunti = sommaQualitaPercentuale / gareCat.length;
+            qualitaMediaPunti = sommaQualitaPercentuale / gareCat.length; // Media dei rapporti puntiEffettivi/puntiMaxGara
         }
 
         // Pesi: diamo più importanza al riempimento per slot con molte gare (LIV3),
-        // e più alla qualità per slot con poche gare (VGLOBE/LIV1).
-        // Questo è un esempio, puoi aggiustare i pesi.
+        // e più alla qualità per slot con poche gare (HC/LIV1).
+        // Questi pesi dovrebbero riflettere l'importanza relativa di riempimento vs qualità per *quel tipo* di slot.
         let pesoRiempimento = 0.5;
         let pesoQualita = 0.5;
 
-        if (maxSlot === 1) { // VGLOBE
+        if (maxSlotPerFascia === 1) { // HC (totale 2 slot)
             pesoRiempimento = 0.4;
             pesoQualita = 0.6;
-        } else if (maxSlot === 3) { // LIV1
+        } else if (maxSlotPerFascia === 3) { // LIV1 (totale 6 slot)
             pesoRiempimento = 0.45;
             pesoQualita = 0.55;
-        } else if (maxSlot === 10) { // LIV3
+        } else if (maxSlotPerFascia === 10) { // LIV3 (totale 20 slot)
             pesoRiempimento = 0.6;
-            pesoQualita = 0.4;
+            pesoQualita = 0.4; // Per LIV3, riempire è più importante che avere punteggi altissimi in ogni gara
         }
         // LIV2 usa i pesi di default 0.5/0.5
 
@@ -1977,15 +2118,15 @@ document.addEventListener('DOMContentLoaded', () => {
             return; // Se il canvas non esiste, esci
         }
 
-        const gareContributive = getGareContributiveConDettagli(); // Include VGLOBE, HC, LIV1, LIV2, LIV3
+        const gareContributive = getGareContributiveConDettagli(); // Include HC, LIV1, LIV2, LIV3
 
         // Calcola la percentuale del potenziale VSR raggiunto per ciascuna categoria
         const datiPercentualePotenziale = [];
-        const categorieRadar = ["VGLOBE", "LIV1", "LIV2", "LIV3"]; // Ordine per gli assi del radar
+        const categorieRadar = ["HC", "LIV1", "LIV2", "LIV3"]; // Ordine per gli assi del radar
 
         categorieRadar.forEach(tipoGara => {
             const gareCat = gareContributive[tipoGara] || [];
-            const maxSlot = LIMITI_GARE_PER_CATEGORIA[tipoGara];
+            const maxSlotPerFascia = LIMITI_GARE_PER_CATEGORIA[tipoGara];
 
             // Trova il valore numerico del livello dalla mappa
             let chiaveMappaPerValoreNumerico = null;
@@ -1995,8 +2136,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const infoLivelloDaMappa = chiaveMappaPerValoreNumerico ? livelliVsrStoricoMap[chiaveMappaPerValoreNumerico] : null;
             const livelloValoreNumerico = infoLivelloDaMappa ? infoLivelloDaMappa.valoreNumerico : null;
 
-            if (maxSlot === 0 || !livelloValoreNumerico) {
-                // Categorie senza slot o senza valore numerico (es. HC generica) non contribuiscono a questo radar
+            const totaleSlotCategoria = maxSlotPerFascia * 2; // Totale slot per categoria
+            if (totaleSlotCategoria === 0 || !livelloValoreNumerico) {
+                // Categorie senza slot o senza valore numerico non contribuiscono a questo radar
                 datiPercentualePotenziale.push(0); // Mostra 0% per queste categorie nel radar
                 return; // Passa alla prossima categoria
             }
@@ -2006,7 +2148,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 puntiAttuali += g.puntiEffettivi;
             });
 
-            const potenzialeMaxCategoria = maxSlot * livelloValoreNumerico;
+            const potenzialeMaxCategoria = totaleSlotCategoria * livelloValoreNumerico; // Potenziale basato sul totale di 40 slot
             let percentualeRaggiunta = (potenzialeMaxCategoria > 0) ? (puntiAttuali / potenzialeMaxCategoria) * 100 : 0;
 
             datiPercentualePotenziale.push(Math.min(100, Math.max(0, percentualeRaggiunta))); // Clampa tra 0 e 100
@@ -2015,7 +2157,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // console.log("Dati per grafico radar (% Potenziale Raggiunto):", datiPercentualePotenziale); // Log dati calcolati
 
         const data = {
-            labels: ['V. Globe FC', 'Livello 1', 'Livello 2', 'Livello 3'],
+            labels: ['Fuori Cat.', 'Livello 1', 'Livello 2', 'Livello 3'], // Etichette per gli assi del radar
             datasets: [{
                 label: '% Potenziale Raggiunto', // Etichetta aggiornata
                 data: datiPercentualePotenziale, // Usa i nuovi dati

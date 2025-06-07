@@ -1,3 +1,10 @@
+/* Definizioni Variabili Globali */
+:root {
+    --colore-punti-100: #0d6efd; /* Blu primario Bootstrap */
+    --colore-punti-50: #0dcaf0; /* Ciano/Azzurro Bootstrap (info) */
+    --colore-punti-vuoti: #6c757d; /* Grigio (Bootstrap secondary) */
+}
+
 /* Stili Generali */
 body {
     font-family: 'Arial', sans-serif;
@@ -802,7 +809,7 @@ td.calculated-result-cell {
     background-color: #e9ecef;
     border: 1px solid #ced4da;
     border-radius: 4px;
-    height: 18px;
+    height: 14px; /* Ridotta l'altezza */
     margin-top: 5px;
     margin-bottom: 10px;
     overflow: hidden;
@@ -1105,10 +1112,95 @@ input[type=number] {
     display: none;
 }
 
+/* Contenitore per descrizione e legenda nella sezione Analisi */
+.descrizione-e-legenda-container {
+    display: flex;
+    justify-content: space-between; /* Spinge la descrizione a sinistra e la legenda a destra */
+    align-items: center; /* Allinea verticalmente gli elementi */
+    margin-bottom: 15px; /* Spazio prima del contenuto degli slot */
+}
+
+/* Stili per la Legenda nella Sezione Analisi */
+.legenda-analisi {
+    /* float: right; Rimosso perché ora è gestito da flexbox del genitore */
+    /* max-width: 320px; Rimosso o aumentato per permettere una singola riga */
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: .25rem;
+    padding: 0.4rem 0.6rem; /* Padding ridotto per compattezza */
+    margin-left: 1rem; /* Spazio dalla descrizione */
+    /* margin-bottom: 1rem; Rimosso, gestito dal contenitore genitore */
+    font-size: 0.7em; /* Testo più piccolo */
+    box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
+    display: flex; /* Abilita flexbox per gli item interni */
+    flex-wrap: nowrap; /* Forza gli item su una singola riga */
+    /* justify-content: flex-end; Non più necessario se flex-wrap è nowrap e il box si adatta */
+    gap: 0.6rem; /* Spazio tra gli item (sia orizzontale che verticale se vanno a capo) */
+    white-space: nowrap; /* Assicura che il testo interno non vada a capo */
+    align-self: center; /* Allinea la legenda verticalmente al centro del suo contenitore flex */
+}
+
+/* Rimuoviamo gli stili per h4 e legenda-sottosezione che non esistono più */
+/* .legenda-analisi h4 { ... } */
+/* .legenda-sottosezione:not(:last-child) { ... } */
+
+.legenda-item {
+    display: flex;
+    align-items: center;
+    color: #495057;
+    /* margin-bottom e margin-right non sono più necessari grazie a 'gap' sul parent */
+}
+
+.legenda-item .colore-campione {
+    display: inline-block;
+    width: 10px; /* Campione di colore più piccolo */
+    height: 10px; /* Campione di colore più piccolo */
+    margin-right: 0.3rem; /* Spazio ridotto tra campione e testo */
+    border: 1px solid #adb5bd;
+    flex-shrink: 0;
+}
+
 /* Avvicina la scritta autore al contenuto precedente specificamente nella pagina Analisi */
 #analisi-view > p#autore-analisi.autore-credits {
     margin-top: 10px;
 }
+
+/* Stili per la nuova barra dei punti VSR per fascia */
+.stacked-bar-label {
+    font-size: 0.85em;
+    color: #495057;
+    margin-top: 12px; /* Spazio sopra l'etichetta */
+    margin-bottom: 4px; /* Spazio tra etichetta e barra */
+}
+
+.stacked-points-bar-container {
+    width: 100%;
+    height: 14px; /* Ridotta l'altezza, uguale alla barra di progresso slot */
+    background-color: #e9ecef; /* Sfondo base per la parte non riempita */
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    display: flex; /* Per allineare i segmenti orizzontalmente */
+    overflow: hidden; /* Per i bordi arrotondati */
+    margin-bottom: 10px; /* Spazio sotto la barra */
+}
+
+.points-bar-segment {
+    height: 100%;
+    transition: width 0.5s ease-in-out;
+    display: flex; /* Per centrare eventuale testo (non usato ora) */
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7em;
+    color: white;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.2);
+}
+
+.points-bar-100 { background-color: var(--colore-punti-100); }
+.points-bar-50 { background-color: var(--colore-punti-50); }
+.points-bar-empty { background-color: var(--colore-punti-vuoti); }
+/* .points-bar-empty non necessita di un colore di sfondo specifico,
+   perché il background del container (.stacked-points-bar-container) farà da sfondo per la parte vuota.
+   Se si volesse un colore diverso per la parte vuota, si potrebbe aggiungere qui. */
 
 /* Stili per le note a piè di pagina nella Dashboard */
 #dashboard-footer-notes {
@@ -1129,4 +1221,23 @@ input[type=number] {
     max-width: 95%; /* Aumentato da 80% a 95% */
     width: auto;
     white-space: normal; /* Permette il wrapping del testo */
+}
+
+/* Stili per la sezione Strategia - Monitoraggio Scadenze per compattare il testo */
+#strategia-view #monitoraggio-scadenze h4 {
+    font-size: 1.05em; /* Riduce la dimensione del titolo h4, rendendolo più vicino a un paragrafo normale */
+    margin-top: 0.8em;  /* Leggera riduzione del margine superiore se necessario */
+    margin-bottom: 0.4em; /* Riduce lo spazio sotto il titolo h4 */
+}
+
+#strategia-view #monitoraggio-scadenze ul li,
+#strategia-view #monitoraggio-scadenze ul li.no-data {
+    font-size: 0.9em;   /* Riduce la dimensione del testo degli elementi della lista */
+    line-height: 1.4;   /* Mantiene una buona leggibilità con il font ridotto */
+    margin-bottom: 0.3em; /* Leggero spazio tra gli elementi della lista */
+    padding-left: 5px;  /* Leggero padding se gli elementi della lista sembrano troppo attaccati al bordo */
+}
+
+#strategia-view #monitoraggio-scadenze .scadenze-categoria {
+    margin-bottom: 0.5em; /* Riduce lo spazio tra le categorie di scadenze */
 }

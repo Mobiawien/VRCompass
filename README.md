@@ -24,7 +24,7 @@ App web per gestire la classifica di Virtual Regatta Offshore che aiuta i giocat
 
 ## Utilizzo
 
-Apri `index.html` nel tuo browser per iniziare a utilizzare VRCompass.
+Apri `https://mobiawien.github.io/VRCompass/` nel tuo browser per iniziare a utilizzare VRCompass.
 
 ## Licenza
 

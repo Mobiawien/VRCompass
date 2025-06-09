@@ -7,7 +7,6 @@
     <!-- Inclusione di Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="style.css">
-    <!-- Gli stili sono stati spostati in style.css -->
 </head>
 <body>
     <nav>
@@ -17,7 +16,7 @@
         <button id="btn-show-analisi" class="nav-button">Analisi</button>
         <button id="btn-show-strategia" class="nav-button">Strategia</button>
         <!-- Spostato qui il badge versione -->
-        <span class="version-badge">VRCompass Beta</span>
+        <span class="version-badge">VRCompass v1.0.0</span>
         <!-- Placeholder per selettore lingua -->
         <div id="language-selector-placeholder" class="language-placeholder">
             Lingua (in costruzione)
@@ -63,7 +62,7 @@
                 <div class="dashboard-column-right">
                     <div class="dashboard-card" id="info-gestione-card">
                         <!-- <h3>VRCompass: Info & Strumenti</h3> --> <!-- Titolo rimosso come richiesto -->
-                        
+
                         <div class="info-gestione-sezione">
                             <h3>Benvenuto in VRCompass!</h3>
                             <p>
@@ -98,7 +97,7 @@
                             <h3>Informativa e Disclaimer</h3>
                             <div id="informativa-disclaimer-section"> <!-- Manteniamo l'ID originale per la logica JS -->
                                 <p><strong>Gestione dei Dati:</strong> Questa applicazione salva i dati inseriti (nome barca, punteggio VSR, dettagli delle regate) unicamente all'interno del <code>localStorage</code> del tuo browser. Nessun dato viene trasmesso o memorizzato su server esterni. L'utente ha pieno controllo sui propri dati e può cancellarli in qualsiasi momento tramite le impostazioni del proprio browser o utilizzando le funzionalità di esportazione/importazione fornite.</p>
-                                <p><strong>Accuratezza e Scopo:</strong> VR Compass è uno strumento di ausilio fornito "così com'è", senza garanzie esplicite o implicite sulla sua accuratezza, completezza o funzionamento continuo. Il suo scopo principale è aiutarti a <strong>tenere traccia e organizzare la tua classifica VSR, fornendo un orientamento per le tue strategie di regata future</strong>, oltre a calcolare crediti e punti VSR. Questi calcoli sono basati su formule note ma potrebbero presentare lievi discrepanze rispetto ai valori ufficiali di Virtual Regatta Offshore a causa di arrotondamenti specifici o logiche interne del gioco non completamente documentate.</p>
+                                <p><strong>Accuratezza e Scopo:</strong> VR Compass è uno strumento di ausilio fornito "così com'è", senza garanzie esplicite o implicite sulla sua accuratezza, completezza o funzionamento continuo. Il suo scopo principale è aiutarti a <strong>tenere traccia e organizzare la tua classifica VSR, fornendo un orientamento per le tue strategie di regata future</strong>, oltre a calcolare crediti e punti VSR. Questi calcoli sono basati su formule note ma potrebbero presentare lievi discrepanze rispetto ai valori ufficiali di Virtual Regatta Offshore a causa di arrotondamenti specifici o logiche interne del gioco non completamente documentate. <strong>Se noti discrepanze significative, potrebbe essere un segnale di un errore nell'inserimento dei dati di una o più regate.</strong></p>
                             </div>
                             <!-- I paragrafi Responsabilità e Copyright sono stati spostati più in basso, fuori da questo div -->
                         </div>
@@ -110,7 +109,10 @@
         <!-- Note a piè di pagina per Responsabilità e Copyright -->
         <div id="dashboard-footer-notes">
             <p><strong>Responsabilità:</strong> Gli sviluppatori di VR Compass non sono responsabili per eventuali perdite di dati, danni o altri problemi derivanti dall'uso di questa applicazione. Si consiglia di utilizzare la funzione di esportazione per creare backup regolari dei propri dati.</p>
-            <p><strong>Copyright e Licenza:</strong> Il codice sorgente di questa applicazione sarà rilasciato, al momento della sua pubblicazione, sotto i termini della <a href="LICENSE.txt" target="_blank" rel="noopener noreferrer">MIT License</a>, che ne definisce le condizioni d'uso, modifica e distribuzione.</p>
+            <p><strong>Copyright e Licenza:</strong> Il codice sorgente di questa applicazione è rilasciato sotto i termini della <a href="https://raw.githubusercontent.com/mobiawien/VRCompass/main/LICENSE" target="_blank">MIT License</a>, che ne definisce le condizioni d'uso, modifica e distribuzione.</p>
+            <footer>
+                <p>&copy; 2024 Velatopiano-La Casa di Hilde - VRCompass | <a href="#" onclick="document.getElementById('informativa-dashboard').scrollIntoView({ behavior: 'smooth' }); return false;">Disclaimer & Gestione Dati</a></p>
+            </footer>
         </div>
         <p id="autore-dashboard" class="autore-credits">by Velatopiano-La Casa di Hilde</p>
     </div>
@@ -199,7 +201,7 @@
                     2.  Selezione Attrezzature: Cliccare sulle celle dei costi delle attrezzature che si intende utilizzare nella "Tabella dei costi e dei bonus". Quando la spesa totale supera il bonus iniziale (visibile nella tabella "Calcolo posizione classifica per recupero crediti"), verrà visualizzata la "Spesa Effettiva" e la "Pos. x Recupero", ovvero la posizione minima in classifica necessaria per recuperare l'investimento.<br><br>
                     3.  Inserimento Bonus Extra: Nel caso di bonus aggiuntivi, inserire l'ammontare nella casella "Bonus" della tabella "Calcolo posizione classifica per recupero crediti".<br><br>
                     4.  Simulazione Risultati: Nella tabella "Calcolo crediti e punti VSR", selezionare il "Livello Gara (VSR)" e inserire una "Classifica Finale" ipotetica per vedere i "Crediti Vinti"*, il "Netto Crediti" e i "Punti VSR" corrispondenti.<br><br>
-                    *Nota: I "Crediti Vinti" visualizzati potrebbero differire leggermente dai valori effettivi in gioco a causa del metodo di arrotondamento specifico adottato da Virtual Regatta Offshore.
+                    *Nota: I "Crediti Vinti" visualizzati potrebbero differire leggermente dai valori effettivi in gioco a causa del metodo di arrotonnamento specifico adottato da Virtual Regatta Offshore.
                 </p>
             </div>
         </div> <!-- Fine container-principale-calcolatrice -->
@@ -231,11 +233,10 @@
                     <label for="livello-gara-vsr-storico">Livello Gara (VSR):</label>
                     <select id="livello-gara-vsr-storico" name="livello-gara-vsr-storico">
                         <option value="0">Seleziona Livello VSR</option>
-                        <option value="VGLOBE">Vendée Globe FC</option> <!-- TESTO MODIFICATO -->
-                        <option value="HC">Fuori Categoria</option> <!-- TESTO MODIFICATO -->
-                        <option value="LIV1">Livello 1</option> <!-- Valore modificato per coerenza -->
-                        <option value="LIV2">Livello 2</option> <!-- Valore modificato per coerenza -->
-                        <option value="LIV3">Livello 3</option> <!-- Valore modificato per coerenza -->
+                        <option value="HC">Fuori Categoria</option>
+                        <option value="LIV1">Livello 1</option>
+                        <option value="LIV2">Livello 2</option>
+                        <option value="LIV3">Livello 3</option>
                     </select>
 
                     <label for="classifica-finale-storico">Classifica Finale:</label>
@@ -249,8 +250,12 @@
 
                 <!-- Pulsanti per filtrare la visualizzazione dello storico -->
                 <div class="filtri-visualizzazione-storico" style="margin-bottom: 10px;">
-                    <button id="btn-mostra-tutte-gare" class="nav-button filtro-btn active">Storico Regate (Aggiorna)</button>
-                    <button id="btn-mostra-gare-valide" class="nav-button filtro-btn">Mostra Valide per Classifica</button>
+                    <button id="btn-mostra-gare-valide" class="nav-button filtro-btn active">Mostra Valide per Classifica</button>
+                    <button id="btn-mostra-tutte-gare" class="nav-button filtro-btn">Storico Regate (Aggiorna)</button>
+                    <button id="btn-storico-hc" class="nav-button filtro-btn">Fuori Cat.</button>
+                    <button id="btn-storico-liv1" class="nav-button filtro-btn">Liv. 1</button>
+                    <button id="btn-storico-liv2" class="nav-button filtro-btn">Liv. 2</button>
+                    <button id="btn-storico-liv3" class="nav-button filtro-btn">Liv. 3</button>
                 </div>
                 <!-- Tabella per visualizzare le gare salvate -->
                 <table id="tabella-classifica-vsr">
@@ -262,7 +267,7 @@
                             <th style="width: 15%;">Classifica Finale</th>
                             <th style="width: 15%;">Punti VSR</th>
                             <th>Stato Punti</th> <!-- Nuova intestazione colonna -->
-                            <th id="header-colonna-azioni">Azioni</th> 
+                            <th id="header-colonna-azioni">Azioni</th>
                         </tr>
                     </thead>
                     <tbody id="classifica-vsr-tbody">
@@ -271,7 +276,7 @@
                 </table>
             </div> <!-- Fine contenuto-vsr -->
 
-                       <div id="istruzioni-vsr-box"> <!-- Box istruzioni spostato qui -->
+            <div id="istruzioni-vsr-box"> <!-- Box istruzioni spostato qui -->
                 <h2>Guida alla Gestione Classifica VSR</h2>
                 <p>
                     Questa sezione ti permette di archiviare i risultati delle tue gare e di calcolare automaticamente i Punti VSR guadagnati. VRCompass ti aiuta a monitorare la validità dei tuoi punteggi e a capire come contribuiscono alla tua classifica VSR.
@@ -280,13 +285,7 @@
                     <strong>Inserimento Dati:</strong><br>
                     1.  <strong>Data:</strong> Inserisci la data di conclusione della gara.<br>
                     2.  <strong>Nome Regata:</strong> Inserisci un nome identificativo per la regata.<br>
-                    3.  <strong>Livello Gara (VSR):</strong> Seleziona il livello corretto della gara. Questi livelli corrispondono alle categorie ufficiali VRO:
-                        <ul>
-                            <li><strong>Vendée Globe FC:</strong> Seleziona questa opzione per la Vendée Globe. I punti di questa gara sono gli unici che VRCompass considererà per lo slot "Fuori Categoria" valido per la classifica VSR.</li>
-                            <li><strong>Fuori Categoria:</strong> Per eventuali altre rare gare definite HC/FC. I punti verranno registrati ma <strong>non</strong> contribuiranno al punteggio VSR totale calcolato da VRCompass, né occuperanno lo slot "Fuori Categoria" valido.</li>
-                            <li><strong>Livello 1, 2, 3:</strong> Seleziona il livello VSR corrispondente alla gara.</li>
-                        </ul>
-                        <p><em>Nota:</em> VRCompass considera solo i punti di una "Vendée Globe FC" per lo slot "Fuori Categoria". Senza una "Vendée Globe FC" valida, questo slot non contribuirà al punteggio VSR calcolato, che si baserà sui migliori 19 risultati delle altre categorie.</p>
+                    3.  <strong>Livello Gara (VSR):</strong> Seleziona il livello corretto della gara dal menu a tendina. Questi livelli corrispondono alle categorie ufficiali VRO.<br>
                     4.  <strong>Classifica Finale:</strong> Inserisci la tua posizione finale nella regata.<br>
                     5.  <strong>Punti VSR:</strong> Vengono calcolati e visualizzati automaticamente da VRCompass in base al Livello Gara e alla Classifica Finale (usando la formula <code>PuntiMaxCategoria / (Classifica<sup>0.125</sup>)</code>, arrotondati).<br>
                     6.  Clicca su "Aggiungi Gara" per salvare il risultato nello storico.
@@ -295,14 +294,15 @@
                     <strong>Come Leggere le Tabelle delle Gare:</strong><br>
                     La tabella mostra le tue gare. Usa i pulsanti di filtro:
                     <ul>
+                        <li><strong>Mostra Valide per Classifica:</strong> Visualizza solo le gare che VRCompass considera per il tuo Punteggio VSR Totale (massimo 40: 2 Fuori Categoria, 6 Liv.1, 12 Liv.2, 20 Liv.3, selezionando le migliori per ogni livello nelle due fasce temporali: &lt;12 mesi e 12-24 mesi). Le gare sono raggruppate per livello e ordinate per punti effettivi.</li>
                         <li><strong>Storico Regate (Aggiorna):</strong> Visualizza tutte le gare inserite, ordinate dalla più recente. Qui puoi modificare o eliminare le gare.</li>
-                        <li><strong>Mostra Valide per Classifica:</strong> Visualizza solo le gare che VRCompass considera per il tuo Punteggio VSR Totale (massimo 20: 1 "Vendée Globe FC", 3 Liv.1, 6 Liv.2, 10 Liv.3, o le migliori 19 se la "Vendée Globe FC" non è valida). Le gare sono raggruppate per livello e ordinate per punti effettivi.</li>
+                        <li><strong>[Nome Livello]:</strong> Visualizza tutte le gare inserite per uno specifico livello (es. "Fuori Cat."), ordinate dalla più recente. Anche qui puoi modificare o eliminare le gare.</li>
                     </ul>
                     Ogni riga della tabella è colorata da VRCompass per indicare la validità temporale dei punti:
                     <ul>
                         <li><span style="background-color: #d4edda; color: #155724; padding: 2px 5px; border-radius: 3px;">Riga Verde Chiaro</span>: Gara entro 12 mesi (punti al 100%).</li>
                         <li><span style="background-color: #fff3cd; color: #856404; padding: 2px 5px; border-radius: 3px;">Riga Giallo Chiaro</span>: Gara tra 12 e 24 mesi (punti al 50% del loro valore originale).</li>
-                        <li><span style="background-color: #e9ecef; color: #6c757d; padding: 2px 5px; border-radius: 3px;">Riga Grigio Chiaro</span>: Gara che non contribuisce al Punteggio VSR Totale. Questo si verifica per gare scadute (oltre 24 mesi) oppure, anche se la gara non è temporalmente scaduta, il suo punteggio non è sufficiente per rientrare tra le migliori 20 selezionate per la classifica (particolarmente visibile nella vista "Mostra Valide per Classifica").</li>
+                        <li><span style="background-color: #e9ecef; color: #6c757d; padding: 2px 5px; border-radius: 3px;">Riga Grigio Chiaro</span>: Gara che non contribuisce al Punteggio VSR Totale. Questo si verifica per gare scadute (oltre 24 mesi) oppure, anche se la gara non è temporalmente scaduta, il suo punteggio non è sufficiente per rientrare tra le migliori 40 selezionate per la classifica (particolarmente visibile nella vista "Mostra Valide per Classifica").</li>
                     </ul>
                     <p>La colonna "Stato Punti" (visibile in "Mostra Valide per Classifica") indica "100%" o "50%" per la contribuzione dei punti.</p>
                     <p><strong>Preavvisi:</strong> Le gare negli ultimi 3 mesi prima di un dimezzamento (100% &rarr; 50%) o scadenza (50% &rarr; 0%) sono evidenziate con un <span style="border-left: 3px solid #dc3545; padding-left: 3px;">bordo rosso a sinistra</span>. In "Mostra Valide per Classifica", lo "Stato Punti" includerà "(Preavviso)".</p>
@@ -310,12 +310,6 @@
                         La colonna "Punti VSR" mostra i punti originali in "Storico Regate". In "Mostra Valide per Classifica", mostra i punti <em>effettivi</em> che contribuiscono (100% o 50% del valore originale, colorati di rosso se al 50%). Il "Punteggio VSR attuale" (visibile sopra il form) è sempre calcolato da VRCompass tenendo conto di questi fattori.
                     </p>
                 </p>
-                <p>
-                    Puoi modificare o eliminare gare dalla vista "Storico Regate (Aggiorna)".
-                </p>
-                    <p style="margin-top: 15px; font-size: 0.9em;">
-                        <strong>Consiglio:</strong> Se hai dubbi sulla data di chiusura esatta di una regata passata o sul suo livello VSR, molti team (specialmente quelli più noti e titolati) pubblicano elenchi dettagliati delle regate ufficiali. Consultare queste risorse online può aiutarti a recuperare le informazioni mancanti per compilare accuratamente il tuo storico.
-                    </p>
             </div> <!-- Fine istruzioni-vsr-box -->
 
         </div> <!-- Fine container-principale-vsr -->
@@ -324,40 +318,62 @@
 
     <div id="analisi-view" class="view-section" style="display: none;">
         <h1>Analisi Classifica VSR</h1>
-        <p>Visualizza lo stato attuale della tua classifica VSR, i tuoi slot e le scadenze imminenti.</p>
 
         <div class="analisi-container"> <!-- Contenitore principale per le sezioni di analisi -->
 
             <div class="analisi-sezione" id="panoramica-slot-vsr">
                 <h2>Panoramica Slot VSR</h2>
-                <p>Visualizza lo stato attuale dei tuoi slot VSR e identifica le opportunità di miglioramento.</p>
+                <!-- Contenitore per descrizione e legenda -->
+                <div class="descrizione-e-legenda-container">
+                    <p class="descrizione-panoramica">Visualizza lo stato attuale dei tuoi slot VSR e identifica le opportunità di miglioramento.</p>
+                    <div class="legenda-analisi">
+                        <span class="legenda-item"><span class="colore-campione" style="background-color: #28a745;"></span>Ottimale</span>
+                        <span class="legenda-item"><span class="colore-campione" style="background-color: #ffc107;"></span>Parziale</span>
+                        <span class="legenda-item"><span class="colore-campione" style="background-color: #dc3545;"></span>Critico</span>
+                        <span class="legenda-item"><span class="colore-campione" style="background-color: var(--colore-punti-100);"></span>100%</span>
+                        <span class="legenda-item"><span class="colore-campione" style="background-color: var(--colore-punti-50);"></span>50%</span>
+                        <span class="legenda-item"><span class="colore-campione" style="background-color: var(--colore-punti-vuoti);"></span>Vuoto</span>
+                    </div>
+                </div>
+                
                 <div id="slot-vsr-container">
-                    <!-- Le informazioni sugli slot verranno popolate qui da JavaScript -->
                     <div class="slot-categoria" id="slot-hc-container">
-                        <h3>Fuori Categoria (Max 1 gara)</h3>
+                        <h3>Fuori Categoria</h3>
                         <div class="slot-info">
                             <div class="slot-info-header">
-                                <p class="slot-occupati-info"><strong>Slot Occupati:</strong> <span id="hc-occupati">0</span>/1</p>
+                                <p class="slot-occupati-info"><strong>Slot Occupati:</strong> <span id="hc-occupati">0</span>/2</p> <!-- Aggiornato il totale qui -->
                                 <p class="slot-punti-categoria"><strong>Punti Categoria:</strong> <span id="hc-punti-categoria">N/A</span></p>
                             </div>
                             <div class="progress-bar-container">
-                                <div class="progress-bar" id="hc-progress-bar"></div>
+                                <div class="progress-bar" id="hc-progress-bar" title="Riempimento Slot"></div>
                             </div>
-                            <p><strong>Punteggio Gara Attuale:</strong> <span id="hc-punti-attuali">N/A</span></p>
+                            <p class="stacked-bar-label">Composizione Punti VSR:</p>
+                            <div class="stacked-points-bar-container" id="hc-stacked-points-bar-container">
+                                <div class="points-bar-segment points-bar-100" id="hc-points-bar-100"></div>
+                                <div class="points-bar-segment points-bar-50" id="hc-points-bar-50"></div>
+                                <div class="points-bar-segment points-bar-empty" id="hc-points-bar-empty"></div>
+                            </div>
+                            <p><strong>Punteggio Gara Attuale (Migliore):</strong> <span id="hc-punti-attuali">N/A</span></p> <!-- Testo aggiornato per chiarezza -->
                             <div class="gare-slot" id="hc-gare-slot">
                                 <!-- Dettaglio gara HC -->
                             </div>
                         </div>
                     </div>
                     <div class="slot-categoria" id="slot-liv1-container">
-                        <h3>Livello 1 (Max 3 gare)</h3>
+                        <h3>Livello 1</h3>
                         <div class="slot-info">
                             <div class="slot-info-header">
-                                <p class="slot-occupati-info"><strong>Slot Occupati:</strong> <span id="liv1-occupati">0</span>/3</p>
+                                <p class="slot-occupati-info"><strong>Slot Occupati:</strong> <span id="liv1-occupati">0</span>/6</p> <!-- Aggiornato il totale qui -->
                                 <p class="slot-punti-categoria"><strong>Punti Categoria:</strong> <span id="liv1-punti-categoria">N/A</span></p>
                             </div>
                             <div class="progress-bar-container">
-                                <div class="progress-bar" id="liv1-progress-bar"></div>
+                                <div class="progress-bar" id="liv1-progress-bar" title="Riempimento Slot"></div>
+                            </div>
+                            <p class="stacked-bar-label">Composizione Punti VSR:</p>
+                            <div class="stacked-points-bar-container" id="liv1-stacked-points-bar-container">
+                                <div class="points-bar-segment points-bar-100" id="liv1-points-bar-100"></div>
+                                <div class="points-bar-segment points-bar-50" id="liv1-points-bar-50"></div>
+                                <div class="points-bar-segment points-bar-empty" id="liv1-points-bar-empty"></div>
                             </div>
                             <p><strong>Punteggio Minimo Contributivo:</strong> <span id="liv1-min-punti">N/A</span></p>
                             <div class="gare-slot" id="liv1-gare-slot">
@@ -366,14 +382,20 @@
                         </div>
                     </div>
                     <div class="slot-categoria" id="slot-liv2-container">
-                        <h3>Livello 2 (Max 6 gare)</h3>
+                        <h3>Livello 2</h3>
                         <div class="slot-info">
                             <div class="slot-info-header">
-                                <p class="slot-occupati-info"><strong>Slot Occupati:</strong> <span id="liv2-occupati">0</span>/6</p>
+                                <p class="slot-occupati-info"><strong>Slot Occupati:</strong> <span id="liv2-occupati">0</span>/12</p> <!-- Aggiornato il totale qui -->
                                 <p class="slot-punti-categoria"><strong>Punti Categoria:</strong> <span id="liv2-punti-categoria">N/A</span></p>
                             </div>
                             <div class="progress-bar-container">
-                                <div class="progress-bar" id="liv2-progress-bar"></div>
+                                <div class="progress-bar" id="liv2-progress-bar" title="Riempimento Slot"></div>
+                            </div>
+                            <p class="stacked-bar-label">Composizione Punti VSR:</p>
+                            <div class="stacked-points-bar-container" id="liv2-stacked-points-bar-container">
+                                <div class="points-bar-segment points-bar-100" id="liv2-points-bar-100"></div>
+                                <div class="points-bar-segment points-bar-50" id="liv2-points-bar-50"></div>
+                                <div class="points-bar-segment points-bar-empty" id="liv2-points-bar-empty"></div>
                             </div>
                             <p><strong>Punteggio Minimo Contributivo:</strong> <span id="liv2-min-punti">N/A</span></p>
                             <div class="gare-slot" id="liv2-gare-slot">
@@ -382,14 +404,20 @@
                         </div>
                     </div>
                     <div class="slot-categoria" id="slot-liv3-container">
-                        <h3>Livello 3 (Max 10 gare)</h3>
+                        <h3>Livello 3</h3>
                         <div class="slot-info">
                             <div class="slot-info-header">
-                                <p class="slot-occupati-info"><strong>Slot Occupati:</strong> <span id="liv3-occupati">0</span>/10</p>
+                                <p class="slot-occupati-info"><strong>Slot Occupati:</strong> <span id="liv3-occupati">0</span>/20</p> <!-- Aggiornato il totale qui -->
                                 <p class="slot-punti-categoria"><strong>Punti Categoria:</strong> <span id="liv3-punti-categoria">N/A</span></p>
                             </div>
                             <div class="progress-bar-container">
-                                <div class="progress-bar" id="liv3-progress-bar"></div>
+                                <div class="progress-bar" id="liv3-progress-bar" title="Riempimento Slot"></div>
+                            </div>
+                            <p class="stacked-bar-label">Composizione Punti VSR:</p>
+                            <div class="stacked-points-bar-container" id="liv3-stacked-points-bar-container">
+                                <div class="points-bar-segment points-bar-100" id="liv3-points-bar-100"></div>
+                                <div class="points-bar-segment points-bar-50" id="liv3-points-bar-50"></div>
+                                <div class="points-bar-segment points-bar-empty" id="liv3-points-bar-empty"></div>
                             </div>
                             <p><strong>Punteggio Minimo Contributivo:</strong> <span id="liv3-min-punti">N/A</span></p>
                             <div class="gare-slot" id="liv3-gare-slot">
@@ -417,7 +445,7 @@
     <div id="strategia-view" class="view-section" style="display: none;">
         <h1>Strategia Classifica VSR</h1>
         <p>Ottimizza la tua classifica VSR analizzando le opportunità, le debolezze e le scadenze con un focus strategico.</p>
-        
+
         <!-- Contenitore principale per layout a due colonne -->
         <div id="strategia-layout-container">
 
@@ -429,9 +457,9 @@
                     <div class="canvas-wrapper-strategia"> <!-- NUOVO WRAPPER PER IL CANVAS -->
                         <canvas id="graficoTortaComposizioneVSR"></canvas>
                     </div>
-                    <div class="spiegazione-grafico"> <!-- Stili inline rimossi, verranno messi nel CSS -->
-                        <p><strong>Come leggere e usare questo grafico per la tua strategia:</strong></p>
-                        <p>Questo grafico a torta è il tuo "check-up" strategico: illustra lo stato di ottimizzazione dei tuoi slot VSR, ponderato per il <strong>potenziale di punteggio massimo</strong> di ciascuna categoria (Vendée Globe FC, Livello 1, Livello 2, Livello 3). Ti aiuta a capire dove stai performando bene e dove hai margini di miglioramento per scalare la classifica.</p>
+                    <div class="spiegazione-grafico">
+                        <p><strong>Come leggere e usare questo grafico per la tua strategia (basato su 40 slot):</strong></p>
+                        <p>Questo grafico a torta è il tuo "check-up" strategico: illustra lo stato di ottimizzazione dei tuoi slot VSR, ponderato per il <strong>potenziale di punteggio massimo</strong> di ciascuna categoria (Fuori Categoria, Livello 1, Livello 2, Livello 3). Ti aiuta a capire dove stai performando bene e dove hai margini di miglioramento per scalare la classifica.</p>
                         <p>
                             Ogni categoria di gara è rappresentata da un colore. La <strong>dimensione totale</strong> della fetta di una categoria (somma delle parti "Ottimizzato" e "Migliorabile") riflette il suo peso sul potenziale VSR totale.
                         </p>
@@ -466,19 +494,9 @@
 
             <!-- Colonna destra: Suggerimenti e Monitoraggio Scadenze -->
             <div id="strategia-contenuto-box">
-                <div class="analisi-sezione" id="valutazione-strategica-slot">
-                    <h2>Valutazione Strategica degli Slot VSR</h2>
-                    <p>Analisi delle opportunità e delle debolezze degli slot VSR con un focus sulla difficoltà e la priorità di intervento.</p>
-                    <ul id="lista-suggerimenti-strategici-slot">
-                        <li class="no-data">Nessun suggerimento strategico disponibile al momento.</li>
-                    </ul>
-                </div>
-
-                <hr class="separatore-analisi" style="margin: 30px 0;">
 
                 <div class="analisi-sezione" id="monitoraggio-scadenze">
                     <h2>Monitoraggio Scadenze e Dimezzamenti</h2>
-                    <p>Tieni sotto controllo le gare che stanno per perdere valore o scadere (prossimi 3 mesi).</p>
                     <div id="scadenze-container">
                         <div class="scadenze-categoria">
                             <h4>Gare in Dimezzamento Imminente (da 100% a 50%)</h4>
@@ -494,6 +512,16 @@
                         </div>
                     </div>
                 </div>
+
+                <hr class="separatore-analisi" style="margin: 30px 0;">
+
+                <div class="analisi-sezione" id="valutazione-strategica-slot">
+                    <h2>Valutazione Strategica degli Slot VSR</h2>
+                    <p>Analisi delle opportunità e delle debolezze degli slot VSR con un focus sulla difficoltà e la priorità di intervento.</p>
+                    <ul id="lista-suggerimenti-strategici-slot">
+                        <li class="no-data">Nessun suggerimento strategico disponibile al momento.</li>
+                    </ul>
+                </div>
             </div>
         </div> <!-- Fine strategia-layout-container -->
 
@@ -501,6 +529,5 @@
     </div>
 
     <script src="script.js"></script>
-    <!-- Eventualmente, se avremo un file JS separato per i grafici, lo includeremo qui -->
 </body>
 </html>

@@ -1,0 +1,1083 @@
+{
+  "dataAggiornamentoDatabase": "2025-06-9",
+  "elencoRegateProposte": [
+    {
+      "idDatabase": "hc_0",
+      "data": "2025-03-17",
+      "livello": "HC",
+      "nome": "Vendée Globe 2024",
+      "puntiVSRBase": 15000
+    },
+    {
+      "idDatabase": "hc_1",
+      "data": "2024-03-15",
+      "livello": "HC",
+      "nome": "ARKEA ULTIM CHALLENGE",
+      "puntiVSRBase": 15000
+    },
+    {
+      "idDatabase": "liv1_0",
+      "data": "2025-06-04",
+      "livello": "LIV1",
+      "nome": "Sodebo e-Skipper Academy",
+      "puntiVSRBase": 10000
+    },
+    {
+      "idDatabase": "liv1_1",
+      "data": "2025-05-30",
+      "livello": "LIV1",
+      "nome": "Atlantic Conqueror",
+      "puntiVSRBase": 10000
+    },
+    {
+      "idDatabase": "liv1_2",
+      "data": "2025-05-15",
+      "livello": "LIV1",
+      "nome": "Transat PAPREC",
+      "puntiVSRBase": 10000
+    },
+    {
+      "idDatabase": "liv1_3",
+      "data": "2024-05-18",
+      "livello": "LIV1",
+      "nome": "THE TRANSAT CIC - VINTAGE",
+      "puntiVSRBase": 10000
+    },
+    {
+      "idDatabase": "liv1_4",
+      "data": "2024-05-18",
+      "livello": "LIV1",
+      "nome": "THE TRANSAT CIC - IMOCA",
+      "puntiVSRBase": 10000
+    },
+    {
+      "idDatabase": "liv1_5",
+      "data": "2024-05-18",
+      "livello": "LIV1",
+      "nome": "THE TRANSAT CIC - CLASS 40",
+      "puntiVSRBase": 10000
+    },
+    {
+      "idDatabase": "liv1_6",
+      "data": "2025-03-18",
+      "livello": "LIV1",
+      "nome": "Jules Verne Trophy",
+      "puntiVSRBase": 10000
+    },
+    {
+      "idDatabase": "liv1_7",
+      "data": "2025-02-10",
+      "livello": "LIV1",
+      "nome": "Globe 40 - La grande route (Globe 40 - Etape 4)",
+      "puntiVSRBase": 10000
+    },
+    {
+      "idDatabase": "liv1_8",
+      "data": "2024-11-14",
+      "livello": "LIV1",
+      "nome": "Globe 40 - La grande route (Globe 40 - Etape 2)",
+      "puntiVSRBase": 10000
+    },
+    {
+      "idDatabase": "liv1_9",
+      "data": "2024-08-27",
+      "livello": "LIV1",
+      "nome": "Route des Terre-Neuvas",
+      "puntiVSRBase": 10000
+    },
+    {
+      "idDatabase": "liv1_10",
+      "data": "2024-07-15",
+      "livello": "LIV1",
+      "nome": "Reverse Odyssey",
+      "puntiVSRBase": 10000
+    },
+    {
+      "idDatabase": "liv1_11",
+      "data": "2024-03-18",
+      "livello": "LIV1",
+      "nome": "Jules Verne Trophy",
+      "puntiVSRBase": 10000
+    },
+    {
+      "idDatabase": "liv1_12",
+      "data": "2023-12-05",
+      "livello": "LIV1",
+      "nome": "Class 40",
+      "puntiVSRBase": 10000
+    },
+    {
+      "idDatabase": "liv1_13",
+      "data": "2023-12-05",
+      "livello": "LIV1",
+      "nome": "Ocean Fifty",
+      "puntiVSRBase": 10000
+    },
+    {
+      "idDatabase": "liv1_14",
+      "data": "2023-12-05",
+      "livello": "LIV1",
+      "nome": "IMOCA",
+      "puntiVSRBase": 10000
+    },
+    {
+      "idDatabase": "liv1_15",
+      "data": "2023-12-05",
+      "livello": "LIV1",
+      "nome": "TJV - ULTIM",
+      "puntiVSRBase": 10000
+    },
+    {
+      "idDatabase": "liv1_16",
+      "data": "2023-11-16",
+      "livello": "LIV1",
+      "nome": "Mini Transat 2/2",
+      "puntiVSRBase": 10000
+    },
+    {
+      "idDatabase": "liv1_17",
+      "data": "2023-10-13",
+      "livello": "LIV1",
+      "nome": "Atlantic Wayback",
+      "puntiVSRBase": 10000
+    },
+    {
+      "idDatabase": "liv2_0",
+      "data": "2025-06-02",
+      "livello": "LIV2",
+      "nome": "CIC Normandy Channel Race",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_1",
+      "data": "2025-05-01",
+      "livello": "LIV2",
+      "nome": "Los Angeles - Honolulu",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_2",
+      "data": "2025-04-27",
+      "livello": "LIV2",
+      "nome": "Globe 40 - La grande route (Globe 40 - Etape 6)",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_3",
+      "data": "2025-04-21",
+      "livello": "LIV2",
+      "nome": "Titanic 1912",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_4",
+      "data": "2025-04-13",
+      "livello": "LIV2",
+      "nome": "eSailing Nations Cup (eSailing Nations Cup Leg 2)",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_5",
+      "data": "2025-04-01",
+      "livello": "LIV2",
+      "nome": "eSailing Nations Cup (eSailing Nations Cup Leg 1)",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_6",
+      "data": "2024-01-30",
+      "livello": "LIV2",
+      "nome": "RORC Transatlantic Race",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_7",
+      "data": "2024-01-02",
+      "livello": "LIV2",
+      "nome": "Rolex Sydney Hobart Yacht Race",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_8",
+      "data": "2023-12-31",
+      "livello": "LIV2",
+      "nome": "Chiloe Expedition",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_9",
+      "data": "2023-12-14",
+      "livello": "LIV2",
+      "nome": "Retour à La Base",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_10",
+      "data": "2023-12-04",
+      "livello": "LIV2",
+      "nome": "Le Havre - Lorient (Class 40)",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_11",
+      "data": "2023-11-05",
+      "livello": "LIV2",
+      "nome": "Le Havre - Lorient (Ocean Fifty)",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_12",
+      "data": "2025-04-03",
+      "livello": "LIV2",
+      "nome": "Intertropical Challenge",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_13",
+      "data": "2025-03-25",
+      "livello": "LIV2",
+      "nome": "Globe 40 - La grande route (Globe 40 - Etape 5)",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_14",
+      "data": "2025-03-25",
+      "livello": "LIV2",
+      "nome": "Transatlantic Sprint",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_15",
+      "data": "2025-03-03",
+      "livello": "LIV2",
+      "nome": "RORC Carribbean 600 (RORC Caribbean 600 Race)",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_16",
+      "data": "2025-03-02",
+      "livello": "LIV2",
+      "nome": "Mediterranean Record",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_17",
+      "data": "2025-02-25",
+      "livello": "LIV2",
+      "nome": "Valentine's Winds (Winds of Valentine)",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_18",
+      "data": "2025-02-06",
+      "livello": "LIV2",
+      "nome": "RORC Transatlantic Race",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_19",
+      "data": "2025-01-18",
+      "livello": "LIV2",
+      "nome": "L’Odyssée de Noël (Christmas Race 3)",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_20",
+      "data": "2025-01-02",
+      "livello": "LIV2",
+      "nome": "Rolex Sydney Hobart Yacht Race",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_21",
+      "data": "2024-12-25",
+      "livello": "LIV2",
+      "nome": "Globe 40 - La grande route (Globe 40 - Etape 3)",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_22",
+      "data": "2024-12-20",
+      "livello": "LIV2",
+      "nome": "Desafío Victoria´s Discovery route (La Gomera - San Salvador)",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_23",
+      "data": "2024-12-15",
+      "livello": "LIV2",
+      "nome": "L’Odyssée de Noël (Christmas Race 1)",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_24",
+      "data": "2024-10-24",
+      "livello": "LIV2",
+      "nome": "Ocean Fifty Series (Ocean Fifty Series I Act 5)",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_25",
+      "data": "2024-10-19",
+      "livello": "LIV2",
+      "nome": "Ocean Fifty Series (Act 4 - MED MAX)",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_26",
+      "data": "2024-09-02",
+      "livello": "LIV2",
+      "nome": "Paris 2024 - Ocean's Call 1",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_27",
+      "data": "2024-09-02",
+      "livello": "LIV2",
+      "nome": "Paris 2024 - Ocean's Call 2",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_28",
+      "data": "2024-07-30",
+      "livello": "LIV2",
+      "nome": "Intertropical Challenge",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_29",
+      "data": "2024-07-28",
+      "livello": "LIV2",
+      "nome": "DRHEAM CUP",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_30",
+      "data": "2024-07-20",
+      "livello": "LIV2",
+      "nome": "Quebec - Saint-Malo I Class 40",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_31",
+      "data": "2024-06-29",
+      "livello": "LIV2",
+      "nome": "NY Vendée Les Sables-d'Olonne",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_32",
+      "data": "2024-06-20",
+      "livello": "LIV2",
+      "nome": "Relais des Océans",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_33",
+      "data": "2024-05-10",
+      "livello": "LIV2",
+      "nome": "Cap Martinique",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_34",
+      "data": "2024-05-08",
+      "livello": "LIV2",
+      "nome": "Nation Cup Finale #4",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_35",
+      "data": "2024-05-01",
+      "livello": "LIV2",
+      "nome": "Los Angeles - Honolulu",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_36",
+      "data": "2024-04-27",
+      "livello": "LIV2",
+      "nome": "NIJI 40",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_37",
+      "data": "2024-04-18",
+      "livello": "LIV2",
+      "nome": "Pacific Cup",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_38",
+      "data": "2024-03-15",
+      "livello": "LIV2",
+      "nome": "Mediterranean Record",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_39",
+      "data": "2023-11-02",
+      "livello": "LIV2",
+      "nome": "Route du Café 93'",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_40",
+      "data": "2023-11-01",
+      "livello": "LIV2",
+      "nome": "La Mauricienne",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_41",
+      "data": "2023-10-11",
+      "livello": "LIV2",
+      "nome": "Mini Transat 1/2",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_42",
+      "data": "2023-08-31",
+      "livello": "LIV2",
+      "nome": "New York - San Francisco",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_43",
+      "data": "2023-07-29",
+      "livello": "LIV2",
+      "nome": "ROLEX Fastnet Race",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_44",
+      "data": "2023-07-12",
+      "livello": "LIV2",
+      "nome": "Transpac 2023",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_45",
+      "data": "2023-07-05",
+      "livello": "LIV2",
+      "nome": "eSkipper Academy",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_46",
+      "data": "2023-07-02",
+      "livello": "LIV2",
+      "nome": "DEN HAAG - GENOVA",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_47",
+      "data": "2023-07-02",
+      "livello": "LIV2",
+      "nome": "V065 Sprint Cup #3",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_48",
+      "data": "2023-06-17",
+      "livello": "LIV2",
+      "nome": "Honolulu Yokohama",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv2_49",
+      "data": "2023-06-06",
+      "livello": "LIV2",
+      "nome": "NEWPORT - AARHUS",
+      "puntiVSRBase": 5000
+    },
+    {
+      "idDatabase": "liv3_0",
+      "data": "2025-05-24",
+      "livello": "LIV3",
+      "nome": "Japan Spring Run",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_1",
+      "data": "2025-05-08",
+      "livello": "LIV3",
+      "nome": "La Pornichet Select",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_2",
+      "data": "2025-04-15",
+      "livello": "LIV3",
+      "nome": "CCEdhec 2025",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_3",
+      "data": "2025-03-20",
+      "livello": "LIV3",
+      "nome": "Celtic Arrow",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_4",
+      "data": "2025-03-12",
+      "livello": "LIV3",
+      "nome": "Saint Patrick 2025 (Saint Patrick's Race)",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_5",
+      "data": "2025-02-23",
+      "livello": "LIV3",
+      "nome": "North Pacific Circuit",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_6",
+      "data": "2025-02-14",
+      "livello": "LIV3",
+      "nome": "Maldives Lagoon Run",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_7",
+      "data": "2025-02-08",
+      "livello": "LIV3",
+      "nome": "Corsican Loop",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_8",
+      "data": "2025-02-02",
+      "livello": "LIV3",
+      "nome": "Pineapple Cup",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_9",
+      "data": "2025-01-27",
+      "livello": "LIV3",
+      "nome": "Tour de Bretagne (Breizh Tour)",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_10",
+      "data": "2024-05-18",
+      "livello": "LIV3",
+      "nome": "Click&Boat #1",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_11",
+      "data": "2024-04-30",
+      "livello": "LIV3",
+      "nome": "Nations Cup #3",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_12",
+      "data": "2024-04-25",
+      "livello": "LIV3",
+      "nome": "Vespucci #1",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_13",
+      "data": "2024-04-24",
+      "livello": "LIV3",
+      "nome": "CCEdhec 2024",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_14",
+      "data": "2024-04-23",
+      "livello": "LIV3",
+      "nome": "Nations Cup #2",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_15",
+      "data": "2024-04-16",
+      "livello": "LIV3",
+      "nome": "Nations Cup #1",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_16",
+      "data": "2024-04-11",
+      "livello": "LIV3",
+      "nome": "Easter Mission",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_17",
+      "data": "2024-03-25",
+      "livello": "LIV3",
+      "nome": "Colombus 1492 #2",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_18",
+      "data": "2024-03-15",
+      "livello": "LIV3",
+      "nome": "Saint Patrick's Race",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_19",
+      "data": "2024-02-26",
+      "livello": "LIV3",
+      "nome": "RORC Caribbean 600 Race",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_20",
+      "data": "2025-04-29",
+      "livello": "LIV3",
+      "nome": "eSailing Nations Cup (eSailing Nations Cup Leg 3)",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_21",
+      "data": "2025-03-22",
+      "livello": "LIV3",
+      "nome": "Havana Run",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_22",
+      "data": "2024-12-04",
+      "livello": "LIV3",
+      "nome": "Le Défi de l'océan Indien (Indian Ocean Rise)",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_23",
+      "data": "2024-11-20",
+      "livello": "LIV3",
+      "nome": "Halloween Challenge",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_24",
+      "data": "2024-11-16",
+      "livello": "LIV3",
+      "nome": "Desafío Victoria´s Discovery route (Huelva - La Gomera)",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_25",
+      "data": "2024-11-09",
+      "livello": "LIV3",
+      "nome": "Le Défi de l'océan Indien (Mozambique Channel Sprint )",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_26",
+      "data": "2024-10-12",
+      "livello": "LIV3",
+      "nome": "Finistère Atlantique",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_27",
+      "data": "2024-09-30",
+      "livello": "LIV3",
+      "nome": "Paris 2024 E-Sailling Challenge (Archipel des Kerguelen)",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_28",
+      "data": "2024-09-25",
+      "livello": "LIV3",
+      "nome": "Normandy Channel Race (CIC Normandy Channel Race)",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_29",
+      "data": "2024-09-24",
+      "livello": "LIV3",
+      "nome": "Globe 40 - La grande route (Globe 40 - Etape 1)",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_30",
+      "data": "2024-09-18",
+      "livello": "LIV3",
+      "nome": "Défi Azimut",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_31",
+      "data": "2024-09-16",
+      "livello": "LIV3",
+      "nome": "NOUMEA - NOUMEA",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_32",
+      "data": "2024-09-13",
+      "livello": "LIV3",
+      "nome": "La Solitaire du Figaro PAPREC #3",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_33",
+      "data": "2024-09-09",
+      "livello": "LIV3",
+      "nome": "GUADELOUPE-MARTINIQUE",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_34",
+      "data": "2024-09-08",
+      "livello": "LIV3",
+      "nome": "Globe 40 - Prologue",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_35",
+      "data": "2024-09-02",
+      "livello": "LIV3",
+      "nome": "La Solitaire du Figaro PAPREC #2",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_36",
+      "data": "2024-09-01",
+      "livello": "LIV3",
+      "nome": "La Solitaire du Figaro PAPREC #1",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_37",
+      "data": "2024-08-30",
+      "livello": "LIV3",
+      "nome": "Singapour Express",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_38",
+      "data": "2024-08-26",
+      "livello": "LIV3",
+      "nome": "CALAIS-CANCALE",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_39",
+      "data": "2024-08-19",
+      "livello": "LIV3",
+      "nome": "ROYAN-BREST",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_40",
+      "data": "2024-08-12",
+      "livello": "LIV3",
+      "nome": "NICE-LEUCATE",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_41",
+      "data": "2024-08-06",
+      "livello": "LIV3",
+      "nome": "NICE-AJACCIO",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_42",
+      "data": "2024-08-05",
+      "livello": "LIV3",
+      "nome": "China Sea Trophy",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_43",
+      "data": "2024-08-04",
+      "livello": "LIV3",
+      "nome": "Roschier Baltic Sea Race",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_44",
+      "data": "2024-07-18",
+      "livello": "LIV3",
+      "nome": "AEGEAN 600",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_45",
+      "data": "2024-07-14",
+      "livello": "LIV3",
+      "nome": "Tour Voile #5",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_46",
+      "data": "2024-07-09",
+      "livello": "LIV3",
+      "nome": "Tour Voile #4",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_47",
+      "data": "2024-07-08",
+      "livello": "LIV3",
+      "nome": "La Trinité Cherbourg",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_48",
+      "data": "2024-07-08",
+      "livello": "LIV3",
+      "nome": "Tour voile #3",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_49",
+      "data": "2024-07-08",
+      "livello": "LIV3",
+      "nome": "Indian Ocean Cup",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_50",
+      "data": "2024-07-03",
+      "livello": "LIV3",
+      "nome": "Tour Voile # 2",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_51",
+      "data": "2024-07-01",
+      "livello": "LIV3",
+      "nome": "Havana Run",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_52",
+      "data": "2024-07-01",
+      "livello": "LIV3",
+      "nome": "Tour Voile # 1",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_53",
+      "data": "2024-06-29",
+      "livello": "LIV3",
+      "nome": "Click&Boat #4",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_54",
+      "data": "2024-06-27",
+      "livello": "LIV3",
+      "nome": "Ocean Fifty Series I Act 2",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_55",
+      "data": "2024-06-24",
+      "livello": "LIV3",
+      "nome": "Road To Summer",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_56",
+      "data": "2024-06-15",
+      "livello": "LIV3",
+      "nome": "Click&Boat #3",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_57",
+      "data": "2024-06-12",
+      "livello": "LIV3",
+      "nome": "One Provence Méditerranée",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_58",
+      "data": "2024-05-31",
+      "livello": "LIV3",
+      "nome": "Click&Boat #2",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_59",
+      "data": "2024-05-29",
+      "livello": "LIV3",
+      "nome": "Ocean Fifty Series I Act 1",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_60",
+      "data": "2024-05-28",
+      "livello": "LIV3",
+      "nome": "Pantaenius Rund Skagen",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_61",
+      "data": "2024-05-26",
+      "livello": "LIV3",
+      "nome": "Trophée Banque Populaire Grand Ouest",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_62",
+      "data": "2024-02-24",
+      "livello": "LIV3",
+      "nome": "Colombus 1492",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_63",
+      "data": "2024-02-16",
+      "livello": "LIV3",
+      "nome": "Transcaribbean Race",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_64",
+      "data": "2024-02-03",
+      "livello": "LIV3",
+      "nome": "Breizh Tour",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_65",
+      "data": "2024-01-06",
+      "livello": "LIV3",
+      "nome": "Christmas Race",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_66",
+      "data": "2023-11-07",
+      "livello": "LIV3",
+      "nome": "Halloween Challenge",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_67",
+      "data": "2023-10-18",
+      "livello": "LIV3",
+      "nome": "Sydney to Auckland",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_68",
+      "data": "2023-09-29",
+      "livello": "LIV3",
+      "nome": "Défi Azimut",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_69",
+      "data": "2023-09-17",
+      "livello": "LIV3",
+      "nome": "La Solitaire 3/3",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_70",
+      "data": "2023-09-12",
+      "livello": "LIV3",
+      "nome": "La Solitaire 2/3",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_71",
+      "data": "2023-09-02",
+      "livello": "LIV3",
+      "nome": "La Solitaire 1/3",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_72",
+      "data": "2023-08-29",
+      "livello": "LIV3",
+      "nome": "NewfoundLand Expedition",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_73",
+      "data": "2023-08-25",
+      "livello": "LIV3",
+      "nome": "Du virtuel au réel, la qualif",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_74",
+      "data": "2023-08-02",
+      "livello": "LIV3",
+      "nome": "PURU Transgascogne 2/2",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_75",
+      "data": "2023-07-27",
+      "livello": "LIV3",
+      "nome": "PURU Transgascogne 1/2",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_76",
+      "data": "2023-07-26",
+      "livello": "LIV3",
+      "nome": "Back to California",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_77",
+      "data": "2023-07-22",
+      "livello": "LIV3",
+      "nome": "AEGEAN 600",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_78",
+      "data": "2023-07-18",
+      "livello": "LIV3",
+      "nome": "Les Sables - Horta 2/2",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_79",
+      "data": "2023-07-07",
+      "livello": "LIV3",
+      "nome": "Les Sables - Horta 1/2",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_80",
+      "data": "2023-06-19",
+      "livello": "LIV3",
+      "nome": "Rolex Giraglia",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_81",
+      "data": "2023-06-16",
+      "livello": "LIV3",
+      "nome": "CIC Normandy Channel Race",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_82",
+      "data": "2023-06-13",
+      "livello": "LIV3",
+      "nome": "VO65 Sprint Cup #2",
+      "puntiVSRBase": 3000
+    },
+    {
+      "idDatabase": "liv3_83",
+      "data": "2023-06-13",
+      "livello": "LIV3",
+      "nome": "AARHUS -DEN HAAG",
+      "puntiVSRBase": 3000
+    }
+  ]
+}

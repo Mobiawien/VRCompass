@@ -252,22 +252,6 @@
                     <button type="submit">Aggiungi Gara</button>
                 </form>
 
-                <!-- Pulsante e Sezione per Caricare Regate da Elenco Esterno -->
-                <div id="carica-elenco-regate-container" class="elenco-regate-suggerite-container">
-                    <button id="btn-carica-elenco-regate" class="dashboard-action-button" style="background-color: #17a2b8; border-color: #17a2b8;">Carica da Elenco Regate</button>
-                    <div id="sezione-elenco-regate-suggerite" style="display: none; margin-top: 15px;">
-                        <p id="info-aggiornamento-elenco-regate" style="font-size: 0.9em; color: #6c757d;"></p>
-                        <table id="tabella-elenco-regate-suggerite" style="width: 100%; margin-top: 10px;">
-                            <thead>
-                                <tr><th>Data</th><th>Nome Regata</th><th>Livello</th><th>Punti Base</th><th>Tua Classifica</th><th>Azione</th></tr>
-                            </thead>
-                            <tbody id="tbody-elenco-regate-suggerite">
-                                <!-- Le righe delle regate suggerite verranno popolate da JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
                 <!-- Pulsanti per filtrare la visualizzazione dello storico -->
                 <div class="filtri-visualizzazione-storico" style="margin-bottom: 10px;">
                     <button id="btn-mostra-gare-valide" class="nav-button filtro-btn active">Mostra Valide per Classifica</button>
@@ -276,6 +260,8 @@
                     <button id="btn-storico-liv1" class="nav-button filtro-btn">Liv. 1</button>
                     <button id="btn-storico-liv2" class="nav-button filtro-btn">Liv. 2</button>
                     <button id="btn-storico-liv3" class="nav-button filtro-btn">Liv. 3</button>
+                    <!-- Pulsante spostato qui -->
+                    <button id="btn-apri-modal-elenco-regate" class="dashboard-action-button filtro-btn" style="background-color: #17a2b8; border-color: #17a2b8; margin-left: 10px;">Carica da Elenco Regate</button>
                 </div>
                 <!-- Tabella per visualizzare le gare salvate -->
                 <table id="tabella-classifica-vsr">
@@ -343,6 +329,25 @@
 
         </div> <!-- Fine container-principale-vsr -->
         <p id="autore-classifica" class="autore-credits">Gestione Classifica by Velatopiano-La Casa di Hilde</p>
+
+        <!-- Struttura della Finestra Modale per l'Elenco Regate (Spostata qui) -->
+        <div id="modal-elenco-regate" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close-button" id="btn-chiudi-modal-elenco-regate">&times;</span>
+                <h2>Elenco Regate Suggerite</h2>
+                <p id="info-aggiornamento-elenco-regate" style="font-size: 0.9em; color: #6c757d;"></p>
+                <div class="modal-table-container"> <!-- Contenitore per rendere la tabella scrollabile -->
+                    <table id="tabella-elenco-regate-suggerite" style="width: 100%; margin-top: 10px;">
+                        <thead>
+                            <tr><th>Data</th><th>Nome Regata</th><th>Livello</th><th>Punti Base</th><th>Tua Classifica</th><th>Azione</th></tr>
+                        </thead>
+                        <tbody id="tbody-elenco-regate-suggerite">
+                            <!-- Le righe delle regate suggerite verranno popolate da JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="analisi-view" class="view-section" style="display: none;">

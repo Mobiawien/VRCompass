@@ -42,8 +42,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnStoricoLiv3 = document.getElementById('btn-storico-liv3');
 
     // Nuovi elementi per Caricamento Elenco Regate
-    const btnCaricaElencoRegate = document.getElementById('btn-carica-elenco-regate');
-    const sezioneElencoRegateSuggerite = document.getElementById('sezione-elenco-regate-suggerite');
+    // const btnCaricaElencoRegate = document.getElementById('btn-carica-elenco-regate'); // Sostituito
+    // const sezioneElencoRegateSuggerite = document.getElementById('sezione-elenco-regate-suggerite'); // Sostituito
+    const btnApriModalElencoRegate = document.getElementById('btn-apri-modal-elenco-regate');
+    const modalElencoRegate = document.getElementById('modal-elenco-regate');
+    const btnChiudiModalElencoRegate = document.getElementById('btn-chiudi-modal-elenco-regate');
     const infoAggiornamentoElencoRegate = document.getElementById('info-aggiornamento-elenco-regate');
     const tbodyElencoRegateSuggerite = document.getElementById('tbody-elenco-regate-suggerite');
 
@@ -345,13 +348,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (fileImportaRegateSuggeriteInput) fileImportaRegateSuggeriteInput.addEventListener('change', preparaImportazioneRegateSuggerite);
         setupModaleAvvisoRegateListeners();
         // Nuovo listener per il pulsante "Carica da Elenco Regate"
-        if (btnCaricaElencoRegate) {
-            btnCaricaElencoRegate.addEventListener('click', gestisciCaricamentoElencoRegate);
+        if (btnApriModalElencoRegate) {
+            btnApriModalElencoRegate.addEventListener('click', apriEPopolaModalElencoRegate);
         }
 
         aggiornaSezioneAnalisi(); // Chiamata iniziale per popolare i dati di analisi
         aggiornaSezioneStrategia(); // Chiamata iniziale per popolare i dati di strategia
         aggiornaGraficoRadarSaluteSlot(); // Chiamata iniziale per il grafico radar
+
+        // Listener per chiudere la modale dell'elenco regate
+        if (btnChiudiModalElencoRegate) {
+            btnChiudiModalElencoRegate.addEventListener('click', chiudiModalElencoRegate);
+        }
+        if (modalElencoRegate) {
+            modalElencoRegate.addEventListener('click', (event) => { if (event.target === modalElencoRegate) { chiudiModalElencoRegate(); } });
+        }
     }
 
     // --- Funzioni Dashboard ---
@@ -1325,25 +1336,30 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.readAsText(fileSelezionatoPerRegateSuggerite);
     }
 
-    // --- Funzioni per Caricamento Elenco Regate da URL ---
-    async function gestisciCaricamentoElencoRegate() {
-        if (!sezioneElencoRegateSuggerite || !infoAggiornamentoElencoRegate || !tbodyElencoRegateSuggerite) {
+    // --- Funzioni per la Modale Elenco Regate ---
+    function apriEPopolaModalElencoRegate() {
+        if (!modalElencoRegate || !infoAggiornamentoElencoRegate || !tbodyElencoRegateSuggerite) {
             console.error("Elementi DOM per l'elenco regate suggerite non trovati.");
             alert("Errore: Impossibile caricare l'elenco delle regate in questo momento.");
             return;
         }
+        modalElencoRegate.style.display = 'block'; // o 'flex' se il CSS lo richiede per il centraggio
+        caricaDatiElencoRegate(); // Chiama la funzione che fa il fetch e popola
+    }
 
-        // Comportamento Toggle: se la sezione è già visibile, la nasconde. Altrimenti la carica.
-        if (sezioneElencoRegateSuggerite.style.display === 'block') {
-            sezioneElencoRegateSuggerite.style.display = 'none';
-            btnCaricaElencoRegate.textContent = 'Carica da Elenco Regate'; // Ripristina testo pulsante
-            return;
+    function chiudiModalElencoRegate() {
+        if (modalElencoRegate) {
+            modalElencoRegate.style.display = 'none';
         }
+        // Opzionale: resettare il contenuto della tabella o il messaggio di info se necessario
+        // infoAggiornamentoElencoRegate.textContent = "";
+        // tbodyElencoRegateSuggerite.innerHTML = "";
+    }
 
+    async function caricaDatiElencoRegate() {
         infoAggiornamentoElencoRegate.textContent = "Caricamento elenco regate...";
         tbodyElencoRegateSuggerite.innerHTML = '<tr><td colspan="6" style="text-align:center;">Attendere...</td></tr>';
-        sezioneElencoRegateSuggerite.style.display = 'block'; // Mostra la sezione
-        btnCaricaElencoRegate.textContent = 'Nascondi Elenco Regate'; // Cambia testo pulsante
+        // La modale è già stata resa visibile da apriEPopolaModalElencoRegate
 
         try {
             const response = await fetch(URL_ELENCO_REGATE);
@@ -1363,9 +1379,8 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Errore durante il caricamento dell'elenco regate:", error);
             infoAggiornamentoElencoRegate.textContent = "Errore nel caricamento dell'elenco regate.";
             tbodyElencoRegateSuggerite.innerHTML = `<tr><td colspan="6" style="text-align:center; color: red;">${error.message}</td></tr>`;
-            alert(`Impossibile caricare l'elenco delle regate: ${error.message}`);
-            // Non nascondere la sezione in caso di errore, così l'utente vede il messaggio.
-            // btnCaricaElencoRegate.textContent = 'Carica da Elenco Regate'; // Potrebbe essere utile resettare il testo
+            // Non chiudere la modale in caso di errore, così l'utente vede il messaggio.
+            // alert(`Impossibile caricare l'elenco delle regate: ${error.message}`); // L'alert potrebbe essere ridondante se il messaggio è nella modale
         }
     }
 
@@ -1382,6 +1397,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const idGareSalvate = new Set(
             gareSalvateAttuali.filter(g => g.idDatabaseMaster != null).map(g => g.idDatabaseMaster)
         );
+
+        // Salva i dati delle regate proposte nel dataset del tbody per poterli riutilizzare
+        tbodyElencoRegateSuggerite.dataset.regateProposte = JSON.stringify(regateProposte);
 
         regateProposte.forEach(regata => {
             const row = tbodyElencoRegateSuggerite.insertRow();
@@ -1456,8 +1474,14 @@ document.addEventListener('DOMContentLoaded', () => {
         aggiornaGraficoRadarSaluteSlot();
 
         // Aggiorna la tabella delle regate suggerite per marcare questa come "Già Aggiunta"
-        // (Ricaricando la tabella delle suggerite, il controllo dei duplicati farà il suo lavoro)
-        popolaTabellaElencoRegateSuggerite(JSON.parse(JSON.stringify(tbodyElencoRegateSuggerite.dataset.regateProposte || "[]"))); // Ricarica con i dati originali
+        // Ricarica la tabella delle regate suggerite usando i dati salvati nel dataset
+        // Questo evita un nuovo fetch e aggiorna solo lo stato dei pulsanti "Aggiungi"
+        try {
+            const regateOriginali = JSON.parse(tbodyElencoRegateSuggerite.dataset.regateProposte || "[]");
+            popolaTabellaElencoRegateSuggerite(regateOriginali);
+        } catch (e) {
+            console.error("Errore nel ripopolare la tabella delle regate suggerite:", e);
+        }
         alert(`Regata "${nuovaGara.nome}" aggiunta al tuo storico con ${nuovaGara.puntiVSR} punti VSR.`);
     }
 
@@ -2459,12 +2483,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Salva i dati delle regate proposte nel dataset del tbody per poterli riutilizzare
-    // quando si aggiorna la tabella dopo un'aggiunta.
-    // Questa è una modifica alla funzione popolaTabellaElencoRegateSuggerite
-    // da inserire prima del return se regateProposte.length === 0
-    // e prima del forEach.
-    // tbodyElencoRegateSuggerite.dataset.regateProposte = JSON.stringify(regateProposte);
-    // Questa riga va inserita in popolaTabellaElencoRegateSuggerite
 
 });

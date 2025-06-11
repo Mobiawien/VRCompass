@@ -43,9 +43,11 @@
                             <label for="file-importa-dati" class="dashboard-action-button" style="cursor: pointer;">Importa Dati</label>
                             <input type="file" id="file-importa-dati" accept=".json" style="display: none;">
                         </div>
-                        <div class="dashboard-item">
-                            <span class="dashboard-descriptor">Punteggio VSR Attuale:</span>
-                            <span id="classifica-vsr-attuale" class="valore-display">N/D</span>
+                        <div class="dashboard-item dashboard-item-flex-space-between">
+                            <div>
+                                <span class="dashboard-descriptor">Punteggio VSR Attuale:</span>
+                                <span id="classifica-vsr-attuale" class="valore-display">N/D</span>
+                            </div>
                         </div>
                     </div>
 
@@ -86,7 +88,10 @@
                                     - <strong>Esporta Dati:</strong> Clicca sul pulsante "Esporta Dati" (nella card "Stato Attuale") per scaricare un file (<code>VRCompass_backup.json</code>) contenente tutti i tuoi dati attuali. Conserva questo file in un luogo sicuro.<br>
                                     - <strong>Importa Dati:</strong> Clicca sul pulsante "Importa Dati" (nella card "Stato Attuale") per selezionare un file <code>.json</code> precedentemente esportato. I dati nel file sovrascriveranno quelli attualmente presenti nell'applicazione.
                                 </p>
-                                <!-- Messaggio di promemoria aggiunto -->
+                                <!-- Reintrodotto il ringraziamento -->
+                                <p style="margin-top: 15px; font-size: 0.9em; color: #007bff;">
+                                    Un ringraziamento speciale al nostro Capitano <strong>ITA 86 FIV / Cristian</strong> per la sua preziosa collaborazione nella gestione e nell'aggiornamento dell'elenco regate, rendendo VRCompass uno strumento ancora più potente!
+                                </p>
                                 <p style="margin-top: 15px; font-size: 0.9em; color: #555;">
                                     <strong>Nota:</strong> Dopo ogni modifica ai dati delle gare o alle informazioni generali (come il nome della barca), è consigliabile <strong>esportare nuovamente i dati</strong> per assicurarsi di avere un backup aggiornato.
                                 </p>
@@ -111,10 +116,9 @@
             <p><strong>Responsabilità:</strong> Gli sviluppatori di VR Compass non sono responsabili per eventuali perdite di dati, danni o altri problemi derivanti dall'uso di questa applicazione. Si consiglia di utilizzare la funzione di esportazione per creare backup regolari dei propri dati.</p>
             <p><strong>Copyright e Licenza:</strong> Il codice sorgente di questa applicazione è rilasciato sotto i termini della <a href="https://raw.githubusercontent.com/mobiawien/VRCompass/main/LICENSE" target="_blank">MIT License</a>, che ne definisce le condizioni d'uso, modifica e distribuzione.</p>
             <footer>
-                <p>&copy; 2024 Velatopiano-La Casa di Hilde - VRCompass | <a href="#" onclick="document.getElementById('informativa-dashboard').scrollIntoView({ behavior: 'smooth' }); return false;">Disclaimer & Gestione Dati</a></p>
+                <p>&copy; 2025 Velatopiano-La Casa di Hilde - VRCompass | <a href="#" onclick="document.getElementById('informativa-dashboard').scrollIntoView({ behavior: 'smooth' }); return false;">Disclaimer & Gestione Dati</a></p>
             </footer>
         </div>
-        <p id="autore-dashboard" class="autore-credits">by Velatopiano-La Casa di Hilde</p>
     </div>
 
     <div id="gestione-crediti-view" class="view-section" style="display: none;"> <!-- ID Modificato -->
@@ -248,6 +252,22 @@
                     <button type="submit">Aggiungi Gara</button>
                 </form>
 
+                <!-- Pulsante e Sezione per Caricare Regate da Elenco Esterno -->
+                <div id="carica-elenco-regate-container" class="elenco-regate-suggerite-container">
+                    <button id="btn-carica-elenco-regate" class="dashboard-action-button" style="background-color: #17a2b8; border-color: #17a2b8;">Carica da Elenco Regate</button>
+                    <div id="sezione-elenco-regate-suggerite" style="display: none; margin-top: 15px;">
+                        <p id="info-aggiornamento-elenco-regate" style="font-size: 0.9em; color: #6c757d;"></p>
+                        <table id="tabella-elenco-regate-suggerite" style="width: 100%; margin-top: 10px;">
+                            <thead>
+                                <tr><th>Data</th><th>Nome Regata</th><th>Livello</th><th>Punti Base</th><th>Tua Classifica</th><th>Azione</th></tr>
+                            </thead>
+                            <tbody id="tbody-elenco-regate-suggerite">
+                                <!-- Le righe delle regate suggerite verranno popolate da JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- Pulsanti per filtrare la visualizzazione dello storico -->
                 <div class="filtri-visualizzazione-storico" style="margin-bottom: 10px;">
                     <button id="btn-mostra-gare-valide" class="nav-button filtro-btn active">Mostra Valide per Classifica</button>
@@ -289,6 +309,15 @@
                     4.  <strong>Classifica Finale:</strong> Inserisci la tua posizione finale nella regata.<br>
                     5.  <strong>Punti VSR:</strong> Vengono calcolati e visualizzati automaticamente da VRCompass in base al Livello Gara e alla Classifica Finale (usando la formula <code>PuntiMaxCategoria / (Classifica<sup>0.125</sup>)</code>, arrotondati).<br>
                     6.  Clicca su "Aggiungi Gara" per salvare il risultato nello storico.
+                </p>
+                <p>
+                    <strong>Caricare Regate da Elenco Suggerito:</strong><br>
+                    1.  Clicca sul pulsante "Carica da Elenco Regate". Verrà visualizzato un elenco di regate suggerite, con l'indicazione della data dell'ultimo aggiornamento e la menzione che l'elenco è curato da <strong>ITA 86 FIV / Cristian</strong>.<br>
+                    2.  Scorri l'elenco. Per ogni regata a cui hai partecipato e che desideri aggiungere al tuo storico:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;- Inserisci la tua <strong>Classifica Finale</strong> nell'apposito campo.<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;- Clicca sul pulsante "Aggiungi" accanto alla regata.<br>
+                    3.  La regata verrà aggiunta al tuo storico VSR con i punti calcolati in base alla classifica inserita. Il pulsante "Aggiungi" per quella regata nell'elenco suggerito diventerà "Già Aggiunta" e sarà disabilitato.<br>
+                    4.  Puoi cliccare nuovamente su "Nascondi Elenco Regate" (il testo del pulsante cambia) per chiudere la visualizzazione dell'elenco.
                 </p>
                 <p>
                     <strong>Come Leggere le Tabelle delle Gare:</strong><br>

@@ -41,12 +41,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnStoricoLiv2 = document.getElementById('btn-storico-liv2');
     const btnStoricoLiv3 = document.getElementById('btn-storico-liv3');
 
+    // Nuovi elementi per Caricamento Elenco Regate
+    const btnCaricaElencoRegate = document.getElementById('btn-carica-elenco-regate');
+    const sezioneElencoRegateSuggerite = document.getElementById('sezione-elenco-regate-suggerite');
+    const infoAggiornamentoElencoRegate = document.getElementById('info-aggiornamento-elenco-regate');
+    const tbodyElencoRegateSuggerite = document.getElementById('tbody-elenco-regate-suggerite');
+
     // Titoli dinamici
     const titoloFormGara = document.getElementById('titolo-form-gara');
 
     // Dashboard - Gestione Dati
     const btnEsportaDati = document.getElementById('btn-esporta-dati');
     const fileImportaDatiInput = document.getElementById('file-importa-dati');
+    // Nuovo per Importazione Regate Suggerite
+    const fileImportaRegateSuggeriteInput = document.getElementById('file-importa-regate-suggerite');
+    const modaleAvvisoCaricamentoRegate = document.getElementById('modale-avviso-caricamento-regate');
+    const btnChiudiModaleAvvisoRegate = document.getElementById('btn-chiudi-modale-avviso-regate');
+    const btnConfermaCaricamentoRegate = document.getElementById('btn-conferma-caricamento-regate');
+    const btnAnnullaCaricamentoRegate = document.getElementById('btn-annulla-caricamento-regate');
+    const dataAggiornamentoFileRegateSpan = document.getElementById('data-aggiornamento-file-regate');
+    let fileSelezionatoPerRegateSuggerite = null; // Per tenere traccia del file selezionato
 
     // Analisi
     const analisiView = document.getElementById('analisi-view');
@@ -155,6 +169,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Variabili per il Grafico a Torta accessibili dalla callback del tooltip
     let potenzialePuntiPerGraficoTorta = {};
     let totalePotenzialePuntiPerGraficoTorta = 1; // Default a 1 per evitare div by zero
+
+    // URL del file JSON con l'elenco delle regate
+    const URL_ELENCO_REGATE = 'https://raw.githubusercontent.com/Mobiawien/VRCompass/main/elenco_regate.json';
 
     // Mappa per tradurre il testo della label del grafico al tipoGara (usato nel tooltip)
     const mappaTestoLabelGraficoATipoGara = {};
@@ -324,6 +341,14 @@ document.addEventListener('DOMContentLoaded', () => {
         setupDashboardListeners();
         if (btnEsportaDati) btnEsportaDati.addEventListener('click', esportaDati);
         if (fileImportaDatiInput) fileImportaDatiInput.addEventListener('change', importaDati);
+        // Nuovo Listener per importazione regate suggerite
+        if (fileImportaRegateSuggeriteInput) fileImportaRegateSuggeriteInput.addEventListener('change', preparaImportazioneRegateSuggerite);
+        setupModaleAvvisoRegateListeners();
+        // Nuovo listener per il pulsante "Carica da Elenco Regate"
+        if (btnCaricaElencoRegate) {
+            btnCaricaElencoRegate.addEventListener('click', gestisciCaricamentoElencoRegate);
+        }
+
         aggiornaSezioneAnalisi(); // Chiamata iniziale per popolare i dati di analisi
         aggiornaSezioneStrategia(); // Chiamata iniziale per popolare i dati di strategia
         aggiornaGraficoRadarSaluteSlot(); // Chiamata iniziale per il grafico radar
@@ -1209,6 +1234,231 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
         reader.readAsText(file);
+    }
+
+    // --- Funzioni per Importazione Regate Suggerite ---
+    function setupModaleAvvisoRegateListeners() {
+        if (btnChiudiModaleAvvisoRegate) {
+            btnChiudiModaleAvvisoRegate.addEventListener('click', () => {
+                modaleAvvisoCaricamentoRegate.style.display = 'none';
+                fileImportaRegateSuggeriteInput.value = ''; // Resetta l'input file
+                fileSelezionatoPerRegateSuggerite = null;
+            });
+        }
+        if (btnAnnullaCaricamentoRegate) {
+            btnAnnullaCaricamentoRegate.addEventListener('click', () => {
+                modaleAvvisoCaricamentoRegate.style.display = 'none';
+                fileImportaRegateSuggeriteInput.value = ''; // Resetta l'input file
+                fileSelezionatoPerRegateSuggerite = null;
+            });
+        }
+        if (btnConfermaCaricamentoRegate) {
+            btnConfermaCaricamentoRegate.addEventListener('click', importaRegateSuggeriteConfermate);
+        }
+    }
+
+    function preparaImportazioneRegateSuggerite(event) {
+        fileSelezionatoPerRegateSuggerite = event.target.files[0];
+        if (!fileSelezionatoPerRegateSuggerite) {
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const datiLetti = JSON.parse(e.target.result);
+                // Estrai la data di aggiornamento, se presente
+                const dataAggiornamento = datiLetti.dataUltimoAggiornamento || "N/D";
+                if (dataAggiornamentoFileRegateSpan) {
+                    dataAggiornamentoFileRegateSpan.textContent = dataAggiornamento;
+                }
+
+                // Mostra il modale di avviso
+                if (modaleAvvisoCaricamentoRegate) {
+                    modaleAvvisoCaricamentoRegate.style.display = 'flex';
+                }
+
+            } catch (error) {
+                console.error("Errore durante la lettura del file delle regate suggerite:", error);
+                alert('Errore durante la lettura del file. Assicurati che sia un file JSON valido e contenga i dati attesi.');
+                fileImportaRegateSuggeriteInput.value = ''; // Resetta l'input file
+                fileSelezionatoPerRegateSuggerite = null;
+            }
+        };
+        reader.readAsText(fileSelezionatoPerRegateSuggerite);
+    }
+
+    function importaRegateSuggeriteConfermate() {
+        if (!fileSelezionatoPerRegateSuggerite) {
+            alert("Nessun file selezionato per l'importazione.");
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const datiImportati = JSON.parse(e.target.result);
+                // Sovrascrivi solo lo storico regate
+                if (Array.isArray(datiImportati.gareSalvate)) {
+                    localStorage.setItem('gareSalvate', JSON.stringify(datiImportati.gareSalvate));
+
+                    // Aggiorna tutte le viste rilevanti
+                    aggiornaTabellaGare();
+                    aggiornaPunteggioVsrTotale(); // Questo aggiorna anche classificaVsrAttualeInput e infoClassificaView
+                    aggiornaSezioneAnalisi();
+                    aggiornaSezioneStrategia();
+                    aggiornaGraficoTortaStatoStrategia();
+                    aggiornaGraficoRadarSaluteSlot();
+
+                    alert('Storico regate suggerite importato con successo! Ricorda di personalizzarlo.');
+                } else {
+                    alert('Errore: Il file JSON non contiene un array "gareSalvate" valido.');
+                }
+            } catch (error) {
+                console.error("Errore durante l'importazione confermata delle regate suggerite:", error);
+                alert('Errore durante l\'importazione del file. Assicurati che sia un file JSON valido.');
+            } finally {
+                if (modaleAvvisoCaricamentoRegate) modaleAvvisoCaricamentoRegate.style.display = 'none';
+                fileImportaRegateSuggeriteInput.value = ''; // Resetta l'input file
+                fileSelezionatoPerRegateSuggerite = null;
+            }
+        };
+        reader.readAsText(fileSelezionatoPerRegateSuggerite);
+    }
+
+    // --- Funzioni per Caricamento Elenco Regate da URL ---
+    async function gestisciCaricamentoElencoRegate() {
+        if (!sezioneElencoRegateSuggerite || !infoAggiornamentoElencoRegate || !tbodyElencoRegateSuggerite) {
+            console.error("Elementi DOM per l'elenco regate suggerite non trovati.");
+            alert("Errore: Impossibile caricare l'elenco delle regate in questo momento.");
+            return;
+        }
+
+        // Comportamento Toggle: se la sezione è già visibile, la nasconde. Altrimenti la carica.
+        if (sezioneElencoRegateSuggerite.style.display === 'block') {
+            sezioneElencoRegateSuggerite.style.display = 'none';
+            btnCaricaElencoRegate.textContent = 'Carica da Elenco Regate'; // Ripristina testo pulsante
+            return;
+        }
+
+        infoAggiornamentoElencoRegate.textContent = "Caricamento elenco regate...";
+        tbodyElencoRegateSuggerite.innerHTML = '<tr><td colspan="6" style="text-align:center;">Attendere...</td></tr>';
+        sezioneElencoRegateSuggerite.style.display = 'block'; // Mostra la sezione
+        btnCaricaElencoRegate.textContent = 'Nascondi Elenco Regate'; // Cambia testo pulsante
+
+        try {
+            const response = await fetch(URL_ELENCO_REGATE);
+            if (!response.ok) {
+                throw new Error(`Errore HTTP ${response.status} nel caricare l'elenco delle regate.`);
+            }
+            const datiElenco = await response.json();
+
+            if (datiElenco && datiElenco.dataAggiornamentoDatabase && Array.isArray(datiElenco.elencoRegateProposte)) {
+                infoAggiornamentoElencoRegate.innerHTML = `Elenco regate aggiornato il: <strong>${new Date(datiElenco.dataAggiornamentoDatabase).toLocaleDateString('it-IT')}</strong>. Aggiornamenti a cura di: <strong>ITA 86 FIV / Cristian</strong>.`;
+                popolaTabellaElencoRegateSuggerite(datiElenco.elencoRegateProposte);
+            } else {
+                throw new Error("Formato dati dell'elenco regate non valido.");
+            }
+
+        } catch (error) {
+            console.error("Errore durante il caricamento dell'elenco regate:", error);
+            infoAggiornamentoElencoRegate.textContent = "Errore nel caricamento dell'elenco regate.";
+            tbodyElencoRegateSuggerite.innerHTML = `<tr><td colspan="6" style="text-align:center; color: red;">${error.message}</td></tr>`;
+            alert(`Impossibile caricare l'elenco delle regate: ${error.message}`);
+            // Non nascondere la sezione in caso di errore, così l'utente vede il messaggio.
+            // btnCaricaElencoRegate.textContent = 'Carica da Elenco Regate'; // Potrebbe essere utile resettare il testo
+        }
+    }
+
+    function popolaTabellaElencoRegateSuggerite(regateProposte) {
+        tbodyElencoRegateSuggerite.innerHTML = ''; // Pulisci la tabella
+
+        if (regateProposte.length === 0) {
+            tbodyElencoRegateSuggerite.innerHTML = '<tr><td colspan="6" style="text-align:center;">Nessuna regata suggerita trovata.</td></tr>';
+            return;
+        }
+
+        const gareSalvateAttuali = JSON.parse(localStorage.getItem('gareSalvate')) || [];
+        // Assicurati che idDatabaseMaster esista e non sia null/undefined prima di aggiungerlo al Set
+        const idGareSalvate = new Set(
+            gareSalvateAttuali.filter(g => g.idDatabaseMaster != null).map(g => g.idDatabaseMaster)
+        );
+
+        regateProposte.forEach(regata => {
+            const row = tbodyElencoRegateSuggerite.insertRow();
+            row.insertCell().textContent = new Date(regata.data).toLocaleDateString('it-IT');
+            row.insertCell().textContent = regata.nome;
+            row.insertCell().textContent = regata.livello;
+            row.insertCell().textContent = formatNumber(regata.puntiVSRBase, 0);
+
+            const cellaClassifica = row.insertCell();
+            const inputClassifica = document.createElement('input');
+            inputClassifica.type = 'number';
+            inputClassifica.min = '1';
+            inputClassifica.placeholder = 'Pos.';
+            inputClassifica.style.width = '60px';
+            inputClassifica.style.textAlign = 'center';
+            cellaClassifica.appendChild(inputClassifica);
+
+            const cellaAzione = row.insertCell();
+            const btnAggiungi = document.createElement('button');
+            btnAggiungi.textContent = 'Aggiungi';
+            btnAggiungi.classList.add('edit-btn'); // Stile simile al pulsante modifica
+            
+            // Controlla se la regata (basata su idDatabase) è già nello storico
+            if (idGareSalvate.has(regata.idDatabase)) {
+                btnAggiungi.textContent = 'Già Aggiunta';
+                btnAggiungi.disabled = true;
+                inputClassifica.disabled = true;
+            } else {
+                btnAggiungi.onclick = () => aggiungiRegataDaElencoAlloStorico(regata, inputClassifica.value);
+            }
+            cellaAzione.appendChild(btnAggiungi);
+        });
+    }
+
+    function aggiungiRegataDaElencoAlloStorico(regataMaster, classificaFinaleUtenteString) {
+        const classificaFinale = parseInt(classificaFinaleUtenteString);
+
+        if (isNaN(classificaFinale) || classificaFinale <= 0) {
+            alert("Per favore, inserisci una classifica finale valida (numero intero maggiore di 0).");
+            return;
+        }
+
+        const infoLivello = Object.values(livelliVsrStoricoMap).find(l => l.tipo === regataMaster.livello);
+        if (!infoLivello || infoLivello.valoreNumerico === null) {
+            alert("Errore: Livello della regata non riconosciuto o non valido.");
+            console.error("Livello non valido per la regata master:", regataMaster);
+            return;
+        }
+
+        const puntiVSRCalcolati = Math.round(infoLivello.valoreNumerico / Math.pow(classificaFinale, 0.125));
+
+        const nuovaGara = {
+            id: Date.now(), // ID univoco per lo storico locale
+            data: regataMaster.data,
+            livello: regataMaster.livello, // Manteniamo il tipo stringa (HC, LIV1, etc.)
+            nome: regataMaster.nome,
+            classificaFinale: classificaFinale,
+            puntiVSR: puntiVSRCalcolati,
+            idDatabaseMaster: regataMaster.idDatabase // Traccia l'ID dal file master
+        };
+
+        let gareSalvate = JSON.parse(localStorage.getItem('gareSalvate')) || [];
+        gareSalvate.push(nuovaGara);
+        localStorage.setItem('gareSalvate', JSON.stringify(gareSalvate));
+
+        // Aggiorna la UI
+        aggiornaTabellaGare(); // Aggiorna la tabella dello storico VSR
+        aggiornaPunteggioVsrTotale();
+        aggiornaSezioneAnalisi();
+        aggiornaSezioneStrategia();
+        aggiornaGraficoTortaStatoStrategia();
+        aggiornaGraficoRadarSaluteSlot();
+
+        // Aggiorna la tabella delle regate suggerite per marcare questa come "Già Aggiunta"
+        // (Ricaricando la tabella delle suggerite, il controllo dei duplicati farà il suo lavoro)
+        popolaTabellaElencoRegateSuggerite(JSON.parse(JSON.stringify(tbodyElencoRegateSuggerite.dataset.regateProposte || "[]"))); // Ricarica con i dati originali
+        alert(`Regata "${nuovaGara.nome}" aggiunta al tuo storico con ${nuovaGara.puntiVSR} punti VSR.`);
     }
 
     // --- Funzioni Sezione Analisi ---
@@ -2175,7 +2425,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (graficoRadarIstanza) {
             graficoRadarIstanza.data = data;
             graficoRadarIstanza.update();
-            // console.log("Grafico radar AGGIORNATO");
+            // console.log("Grafico radar AGGIORNATO con dati:", datiPercentualePotenziale);
             // console.log("Grafico radar AGGIORNATO con dati:", datiPercentualePotenziale);
         } else {
             graficoRadarIstanza = new Chart(canvasGraficoRadar, {
@@ -2208,4 +2458,13 @@ document.addEventListener('DOMContentLoaded', () => {
             // console.log("Grafico radar CREATO", graficoRadarIstanza);
         }
     }
+
+    // Salva i dati delle regate proposte nel dataset del tbody per poterli riutilizzare
+    // quando si aggiorna la tabella dopo un'aggiunta.
+    // Questa è una modifica alla funzione popolaTabellaElencoRegateSuggerite
+    // da inserire prima del return se regateProposte.length === 0
+    // e prima del forEach.
+    // tbodyElencoRegateSuggerite.dataset.regateProposte = JSON.stringify(regateProposte);
+    // Questa riga va inserita in popolaTabellaElencoRegateSuggerite
+
 });

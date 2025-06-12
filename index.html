@@ -16,7 +16,7 @@
         <button id="btn-show-analisi" class="nav-button">Analisi</button>
         <button id="btn-show-strategia" class="nav-button">Strategia</button>
         <!-- Spostato qui il badge versione -->
-        <span class="version-badge">VRCompass v1.0.0</span>
+        <span class="version-badge">VRCompass v1.1.0</span>
         <!-- Placeholder per selettore lingua -->
         <div id="language-selector-placeholder" class="language-placeholder">
             Lingua (in costruzione)
@@ -43,9 +43,11 @@
                             <label for="file-importa-dati" class="dashboard-action-button" style="cursor: pointer;">Importa Dati</label>
                             <input type="file" id="file-importa-dati" accept=".json" style="display: none;">
                         </div>
-                        <div class="dashboard-item">
-                            <span class="dashboard-descriptor">Punteggio VSR Attuale:</span>
-                            <span id="classifica-vsr-attuale" class="valore-display">N/D</span>
+                        <div class="dashboard-item dashboard-item-flex-space-between">
+                            <div>
+                                <span class="dashboard-descriptor">Punteggio VSR Attuale:</span>
+                                <span id="classifica-vsr-attuale" class="valore-display">N/D</span>
+                            </div>
                         </div>
                     </div>
 
@@ -86,7 +88,10 @@
                                     - <strong>Esporta Dati:</strong> Clicca sul pulsante "Esporta Dati" (nella card "Stato Attuale") per scaricare un file (<code>VRCompass_backup.json</code>) contenente tutti i tuoi dati attuali. Conserva questo file in un luogo sicuro.<br>
                                     - <strong>Importa Dati:</strong> Clicca sul pulsante "Importa Dati" (nella card "Stato Attuale") per selezionare un file <code>.json</code> precedentemente esportato. I dati nel file sovrascriveranno quelli attualmente presenti nell'applicazione.
                                 </p>
-                                <!-- Messaggio di promemoria aggiunto -->
+                                <!-- Reintrodotto il ringraziamento -->
+                                <p style="margin-top: 15px; font-size: 0.9em; color: #007bff;">
+                                    Un ringraziamento speciale al nostro Capitano <strong>ITA 86 FIV / Cristian</strong> per la sua preziosa collaborazione nella gestione e nell'aggiornamento dell'elenco regate, rendendo VRCompass uno strumento ancora più potente!
+                                </p>
                                 <p style="margin-top: 15px; font-size: 0.9em; color: #555;">
                                     <strong>Nota:</strong> Dopo ogni modifica ai dati delle gare o alle informazioni generali (come il nome della barca), è consigliabile <strong>esportare nuovamente i dati</strong> per assicurarsi di avere un backup aggiornato.
                                 </p>
@@ -111,10 +116,9 @@
             <p><strong>Responsabilità:</strong> Gli sviluppatori di VR Compass non sono responsabili per eventuali perdite di dati, danni o altri problemi derivanti dall'uso di questa applicazione. Si consiglia di utilizzare la funzione di esportazione per creare backup regolari dei propri dati.</p>
             <p><strong>Copyright e Licenza:</strong> Il codice sorgente di questa applicazione è rilasciato sotto i termini della <a href="https://raw.githubusercontent.com/mobiawien/VRCompass/main/LICENSE" target="_blank">MIT License</a>, che ne definisce le condizioni d'uso, modifica e distribuzione.</p>
             <footer>
-                <p>&copy; 2024 Velatopiano-La Casa di Hilde - VRCompass | <a href="#" onclick="document.getElementById('informativa-dashboard').scrollIntoView({ behavior: 'smooth' }); return false;">Disclaimer & Gestione Dati</a></p>
+                <p>&copy; 2025 Velatopiano-La Casa di Hilde - VRCompass | <a href="#" onclick="document.getElementById('informativa-dashboard').scrollIntoView({ behavior: 'smooth' }); return false;">Disclaimer & Gestione Dati</a></p>
             </footer>
         </div>
-        <p id="autore-dashboard" class="autore-credits">by Velatopiano-La Casa di Hilde</p>
     </div>
 
     <div id="gestione-crediti-view" class="view-section" style="display: none;"> <!-- ID Modificato -->
@@ -251,11 +255,13 @@
                 <!-- Pulsanti per filtrare la visualizzazione dello storico -->
                 <div class="filtri-visualizzazione-storico" style="margin-bottom: 10px;">
                     <button id="btn-mostra-gare-valide" class="nav-button filtro-btn active">Mostra Valide per Classifica</button>
-                    <button id="btn-mostra-tutte-gare" class="nav-button filtro-btn">Storico Regate (Aggiorna)</button>
+                    <button id="btn-mostra-tutte-gare" class="nav-button filtro-btn">Storico Regate</button>
                     <button id="btn-storico-hc" class="nav-button filtro-btn">Fuori Cat.</button>
                     <button id="btn-storico-liv1" class="nav-button filtro-btn">Liv. 1</button>
                     <button id="btn-storico-liv2" class="nav-button filtro-btn">Liv. 2</button>
                     <button id="btn-storico-liv3" class="nav-button filtro-btn">Liv. 3</button>
+                    <!-- Pulsante spostato qui -->
+                    <button id="btn-apri-modal-elenco-regate" class="dashboard-action-button filtro-btn" style="background-color: #17a2b8; border-color: #17a2b8; margin-left: 10px;">Carica da Elenco Regate</button>
                 </div>
                 <!-- Tabella per visualizzare le gare salvate -->
                 <table id="tabella-classifica-vsr">
@@ -291,6 +297,15 @@
                     6.  Clicca su "Aggiungi Gara" per salvare il risultato nello storico.
                 </p>
                 <p>
+                    <strong>Caricare Regate da Elenco Suggerito:</strong><br>
+                    1.  Clicca sul pulsante "Carica da Elenco Regate". Verrà visualizzato un elenco di regate suggerite, con l'indicazione della data dell'ultimo aggiornamento e la menzione che l'elenco è curato da <strong>ITA 86 FIV / Cristian</strong>.<br>
+                    2.  Scorri l'elenco. Per ogni regata a cui hai partecipato e che desideri aggiungere al tuo storico:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;- Inserisci la tua <strong>Classifica Finale</strong> nell'apposito campo.<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;- Clicca sul pulsante "Aggiungi" accanto alla regata.<br>
+                    3.  La regata verrà aggiunta al tuo storico VSR con i punti calcolati in base alla classifica inserita. Il pulsante "Aggiungi" per quella regata nell'elenco suggerito diventerà "Già Aggiunta" e sarà disabilitato.<br>
+                    4.  Puoi cliccare nuovamente su "Nascondi Elenco Regate" (il testo del pulsante cambia) per chiudere la visualizzazione dell'elenco.
+                </p>
+                <p>
                     <strong>Come Leggere le Tabelle delle Gare:</strong><br>
                     La tabella mostra le tue gare. Usa i pulsanti di filtro:
                     <ul>
@@ -314,6 +329,25 @@
 
         </div> <!-- Fine container-principale-vsr -->
         <p id="autore-classifica" class="autore-credits">Gestione Classifica by Velatopiano-La Casa di Hilde</p>
+
+        <!-- Struttura della Finestra Modale per l'Elenco Regate (Spostata qui) -->
+        <div id="modal-elenco-regate" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close-button" id="btn-chiudi-modal-elenco-regate">&times;</span>
+                <h2>Elenco Regate Suggerite</h2>
+                <p id="info-aggiornamento-elenco-regate" style="font-size: 0.9em; color: #6c757d;"></p>
+                <div class="modal-table-container"> <!-- Contenitore per rendere la tabella scrollabile -->
+                    <table id="tabella-elenco-regate-suggerite" style="width: 100%; margin-top: 10px;">
+                        <thead>
+                            <tr><th>Data</th><th>Nome Regata</th><th>Livello</th><th>Punti Base</th><th>Tua Classifica</th><th>Azione</th></tr>
+                        </thead>
+                        <tbody id="tbody-elenco-regate-suggerite">
+                            <!-- Le righe delle regate suggerite verranno popolate da JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="analisi-view" class="view-section" style="display: none;">
@@ -460,13 +494,14 @@
                     <div class="spiegazione-grafico">
                         <p><strong>Come leggere e usare questo grafico per la tua strategia (basato su 40 slot):</strong></p>
                         <p>Questo grafico a torta è il tuo "check-up" strategico: illustra lo stato di ottimizzazione dei tuoi slot VSR, ponderato per il <strong>potenziale di punteggio massimo</strong> di ciascuna categoria (Fuori Categoria, Livello 1, Livello 2, Livello 3). Ti aiuta a capire dove stai performando bene e dove hai margini di miglioramento per scalare la classifica.</p>
+                        <!-- MODIFICATO: Chiarito che il potenziale massimo tiene conto del decadimento -->
                         <p>
                             Ogni categoria di gara è rappresentata da un colore. La <strong>dimensione totale</strong> della fetta di una categoria (somma delle parti "Ottimizzato" e "Migliorabile") riflette il suo peso sul potenziale VSR totale.
                         </p>
                         <p>
                             Per ogni categoria, il grafico è diviso in due segmenti che insieme rappresentano il 100% del potenziale di "salute" di quella categoria:
                             <ul>
-                                <li>La parte <strong>colorata più intensa ("Ottimizzato")</strong>: Indica la percentuale di "salute" attuale della categoria. Un alto valore qui significa che gli slot sono ben riempiti con gare dai punteggi validi e competitivi.</li>
+                                <li>La parte <strong>colorata più intensa ("Ottimizzato")</strong>: Indica la percentuale di "salute" attuale della categoria. Un alto valore qui significa che gli slot sono ben riempiti con gare i cui punteggi massimizzano il potenziale di ciascun singolo slot (considerando il loro contributo al 100% o al 50%).</li>
                                 <li>La parte <strong>colorata più tenue ("Migliorabile")</strong>: Mostra la percentuale di "salute" ancora da conquistare per quella categoria. Rappresenta slot vuoti o gare con punteggi che possono essere significativamente migliorati.</li>
                             </ul>
                         </p>
@@ -475,8 +510,8 @@
                             <ul>
                                 <li><strong>"Salute slot" (XX%)</strong>: Misura l'<em>efficienza</em> con cui gestisci gli slot di quella categoria (riempimento e qualità media dei punti). Un valore alto è ottimo.</li>
                                 <li><strong>"Miglioramento potenziale" (YY%)</strong>: È <code>100% - Salute slot</code>. Indica quanto margine hai per ottimizzare la gestione di quella categoria.</li>
-                                <li><strong>Punti VSR: Attuali / Potenziali</strong> (es. "24.606 / 30.000"): Confronta i tuoi punti VSR reali con il massimo teorico per quella categoria.</li>
-                                <li><strong>Percentuale del Potenziale Categoria (ZZ%)</strong>: È <code>(Attuali / Potenziali) * 100</code>. Indica quanto sei vicino a massimizzare i punti VSR <em>per quella specifica categoria</em>.</li>
+                                <li><strong>Punti VSR: Attuali / Potenziali</strong> (es. per HC: "18.500 / 22.500", per LIV1: "35.000 / 45.000"): Confronta i tuoi punti VSR reali con il massimo teorico per quella categoria. Questo potenziale massimo considera che metà degli slot contribuiscono al 100% e l'altra metà al 50% del punteggio base della gara.</li>
+                                <li><strong>Percentuale del Potenziale Categoria (ZZ%)</strong>: È <code>(Punti Attuali / Punti Potenziali) * 100</code>. Indica quanto sei vicino a massimizzare i punti VSR <em>per quella specifica categoria</em>, tenendo conto del potenziale corretto.</li>
                             </ul>
                         </p>
                         <p><strong>Interpretazione combinata per la strategia:</strong></p>

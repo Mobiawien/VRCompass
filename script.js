@@ -41,12 +41,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnStoricoLiv2 = document.getElementById('btn-storico-liv2');
     const btnStoricoLiv3 = document.getElementById('btn-storico-liv3');
 
+    // Nuovi elementi per Caricamento Elenco Regate
+    // const btnCaricaElencoRegate = document.getElementById('btn-carica-elenco-regate'); // Sostituito
+    // const sezioneElencoRegateSuggerite = document.getElementById('sezione-elenco-regate-suggerite'); // Sostituito
+    const btnApriModalElencoRegate = document.getElementById('btn-apri-modal-elenco-regate');
+    const modalElencoRegate = document.getElementById('modal-elenco-regate');
+    const btnChiudiModalElencoRegate = document.getElementById('btn-chiudi-modal-elenco-regate');
+    const infoAggiornamentoElencoRegate = document.getElementById('info-aggiornamento-elenco-regate');
+    const tbodyElencoRegateSuggerite = document.getElementById('tbody-elenco-regate-suggerite');
+
     // Titoli dinamici
     const titoloFormGara = document.getElementById('titolo-form-gara');
 
     // Dashboard - Gestione Dati
     const btnEsportaDati = document.getElementById('btn-esporta-dati');
     const fileImportaDatiInput = document.getElementById('file-importa-dati');
+    // Nuovo per Importazione Regate Suggerite
+    const fileImportaRegateSuggeriteInput = document.getElementById('file-importa-regate-suggerite');
+    const modaleAvvisoCaricamentoRegate = document.getElementById('modale-avviso-caricamento-regate');
+    const btnChiudiModaleAvvisoRegate = document.getElementById('btn-chiudi-modale-avviso-regate');
+    const btnConfermaCaricamentoRegate = document.getElementById('btn-conferma-caricamento-regate');
+    const btnAnnullaCaricamentoRegate = document.getElementById('btn-annulla-caricamento-regate');
+    const dataAggiornamentoFileRegateSpan = document.getElementById('data-aggiornamento-file-regate');
+    let fileSelezionatoPerRegateSuggerite = null; // Per tenere traccia del file selezionato
 
     // Analisi
     const analisiView = document.getElementById('analisi-view');
@@ -155,6 +172,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Variabili per il Grafico a Torta accessibili dalla callback del tooltip
     let potenzialePuntiPerGraficoTorta = {};
     let totalePotenzialePuntiPerGraficoTorta = 1; // Default a 1 per evitare div by zero
+
+    // URL del file JSON con l'elenco delle regate
+    const URL_ELENCO_REGATE = 'https://raw.githubusercontent.com/Mobiawien/VRCompass/main/elenco_regate.json';
 
     // Mappa per tradurre il testo della label del grafico al tipoGara (usato nel tooltip)
     const mappaTestoLabelGraficoATipoGara = {};
@@ -324,9 +344,25 @@ document.addEventListener('DOMContentLoaded', () => {
         setupDashboardListeners();
         if (btnEsportaDati) btnEsportaDati.addEventListener('click', esportaDati);
         if (fileImportaDatiInput) fileImportaDatiInput.addEventListener('change', importaDati);
+        // Nuovo Listener per importazione regate suggerite
+        if (fileImportaRegateSuggeriteInput) fileImportaRegateSuggeriteInput.addEventListener('change', preparaImportazioneRegateSuggerite);
+        setupModaleAvvisoRegateListeners();
+        // Nuovo listener per il pulsante "Carica da Elenco Regate"
+        if (btnApriModalElencoRegate) {
+            btnApriModalElencoRegate.addEventListener('click', apriEPopolaModalElencoRegate);
+        }
+
         aggiornaSezioneAnalisi(); // Chiamata iniziale per popolare i dati di analisi
         aggiornaSezioneStrategia(); // Chiamata iniziale per popolare i dati di strategia
         aggiornaGraficoRadarSaluteSlot(); // Chiamata iniziale per il grafico radar
+
+        // Listener per chiudere la modale dell'elenco regate
+        if (btnChiudiModalElencoRegate) {
+            btnChiudiModalElencoRegate.addEventListener('click', chiudiModalElencoRegate);
+        }
+        if (modalElencoRegate) {
+            modalElencoRegate.addEventListener('click', (event) => { if (event.target === modalElencoRegate) { chiudiModalElencoRegate(); } });
+        }
     }
 
     // --- Funzioni Dashboard ---
@@ -900,10 +936,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 const limite = LIMITI_GARE_PER_CATEGORIA[tipo]; // Limite *per fascia*
 
                 // Seleziona le migliori gare recenti per questo tipo
-                const miglioriRecenti = (gareRecentiRaggruppate[tipo] || []).sort((a, b) => b.puntiEffettivi - a.puntiEffettivi).slice(0, limite);
+                const miglioriRecenti = (gareRecentiRaggruppate[tipo] || []).sort((a, b) => {
+                    if (b.puntiEffettivi !== a.puntiEffettivi) {
+                        return b.puntiEffettivi - a.puntiEffettivi;
+                    }
+                    return new Date(b.data) - new Date(a.data); // Gare più recenti prima a parità di punti
+                }).slice(0, limite);
 
                 // Seleziona le migliori gare meno recenti per questo tipo
-                const miglioriMenoRecenti = (gareMenoRecentiRaggruppate[tipo] || []).sort((a, b) => b.puntiEffettivi - a.puntiEffettivi).slice(0, limite);
+                const miglioriMenoRecenti = (gareMenoRecentiRaggruppate[tipo] || []).sort((a, b) => {
+                    if (b.puntiEffettivi !== a.puntiEffettivi) {
+                        return b.puntiEffettivi - a.puntiEffettivi;
+                    }
+                    return new Date(b.data) - new Date(a.data); // Gare più recenti prima a parità di punti
+                }).slice(0, limite);
 
                 gareContributiveFinali[tipo] = miglioriRecenti.concat(miglioriMenoRecenti); // Combina le gare selezionate
             }
@@ -1211,6 +1257,244 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.readAsText(file);
     }
 
+    // --- Funzioni per Importazione Regate Suggerite ---
+    function setupModaleAvvisoRegateListeners() {
+        if (btnChiudiModaleAvvisoRegate) {
+            btnChiudiModaleAvvisoRegate.addEventListener('click', () => {
+                modaleAvvisoCaricamentoRegate.style.display = 'none';
+                fileImportaRegateSuggeriteInput.value = ''; // Resetta l'input file
+                fileSelezionatoPerRegateSuggerite = null;
+            });
+        }
+        if (btnAnnullaCaricamentoRegate) {
+            btnAnnullaCaricamentoRegate.addEventListener('click', () => {
+                modaleAvvisoCaricamentoRegate.style.display = 'none';
+                fileImportaRegateSuggeriteInput.value = ''; // Resetta l'input file
+                fileSelezionatoPerRegateSuggerite = null;
+            });
+        }
+        if (btnConfermaCaricamentoRegate) {
+            btnConfermaCaricamentoRegate.addEventListener('click', importaRegateSuggeriteConfermate);
+        }
+    }
+
+    function preparaImportazioneRegateSuggerite(event) {
+        fileSelezionatoPerRegateSuggerite = event.target.files[0];
+        if (!fileSelezionatoPerRegateSuggerite) {
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const datiLetti = JSON.parse(e.target.result);
+                // Estrai la data di aggiornamento, se presente
+                const dataAggiornamento = datiLetti.dataUltimoAggiornamento || "N/D";
+                if (dataAggiornamentoFileRegateSpan) {
+                    dataAggiornamentoFileRegateSpan.textContent = dataAggiornamento;
+                }
+
+                // Mostra il modale di avviso
+                if (modaleAvvisoCaricamentoRegate) {
+                    modaleAvvisoCaricamentoRegate.style.display = 'flex';
+                }
+
+            } catch (error) {
+                console.error("Errore durante la lettura del file delle regate suggerite:", error);
+                alert('Errore durante la lettura del file. Assicurati che sia un file JSON valido e contenga i dati attesi.');
+                fileImportaRegateSuggeriteInput.value = ''; // Resetta l'input file
+                fileSelezionatoPerRegateSuggerite = null;
+            }
+        };
+        reader.readAsText(fileSelezionatoPerRegateSuggerite);
+    }
+
+    function importaRegateSuggeriteConfermate() {
+        if (!fileSelezionatoPerRegateSuggerite) {
+            alert("Nessun file selezionato per l'importazione.");
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const datiImportati = JSON.parse(e.target.result);
+                // Sovrascrivi solo lo storico regate
+                if (Array.isArray(datiImportati.gareSalvate)) {
+                    localStorage.setItem('gareSalvate', JSON.stringify(datiImportati.gareSalvate));
+
+                    // Aggiorna tutte le viste rilevanti
+                    aggiornaTabellaGare();
+                    aggiornaPunteggioVsrTotale(); // Questo aggiorna anche classificaVsrAttualeInput e infoClassificaView
+                    aggiornaSezioneAnalisi();
+                    aggiornaSezioneStrategia();
+                    aggiornaGraficoTortaStatoStrategia();
+                    aggiornaGraficoRadarSaluteSlot();
+
+                    alert('Storico regate suggerite importato con successo! Ricorda di personalizzarlo.');
+                } else {
+                    alert('Errore: Il file JSON non contiene un array "gareSalvate" valido.');
+                }
+            } catch (error) {
+                console.error("Errore durante l'importazione confermata delle regate suggerite:", error);
+                alert('Errore durante l\'importazione del file. Assicurati che sia un file JSON valido.');
+            } finally {
+                if (modaleAvvisoCaricamentoRegate) modaleAvvisoCaricamentoRegate.style.display = 'none';
+                fileImportaRegateSuggeriteInput.value = ''; // Resetta l'input file
+                fileSelezionatoPerRegateSuggerite = null;
+            }
+        };
+        reader.readAsText(fileSelezionatoPerRegateSuggerite);
+    }
+
+    // --- Funzioni per la Modale Elenco Regate ---
+    function apriEPopolaModalElencoRegate() {
+        if (!modalElencoRegate || !infoAggiornamentoElencoRegate || !tbodyElencoRegateSuggerite) {
+            console.error("Elementi DOM per l'elenco regate suggerite non trovati.");
+            alert("Errore: Impossibile caricare l'elenco delle regate in questo momento.");
+            return;
+        }
+        modalElencoRegate.style.display = 'block'; // o 'flex' se il CSS lo richiede per il centraggio
+        caricaDatiElencoRegate(); // Chiama la funzione che fa il fetch e popola
+    }
+
+    function chiudiModalElencoRegate() {
+        if (modalElencoRegate) {
+            modalElencoRegate.style.display = 'none';
+        }
+        // Opzionale: resettare il contenuto della tabella o il messaggio di info se necessario
+        // infoAggiornamentoElencoRegate.textContent = "";
+        // tbodyElencoRegateSuggerite.innerHTML = "";
+    }
+
+    async function caricaDatiElencoRegate() {
+        infoAggiornamentoElencoRegate.textContent = "Caricamento elenco regate...";
+        tbodyElencoRegateSuggerite.innerHTML = '<tr><td colspan="6" style="text-align:center;">Attendere...</td></tr>';
+        // La modale è già stata resa visibile da apriEPopolaModalElencoRegate
+
+        try {
+            const response = await fetch(URL_ELENCO_REGATE);
+            if (!response.ok) {
+                throw new Error(`Errore HTTP ${response.status} nel caricare l'elenco delle regate.`);
+            }
+            const datiElenco = await response.json();
+
+            if (datiElenco && datiElenco.dataAggiornamentoDatabase && Array.isArray(datiElenco.elencoRegateProposte)) {
+                infoAggiornamentoElencoRegate.innerHTML = `Elenco regate aggiornato il: <strong>${new Date(datiElenco.dataAggiornamentoDatabase).toLocaleDateString('it-IT')}</strong>. Aggiornamenti a cura di: <strong>ITA 86 FIV / Cristian</strong>.`;
+                popolaTabellaElencoRegateSuggerite(datiElenco.elencoRegateProposte);
+            } else {
+                throw new Error("Formato dati dell'elenco regate non valido.");
+            }
+
+        } catch (error) {
+            console.error("Errore durante il caricamento dell'elenco regate:", error);
+            infoAggiornamentoElencoRegate.textContent = "Errore nel caricamento dell'elenco regate.";
+            tbodyElencoRegateSuggerite.innerHTML = `<tr><td colspan="6" style="text-align:center; color: red;">${error.message}</td></tr>`;
+            // Non chiudere la modale in caso di errore, così l'utente vede il messaggio.
+            // alert(`Impossibile caricare l'elenco delle regate: ${error.message}`); // L'alert potrebbe essere ridondante se il messaggio è nella modale
+        }
+    }
+
+    function popolaTabellaElencoRegateSuggerite(regateProposte) {
+        tbodyElencoRegateSuggerite.innerHTML = ''; // Pulisci la tabella
+
+        if (regateProposte.length === 0) {
+            tbodyElencoRegateSuggerite.innerHTML = '<tr><td colspan="6" style="text-align:center;">Nessuna regata suggerita trovata.</td></tr>';
+            return;
+        }
+
+        const gareSalvateAttuali = JSON.parse(localStorage.getItem('gareSalvate')) || [];
+        // Assicurati che idDatabaseMaster esista e non sia null/undefined prima di aggiungerlo al Set
+        const idGareSalvate = new Set(
+            gareSalvateAttuali.filter(g => g.idDatabaseMaster != null).map(g => g.idDatabaseMaster)
+        );
+
+        // Salva i dati delle regate proposte nel dataset del tbody per poterli riutilizzare
+        tbodyElencoRegateSuggerite.dataset.regateProposte = JSON.stringify(regateProposte);
+
+        regateProposte.forEach(regata => {
+            const row = tbodyElencoRegateSuggerite.insertRow();
+            row.insertCell().textContent = new Date(regata.data).toLocaleDateString('it-IT');
+            row.insertCell().textContent = regata.nome;
+            row.insertCell().textContent = regata.livello;
+            row.insertCell().textContent = formatNumber(regata.puntiVSRBase, 0);
+
+            const cellaClassifica = row.insertCell();
+            const inputClassifica = document.createElement('input');
+            inputClassifica.type = 'number';
+            inputClassifica.min = '1';
+            inputClassifica.placeholder = 'Pos.';
+            inputClassifica.style.width = '60px';
+            inputClassifica.style.textAlign = 'center';
+            cellaClassifica.appendChild(inputClassifica);
+
+            const cellaAzione = row.insertCell();
+            const btnAggiungi = document.createElement('button');
+            btnAggiungi.textContent = 'Aggiungi';
+            btnAggiungi.classList.add('edit-btn'); // Stile simile al pulsante modifica
+            
+            // Controlla se la regata (basata su idDatabase) è già nello storico
+            if (idGareSalvate.has(regata.idDatabase)) {
+                btnAggiungi.textContent = 'Già Aggiunta';
+                btnAggiungi.disabled = true;
+                inputClassifica.disabled = true;
+            } else {
+                btnAggiungi.onclick = () => aggiungiRegataDaElencoAlloStorico(regata, inputClassifica.value);
+            }
+            cellaAzione.appendChild(btnAggiungi);
+        });
+    }
+
+    function aggiungiRegataDaElencoAlloStorico(regataMaster, classificaFinaleUtenteString) {
+        const classificaFinale = parseInt(classificaFinaleUtenteString);
+
+        if (isNaN(classificaFinale) || classificaFinale <= 0) {
+            alert("Per favore, inserisci una classifica finale valida (numero intero maggiore di 0).");
+            return;
+        }
+
+        const infoLivello = Object.values(livelliVsrStoricoMap).find(l => l.tipo === regataMaster.livello);
+        if (!infoLivello || infoLivello.valoreNumerico === null) {
+            alert("Errore: Livello della regata non riconosciuto o non valido.");
+            console.error("Livello non valido per la regata master:", regataMaster);
+            return;
+        }
+
+        const puntiVSRCalcolati = Math.round(infoLivello.valoreNumerico / Math.pow(classificaFinale, 0.125));
+
+        const nuovaGara = {
+            id: Date.now(), // ID univoco per lo storico locale
+            data: regataMaster.data,
+            livello: regataMaster.livello, // Manteniamo il tipo stringa (HC, LIV1, etc.)
+            nome: regataMaster.nome,
+            classificaFinale: classificaFinale,
+            puntiVSR: puntiVSRCalcolati,
+            idDatabaseMaster: regataMaster.idDatabase // Traccia l'ID dal file master
+        };
+
+        let gareSalvate = JSON.parse(localStorage.getItem('gareSalvate')) || [];
+        gareSalvate.push(nuovaGara);
+        localStorage.setItem('gareSalvate', JSON.stringify(gareSalvate));
+
+        // Aggiorna la UI
+        aggiornaTabellaGare(); // Aggiorna la tabella dello storico VSR
+        aggiornaPunteggioVsrTotale();
+        aggiornaSezioneAnalisi();
+        aggiornaSezioneStrategia();
+        aggiornaGraficoTortaStatoStrategia();
+        aggiornaGraficoRadarSaluteSlot();
+
+        // Aggiorna la tabella delle regate suggerite per marcare questa come "Già Aggiunta"
+        // Ricarica la tabella delle regate suggerite usando i dati salvati nel dataset
+        // Questo evita un nuovo fetch e aggiorna solo lo stato dei pulsanti "Aggiungi"
+        try {
+            const regateOriginali = JSON.parse(tbodyElencoRegateSuggerite.dataset.regateProposte || "[]");
+            popolaTabellaElencoRegateSuggerite(regateOriginali);
+        } catch (e) {
+            console.error("Errore nel ripopolare la tabella delle regate suggerite:", e);
+        }
+        alert(`Regata "${nuovaGara.nome}" aggiunta al tuo storico con ${nuovaGara.puntiVSR} punti VSR.`);
+    }
+
     // --- Funzioni Sezione Analisi ---
     function aggiornaSezioneAnalisi() {
         aggiornaPanoramicaSlotVSR();
@@ -1290,8 +1574,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
 
-                const potenzialeMaxPuntiCategoria = livelloValoreNumerico * totaleSlotCategoria; // Max punti per la categoria (es. 15000 * 2 per HC)
-
+                // Corretto: potenziale massimo tiene conto del decadimento al 50% per la seconda fascia
+                const potenzialeMaxPuntiCategoria = livelloValoreNumerico * maxSlotPerFascia * 1.5; 
                 let perc100 = 0;
                 let perc50 = 0;
                 let percEmpty = 100;
@@ -1615,237 +1899,261 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     function aggiornaValutazioneStrategicaSlot() {
-        if (!listaSuggerimentiStrategiciSlot) return;
+        if (!listaSuggerimentiStrategiciSlot) {
+            console.warn("Elemento listaSuggerimentiStrategiciSlot non trovato. Impossibile aggiornare i suggerimenti.");
+            return;
+        }
+        try {
+            console.log("[Strategia] Inizio aggiornaValutazioneStrategicaSlot");
+            const gareContributive = getGareContributiveConDettagli();
+            const suggerimentiStrategici = [];
+            const gareConScadenze = getGareConScadenzeImminenti(); // Ottieni gare con scadenze
+            const idsGareConScadenze = new Set(gareConScadenze.map(g => g.id)); // Set di ID per lookup veloce
 
-        const gareContributive = getGareContributiveConDettagli();
-        const suggerimentiStrategici = [];
-        const gareConScadenze = getGareConScadenzeImminenti(); // Ottieni gare con scadenze
-        const idsGareConScadenze = new Set(gareConScadenze.map(g => g.id)); // Set di ID per lookup veloce
-
-        // Definizioni strategiche per categoria
-        const strategiePerCategoria = {
-            "HC": {
-                nomeBreve: "Fuori Categoria",
-                iconaAzione: "🎯",
-                testoSlotVuoto: "<strong>Opportunità Fuori Categoria:</strong> Lo slot contributivo è vuoto. Le gare HC offrono molti punti. Partecipare a una gara di questo tipo è fondamentale per un VSR competitivo. <em>Identifica la prossima gara HC nel calendario e pianifica la tua partecipazione. Nel frattempo, ottimizza al massimo gli slot di Livello 1, 2 e 3.</em>",
-                testoSlotPienoDeboleBase: (punti) => `<strong>Azione Critica Fuori Categoria:</strong> Il tuo risultato attuale di ${formatNumber(punti, 0)} punti è sotto la soglia ottimale.`,
-                testoSlotPienoOKBase: (punti) => `✅ <strong>Stato Fuori Categoria Ottimale:</strong> Slot coperto con ${formatNumber(punti, 0)} punti.`,
-                testoAzioneMiglioramento: () => `Punta a un risultato migliore nella prossima gara HC disponibile.`,
-                testoPreavviso: (dataEvento, tipoEvento, impattoPunti) => ` <strong class="text-danger">Importante: questa gara è in ${tipoEvento} il ${dataEvento}!</strong>`,
-                testoUrgenzaDimezzamento: (dataEvento, giorniRimanenti, impattoPunti) => {
-                    const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
-                    return ` <strong class="text-danger">❗URGENTE: Mancan${Math.abs(giorniRimanenti) === 1 ? 'o' : 'o'} ${giorniRimanenti} ${pluraleGiorni} alla ${tipoEvento.toLowerCase()} di questa gara (${dataEvento})! Perderai ${formatNumber(impattoPunti,0)} punti.</strong>`;
-                },
-                testoUrgenzaScadenza: (dataEvento, giorniRimanenti, impattoPunti) => {
-                     const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
-                     return ` <strong class="text-danger">❗URGENTE: Mancan${Math.abs(giorniRimanenti) === 1 ? 'o' : 'o'} ${giorniRimanenti} ${pluraleGiorni} alla ${tipoEvento.toLowerCase()} di questa gara (${dataEvento})! Questo slot si azzererà.</strong>`;
-                }
-            },
-            "LIV1": {
-                nomeBreve: "Livello 1",
-                iconaAzione: "🎯",
-                testoSlotVuoto: (numGareDaAggiungere100, puntiEsempio, nomeCategoria, numGareCheSiDimezzano) => { // Modificato riferimento al piazzamento
-                    let baseText = `<strong>Azione ${nomeCategoria}:</strong> Per ottimizzare la tua fascia 100%, dovresti aggiungere ${numGareDaAggiungere100 > 1 ? `${numGareDaAggiungere100} nuove gare` : 'una nuova gara'}. ${puntiEsempio ? `Un 50° posto potrebbe dare circa ${formatNumber(puntiEsempio,0)} pts.` : ''}`;
-                    if (numGareCheSiDimezzano > 0) {
-                        baseText += ` <strong class='text-info'>Questo suggerimento considera che ${numGareCheSiDimezzano > 1 ? `${numGareCheSiDimezzano} delle tue gare` : 'una delle tue gare'} al 100% passer${
-                                     numGareCheSiDimezzano > 1 ? 'anno' : 'à'} presto al 50% (vedi "Monitoraggio Scadenze").</strong>`;
+            // Definizioni strategiche per categoria
+            // ... (definizione di strategiePerCategoria rimane invariata) ...
+            const strategiePerCategoria = {
+                "HC": {
+                    nomeBreve: "Fuori Categoria",
+                    iconaAzione: "🎯",
+                    testoSlotVuoto: "<strong>Opportunità Fuori Categoria:</strong> Lo slot contributivo è vuoto. Le gare HC offrono molti punti. Partecipare a una gara di questo tipo è fondamentale per un VSR competitivo. <em>Identifica la prossima gara HC nel calendario e pianifica la tua partecipazione. Nel frattempo, ottimizza al massimo gli slot di Livello 1, 2 e 3.</em>",
+                    testoSlotPienoDeboleBase: (punti) => `<strong>Azione Critica Fuori Categoria:</strong> Il tuo risultato attuale di ${formatNumber(punti, 0)} punti è sotto la soglia ottimale.`,
+                    testoSlotPienoOKBase: (punti) => `✅ <strong>Stato Fuori Categoria Ottimale:</strong> Slot coperto con ${formatNumber(punti, 0)} punti.`,
+                    testoAzioneMiglioramento: () => `Punta a un risultato migliore nella prossima gara HC disponibile.`,
+                    testoPreavviso: (dataEvento, tipoEvento, impattoPunti) => ` <strong class="text-danger">Importante: questa gara è in ${tipoEvento} il ${dataEvento}!</strong>`,
+                    testoUrgenzaDimezzamento: (dataEvento, giorniRimanenti, impattoPunti, tipoEvento) => { // Aggiunto tipoEvento
+                        const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
+                        return ` <strong class="text-danger">❗URGENTE: Mancan${Math.abs(giorniRimanenti) === 1 ? 'o' : 'o'} ${giorniRimanenti} ${pluraleGiorni} alla ${tipoEvento.toLowerCase()} di questa gara (${dataEvento})! Perderai ${formatNumber(impattoPunti,0)} punti.</strong>`;
+                    },
+                    testoUrgenzaScadenza: (dataEvento, giorniRimanenti, impattoPunti, tipoEvento) => { // Aggiunto tipoEvento
+                        const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
+                        return ` <strong class="text-danger">❗URGENTE: Mancan${Math.abs(giorniRimanenti) === 1 ? 'o' : 'o'} ${giorniRimanenti} ${pluraleGiorni} alla ${tipoEvento.toLowerCase()} di questa gara (${dataEvento})! Questo slot si azzererà.</strong>`;
                     }
-                    return `${baseText} <em>Questa categoria offre un buon bilanciamento punti/accessibilità. Punta a risultati solidi.</em>`;
                 },
-                testoSlotPienoDeboleBase: (punti) => `<strong>Azione Livello 1:</strong> Migliora il tuo risultato meno performante (${formatNumber(punti, 0)} punti).`,
-                testoSlotPienoOKBase: (punti) => `✅ <strong>Stato Livello 1 Ottimale:</strong> Slot coperto con risultati solidi (minimo ${formatNumber(punti, 0)} punti).`,
-                testoAzioneMiglioramento: (classificaTarget) => `Punta a un piazzamento di ${classificaTarget}° o migliore per sostituire la gara meno performante.`,
-                testoPreavviso: (dataEvento, tipoEvento, impattoPunti) => ` <strong class="text-danger">Importante: questa gara è in ${tipoEvento} il ${dataEvento}! Perderà ${formatNumber(impattoPunti,0)} punti.</strong>`,
-                testoUrgenzaDimezzamento: (dataEvento, giorniRimanenti, impattoPunti) => {
-                    const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
-                    return ` <strong class="text-danger">❗URGENTE: Mancan${Math.abs(giorniRimanenti) === 1 ? 'o' : 'o'} ${giorniRimanenti} ${pluraleGiorni} alla ${tipoEvento.toLowerCase()} di questa gara (${dataEvento})! Perderai ${formatNumber(impattoPunti,0)} punti.</strong>`;
-                },
-                testoUrgenzaScadenza: (dataEvento, giorniRimanenti, impattoPunti) => {
-                     const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
-                     return ` <strong class="text-danger">❗URGENTE: Mancan${Math.abs(giorniRimanenti) === 1 ? 'o' : 'o'} ${giorniRimanenti} ${pluraleGiorni} alla ${tipoEvento.toLowerCase()} di questa gara (${dataEvento})! Questo slot si azzererà.</strong>`;
-                }
-            },
-            "LIV2": {
-                nomeBreve: "Livello 2",
-                iconaAzione: "🎯",
-                testoSlotVuoto: (numGareDaAggiungere100, puntiEsempio, nomeCategoria, numGareCheSiDimezzano) => { // Modificato riferimento al piazzamento
-                    let baseText = `<strong>Azione ${nomeCategoria}:</strong> Per ottimizzare la tua fascia 100%, dovresti aggiungere ${numGareDaAggiungere100 > 1 ? `${numGareDaAggiungere100} nuove gare` : 'una nuova gara'}. ${puntiEsempio ? `Un 50° posto potrebbe dare circa ${formatNumber(puntiEsempio,0)} pts.` : ''}`;
-                    if (numGareCheSiDimezzano > 0) {
-                        baseText += ` <strong class='text-info'>Questo suggerimento considera che ${numGareCheSiDimezzano > 1 ? `${numGareCheSiDimezzano} delle tue gare` : 'una delle tue gare'} al 100% passer${
-                                     numGareCheSiDimezzano > 1 ? 'anno' : 'à'} presto al 50% (vedi "Monitoraggio Scadenze").</strong>`;
+                "LIV1": {
+                    nomeBreve: "Livello 1",
+                    iconaAzione: "🎯",
+                    testoSlotVuoto: (numGareDaAggiungere100, puntiEsempio, nomeCategoria, numGareCheSiDimezzano) => { 
+                        let baseText = `<strong>Azione ${nomeCategoria}:</strong> Per ottimizzare la tua fascia 100%, dovresti aggiungere ${numGareDaAggiungere100 > 1 ? `${numGareDaAggiungere100} nuove gare` : 'una nuova gara'}. ${puntiEsempio ? `Un 50° posto potrebbe dare circa ${formatNumber(puntiEsempio,0)} pts.` : ''}`;
+                        if (numGareCheSiDimezzano > 0) {
+                            baseText += ` <strong class='text-info'>Nota: ${numGareCheSiDimezzano > 1 ? `${numGareCheSiDimezzano} delle tue gare` : 'una delle tue gare'} al 100% passer${
+                                        numGareCheSiDimezzano > 1 ? 'anno' : 'à'} presto al 50% (vedi "Monitoraggio Scadenze").</strong>`;
+                        }
+                        return `${baseText} <em>Questa categoria offre un buon bilanciamento punti/accessibilità. Punta a risultati solidi.</em>`;
+                    },
+                    testoSlotPienoDeboleBase: (punti) => `<strong>Azione Livello 1:</strong> Migliora il tuo risultato meno performante (${formatNumber(punti, 0)} punti).`,
+                    testoSlotPienoOKBase: (punti) => `✅ <strong>Stato Livello 1 Ottimale:</strong> Slot coperto con risultati solidi (minimo ${formatNumber(punti, 0)} punti).`,
+                    testoAzioneMiglioramento: (classificaTarget) => `Punta a un piazzamento di ${classificaTarget}° o migliore per sostituire la gara meno performante.`,
+                    testoPreavviso: (dataEvento, tipoEvento, impattoPunti) => ` <strong class="text-danger">Importante: questa gara è in ${tipoEvento} il ${dataEvento}! Perderà ${formatNumber(impattoPunti,0)} punti.</strong>`,
+                    testoUrgenzaDimezzamento: (dataEvento, giorniRimanenti, impattoPunti, tipoEvento) => { // Aggiunto tipoEvento
+                        const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
+                        return ` <strong class="text-danger">❗URGENTE: Mancan${Math.abs(giorniRimanenti) === 1 ? 'o' : 'o'} ${giorniRimanenti} ${pluraleGiorni} alla ${tipoEvento.toLowerCase()} di questa gara (${dataEvento})! Perderai ${formatNumber(impattoPunti,0)} punti.</strong>`;
+                    },
+                    testoUrgenzaScadenza: (dataEvento, giorniRimanenti, impattoPunti, tipoEvento) => { // Aggiunto tipoEvento
+                        const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
+                        return ` <strong class="text-danger">❗URGENTE: Mancan${Math.abs(giorniRimanenti) === 1 ? 'o' : 'o'} ${giorniRimanenti} ${pluraleGiorni} alla ${tipoEvento.toLowerCase()} di questa gara (${dataEvento})! Questo slot si azzererà.</strong>`;
                     }
-                    return `${baseText} <em>Utile per completare la classifica e fare "volume". Non trascurarla e punta a risultati solidi.</em>`;
                 },
-                testoSlotPienoDeboleBase: (punti) => `<strong>Azione Livello 2:</strong> Migliora il tuo risultato meno performante (${formatNumber(punti, 0)} punti).`,
-                testoSlotPienoOKBase: (punti) => `✅ <strong>Stato Livello 2 Ottimale:</strong> Slot coperto con risultati solidi (minimo ${formatNumber(punti, 0)} punti).`,
-                testoAzioneMiglioramento: (classificaTarget) => `Punta a un piazzamento di ${classificaTarget}° o migliore per sostituire la gara meno performante.`,
-                testoPreavviso: (dataEvento, tipoEvento, impattoPunti) => ` <strong class="text-danger">Importante: questa gara è in ${tipoEvento} il ${dataEvento}! Perderà ${formatNumber(impattoPunti,0)} punti.</strong>`,
-                testoUrgenzaDimezzamento: (dataEvento, giorniRimanenti, impattoPunti) => {
-                    const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
-                    return ` <strong class="text-danger">❗URGENTE: Mancan${Math.abs(giorniRimanenti) === 1 ? 'o' : 'o'} ${giorniRimanenti} ${pluraleGiorni} alla ${tipoEvento.toLowerCase()} di questa gara (${dataEvento})! Perderai ${formatNumber(impattoPunti,0)} punti.</strong>`;
-                },
-                testoUrgenzaScadenza: (dataEvento, giorniRimanenti, impattoPunti) => {
-                     const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
-                     return ` <strong class="text-danger">❗URGENTE: Mancan${Math.abs(giorniRimanenti) === 1 ? 'o' : 'o'} ${giorniRimanenti} ${pluraleGiorni} alla ${tipoEvento.toLowerCase()} di questa gara (${dataEvento})! Questo slot si azzererà.</strong>`;
-                }
-            },
-            "LIV3": {
-                nomeBreve: "Livello 3",
-                iconaAzione: "🎯",
-                testoSlotVuoto: (numGareDaAggiungere100, puntiEsempio, nomeCategoria, numGareCheSiDimezzano) => { // Modificato riferimento al piazzamento
-                    let baseText = `<strong>Azione ${nomeCategoria}:</strong> Per ottimizzare la tua fascia 100%, dovresti aggiungere ${numGareDaAggiungere100 > 1 ? `${numGareDaAggiungere100} nuove gare` : 'una nuova gara'}. ${puntiEsempio ? `Un 50° posto potrebbe dare circa ${formatNumber(puntiEsempio,0)} pts.` : ''}`;
-                    if (numGareCheSiDimezzano > 0) {
-                        baseText += ` <strong class='text-info'>Questo suggerimento considera che ${numGareCheSiDimezzano > 1 ? `${numGareCheSiDimezzano} delle tue gare` : 'una delle tue gare'} al 100% passer${
-                                     numGareCheSiDimezzano > 1 ? 'anno' : 'à'} presto al 50% (vedi "Monitoraggio Scadenze").</strong>`;
+                "LIV2": {
+                    nomeBreve: "Livello 2",
+                    iconaAzione: "🎯",
+                    testoSlotVuoto: (numGareDaAggiungere100, puntiEsempio, nomeCategoria, numGareCheSiDimezzano) => { 
+                        let baseText = `<strong>Azione ${nomeCategoria}:</strong> Per ottimizzare la tua fascia 100%, dovresti aggiungere ${numGareDaAggiungere100 > 1 ? `${numGareDaAggiungere100} nuove gare` : 'una nuova gara'}. ${puntiEsempio ? `Un 50° posto potrebbe dare circa ${formatNumber(puntiEsempio,0)} pts.` : ''}`;
+                        if (numGareCheSiDimezzano > 0) {
+                            baseText += ` <strong class='text-info'>Nota: ${numGareCheSiDimezzano > 1 ? `${numGareCheSiDimezzano} delle tue gare` : 'una delle tue gare'} al 100% passer${
+                                        numGareCheSiDimezzano > 1 ? 'anno' : 'à'} presto al 50% (vedi "Monitoraggio Scadenze").</strong>`;
+                        }
+                        return `${baseText} <em>Utile per completare la classifica e fare "volume". Non trascurarla e punta a risultati solidi.</em>`;
+                    },
+                    testoSlotPienoDeboleBase: (punti) => `<strong>Azione Livello 2:</strong> Migliora il tuo risultato meno performante (${formatNumber(punti, 0)} punti).`,
+                    testoSlotPienoOKBase: (punti) => `✅ <strong>Stato Livello 2 Ottimale:</strong> Slot coperto con risultati solidi (minimo ${formatNumber(punti, 0)} punti).`,
+                    testoAzioneMiglioramento: (classificaTarget) => `Punta a un piazzamento di ${classificaTarget}° o migliore per sostituire la gara meno performante.`,
+                    testoPreavviso: (dataEvento, tipoEvento, impattoPunti) => ` <strong class="text-danger">Importante: questa gara è in ${tipoEvento} il ${dataEvento}! Perderà ${formatNumber(impattoPunti,0)} punti.</strong>`,
+                    testoUrgenzaDimezzamento: (dataEvento, giorniRimanenti, impattoPunti, tipoEvento) => { // Aggiunto tipoEvento
+                        const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
+                        return ` <strong class="text-danger">❗URGENTE: Mancan${Math.abs(giorniRimanenti) === 1 ? 'o' : 'o'} ${giorniRimanenti} ${pluraleGiorni} alla ${tipoEvento.toLowerCase()} di questa gara (${dataEvento})! Perderai ${formatNumber(impattoPunti,0)} punti.</strong>`;
+                    },
+                    testoUrgenzaScadenza: (dataEvento, giorniRimanenti, impattoPunti, tipoEvento) => { // Aggiunto tipoEvento
+                        const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
+                        return ` <strong class="text-danger">❗URGENTE: Mancan${Math.abs(giorniRimanenti) === 1 ? 'o' : 'o'} ${giorniRimanenti} ${pluraleGiorni} alla ${tipoEvento.toLowerCase()} di questa gara (${dataEvento})! Questo slot si azzererà.</strong>`;
                     }
-                    return `${baseText} <em>L'obiettivo primario è avere ${LIMITI_GARE_PER_CATEGORIA["LIV3"]*2} gare che contribuiscono. Anche punteggi modesti sono utili.</em>`;
                 },
-                testoSlotPienoDeboleBase: (punti) => `<strong>Azione Livello 3:</strong> Migliora il tuo risultato meno performante (${formatNumber(punti, 0)} punti).`,
-                testoSlotPienoOKBase: (punti) => `✅ <strong>Stato Livello 3 Ottimale:</strong> Slot coperto con risultati solidi (minimo ${formatNumber(punti, 0)} punti).`,
-                testoAzioneMiglioramento: (classificaTarget) => `Punta a un piazzamento di ${classificaTarget}° o migliore per sostituire la gara meno performante.`,
-                testoPreavviso: (dataEvento, tipoEvento, impattoPunti) => ` <strong class="text-danger">Importante: questa gara è in ${tipoEvento} il ${dataEvento}! Perderà ${formatNumber(impattoPunti,0)} punti.</strong>`,
-                testoUrgenzaDimezzamento: (dataEvento, giorniRimanenti, impattoPunti) => {
-                    const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
-                    return ` <strong class="text-danger">❗URGENTE: Mancan${Math.abs(giorniRimanenti) === 1 ? 'o' : 'o'} ${giorniRimanenti} ${pluraleGiorni} alla ${tipoEvento.toLowerCase()} di questa gara (${dataEvento})! Perderai ${formatNumber(impattoPunti,0)} punti.</strong>`;
-                },
-                testoUrgenzaScadenza: (dataEvento, giorniRimanenti, impattoPunti) => {
-                     const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
-                     return ` <strong class="text-danger">❗URGENTE: Mancan${Math.abs(giorniRimanenti) === 1 ? 'o' : 'o'} ${giorniRimanenti} ${pluraleGiorni} alla ${tipoEvento.toLowerCase()} di questa gara (${dataEvento})! Questo slot si azzererà.</strong>`;
+                "LIV3": {
+                    nomeBreve: "Livello 3",
+                    iconaAzione: "🎯",
+                    testoSlotVuoto: (numGareDaAggiungere100, puntiEsempio, nomeCategoria, numGareCheSiDimezzano) => { 
+                        let baseText = `<strong>Azione ${nomeCategoria}:</strong> Per ottimizzare la tua fascia 100%, dovresti aggiungere ${numGareDaAggiungere100 > 1 ? `${numGareDaAggiungere100} nuove gare` : 'una nuova gara'}. ${puntiEsempio ? `Un 50° posto potrebbe dare circa ${formatNumber(puntiEsempio,0)} pts.` : ''}`;
+                        if (numGareCheSiDimezzano > 0) {
+                            baseText += ` <strong class='text-info'>Nota: ${numGareCheSiDimezzano > 1 ? `${numGareCheSiDimezzano} delle tue gare` : 'una delle tue gare'} al 100% passer${
+                                        numGareCheSiDimezzano > 1 ? 'anno' : 'à'} presto al 50% (vedi "Monitoraggio Scadenze").</strong>`;
+                        }
+                        return `${baseText} <em>L'obiettivo primario è avere ${LIMITI_GARE_PER_CATEGORIA["LIV3"]*2} gare che contribuiscono. Anche punteggi modesti sono utili.</em>`;
+                    },
+                    testoSlotPienoDeboleBase: (punti) => `<strong>Azione Livello 3:</strong> Migliora il tuo risultato meno performante (${formatNumber(punti, 0)} punti).`,
+                    testoSlotPienoOKBase: (punti) => `✅ <strong>Stato Livello 3 Ottimale:</strong> Slot coperto con risultati solidi (minimo ${formatNumber(punti, 0)} punti).`,
+                    testoAzioneMiglioramento: (classificaTarget) => `Punta a un piazzamento di ${classificaTarget}° o migliore per sostituire la gara meno performante.`,
+                    testoPreavviso: (dataEvento, tipoEvento, impattoPunti) => ` <strong class="text-danger">Importante: questa gara è in ${tipoEvento} il ${dataEvento}! Perderà ${formatNumber(impattoPunti,0)} punti.</strong>`,
+                    testoUrgenzaDimezzamento: (dataEvento, giorniRimanenti, impattoPunti, tipoEvento) => { // Aggiunto tipoEvento
+                        const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
+                        return ` <strong class="text-danger">❗URGENTE: Mancan${Math.abs(giorniRimanenti) === 1 ? 'o' : 'o'} ${giorniRimanenti} ${pluraleGiorni} alla ${tipoEvento.toLowerCase()} di questa gara (${dataEvento})! Perderai ${formatNumber(impattoPunti,0)} punti.</strong>`;
+                    },
+                    testoUrgenzaScadenza: (dataEvento, giorniRimanenti, impattoPunti, tipoEvento) => { // Aggiunto tipoEvento
+                        const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
+                        return ` <strong class="text-danger">❗URGENTE: Mancan${Math.abs(giorniRimanenti) === 1 ? 'o' : 'o'} ${giorniRimanenti} ${pluraleGiorni} alla ${tipoEvento.toLowerCase()} di questa gara (${dataEvento})! Questo slot si azzererà.</strong>`;
+                    }
                 }
-            }
-        };
+            };
 
-        const ordineTipiPerStrategia = ["HC", "LIV1", "LIV2", "LIV3"];
+            const ordineTipiPerStrategia = ["HC", "LIV1", "LIV2", "LIV3"];
 
-        ordineTipiPerStrategia.forEach(tipoGara => {
-            const gareCat = gareContributive[tipoGara] || [];
-            const infoStrategia = strategiePerCategoria[tipoGara];
+            ordineTipiPerStrategia.forEach(tipoGara => {
+                console.log(`[Strategia] Analisi per tipoGara: ${tipoGara}`);
+                const gareCat = gareContributive[tipoGara] || [];
+                const infoStrategia = strategiePerCategoria[tipoGara];
 
-            // Trova la chiave corrispondente al tipoGara per accedere a valoreNumerico
-            let chiaveMappaPerValoreNumerico = null;
-            for (const key in livelliVsrStoricoMap) {
-                if (livelliVsrStoricoMap[key].tipo === tipoGara) chiaveMappaPerValoreNumerico = key;
-            }
-            const infoLivelloDaMappa = chiaveMappaPerValoreNumerico ? livelliVsrStoricoMap[chiaveMappaPerValoreNumerico] : null;
-            const livelloValoreNumerico = infoLivelloDaMappa ? infoLivelloDaMappa.valoreNumerico : null;
-
-            if (!infoStrategia || !livelloValoreNumerico) {
-                return;
-            }
-
-            let icona = infoStrategia.iconaAzione ? `<span class="warning-triangle">${infoStrategia.iconaAzione}</span>` : `<span class="warning-triangle">⚠️</span>`;
-            let suggerimentoTestoCompleto = "";
-            const limiteGareContributive = LIMITI_GARE_PER_CATEGORIA[tipoGara] * 2; // Totale slot contributivi (es. 2 per HC, 6 per LIV1)
-
-            if (gareCat.length < limiteGareContributive) { // Meno gare contributive del limite
-                let puntiEsempio = null;
-                if (livelloValoreNumerico) {
-                    puntiEsempio = calcolaPuntiPerClassifica(livelloValoreNumerico, 50); // Esempio per 50° posto
+                let chiaveMappaPerValoreNumerico = null;
+                for (const key in livelliVsrStoricoMap) {
+                    if (livelliVsrStoricoMap[key].tipo === tipoGara) chiaveMappaPerValoreNumerico = key;
                 }
-                
-                // Calcola quante gare aggiungere per la fascia 100%, tenendo conto dei dimezzamenti
+                const infoLivelloDaMappa = chiaveMappaPerValoreNumerico ? livelliVsrStoricoMap[chiaveMappaPerValoreNumerico] : null;
+                const livelloValoreNumerico = infoLivelloDaMappa ? infoLivelloDaMappa.valoreNumerico : null;
+
+                if (!infoStrategia || !livelloValoreNumerico) {
+                    console.warn(`[Strategia] Informazioni strategia o valore numerico mancanti per ${tipoGara}. Salto.`);
+                    return;
+                }
+                console.log(`[Strategia] ${tipoGara} - LivelloValoreNumerico: ${livelloValoreNumerico}, GareCat:`, JSON.parse(JSON.stringify(gareCat)));
+
+                let icona = infoStrategia.iconaAzione ? `<span class="warning-triangle">${infoStrategia.iconaAzione}</span>` : `<span class="warning-triangle">⚠️</span>`;
+                let suggerimentoTestoCompleto = "";
+                const limitePerFascia = LIMITI_GARE_PER_CATEGORIA[tipoGara];
+
                 const gare100Attuali = gareCat.filter(g => g.fattoreDecadimento === 1.0);
                 const numGare100Attuali = gare100Attuali.length;
                 const gare100InDimezzamentoImminente = gare100Attuali.filter(g => g.mesiTrascorsi >= 9 && g.mesiTrascorsi < 12).length;
-                
-                // Numero di slot attualmente vuoti nella fascia 100%
-                const slotAttualmenteVuoti100 = LIMITI_GARE_PER_CATEGORIA[tipoGara] - numGare100Attuali;
-                // Numero totale di gare da aggiungere per la fascia 100% (slot vuoti + quelli che si libereranno)
-                const numGareDaAggiungere100 = slotAttualmenteVuoti100 + gare100InDimezzamentoImminente;
 
-                if (tipoGara === "HC" && typeof infoStrategia.testoSlotVuoto === 'string') {
-                    suggerimentoTestoCompleto = `${icona} ${infoStrategia.testoSlotVuoto}`;
-                } else if (typeof infoStrategia.testoSlotVuoto === 'function') {
-                    // Passa il numero di gare da aggiungere per la fascia 100% e il numero di quelle che si dimezzano
-                    suggerimentoTestoCompleto = `${icona} ${infoStrategia.testoSlotVuoto(numGareDaAggiungere100, puntiEsempio, infoStrategia.nomeBreve, gare100InDimezzamentoImminente)}`;
-                }
+                const slotAttualmenteVuoti100 = limitePerFascia - numGare100Attuali;
+                const numGareNecessariePerFascia100 = slotAttualmenteVuoti100 + gare100InDimezzamentoImminente;
 
-            } else { // Tutti gli slot contributivi sono pieni (gareCat.length === limiteGareContributive)
-                const puntiDaBattere = gareCat[gareCat.length - 1].puntiEffettivi;
-                const isDebole = livelloValoreNumerico && SOGLIA_DEBOLEZZA[livelloValoreNumerico.toString()] && puntiDaBattere < (livelloValoreNumerico * SOGLIA_DEBOLEZZA[livelloValoreNumerico.toString()]);
-                const garaMenoPerformante = gareCat[gareCat.length - 1];
-
-                if (isDebole) {
-                    const classificaTarget = calcolaClassificaPerPuntiTarget(livelloValoreNumerico, puntiDaBattere + 1);
-                    suggerimentoTestoCompleto = `${icona} ${infoStrategia.testoSlotPienoDeboleBase(puntiDaBattere)}`;
-                    if (infoStrategia.testoAzioneMiglioramento) {
-                        suggerimentoTestoCompleto += ` ${infoStrategia.testoAzioneMiglioramento(classificaTarget)}`;
+                if (numGareNecessariePerFascia100 > 0) {
+                    console.log(`[Strategia] ${tipoGara} - Necessarie ${numGareNecessariePerFascia100} gare per fascia 100%.`);
+                    let puntiEsempio = null;
+                    if (livelloValoreNumerico) {
+                        puntiEsempio = calcolaPuntiPerClassifica(livelloValoreNumerico, 50);
                     }
-                } else { // Non debole
-                    suggerimentoTestoCompleto = `${infoStrategia.testoSlotPienoOKBase(puntiDaBattere)}`;
-                    const classificaTarget = calcolaClassificaPerPuntiTarget(livelloValoreNumerico, puntiDaBattere + 1);
-                     if (classificaTarget && infoStrategia.testoAzioneMiglioramento && tipoGara !== "HC") { // Non aggiungere azione miglioramento per HC se OK
-                        suggerimentoTestoCompleto += ` ${infoStrategia.testoAzioneMiglioramento(classificaTarget)}`;
-                     } else if (tipoGara === "HC" && infoStrategia.testoSlotPienoOKBase) { // Per HC, se OK, aggiungi solo il testo di monitoraggio
-                         suggerimentoTestoCompleto = infoStrategia.testoSlotPienoOKBase(puntiDaBattere); // Assicura che il testo OK sia usato
-                     }
+                    if (tipoGara === "HC" && typeof infoStrategia.testoSlotVuoto === 'string') {
+                        suggerimentoTestoCompleto = `${icona} ${infoStrategia.testoSlotVuoto}`;
+                    } else if (typeof infoStrategia.testoSlotVuoto === 'function') {
+                        suggerimentoTestoCompleto = `${icona} ${infoStrategia.testoSlotVuoto(numGareNecessariePerFascia100, puntiEsempio, infoStrategia.nomeBreve, gare100InDimezzamentoImminente)}`;
+                    }
+                } else {
+                    console.log(`[Strategia] ${tipoGara} - Fascia 100% piena e stabile.`);
+                    if (gare100Attuali.length > 0) {
+                        console.log(`[Strategia] ${tipoGara} - Ci sono ${gare100Attuali.length} gare al 100%.`);
+                        const gare100Ordinate = [...gare100Attuali].sort((a, b) => a.puntiEffettivi - b.puntiEffettivi);
+                        const garaMenoPerformante100 = gare100Ordinate[0];
+                        const puntiMenoPerformanti100 = garaMenoPerformante100.puntiEffettivi;
+
+                        const sogliaDebolezzaPunti = livelloValoreNumerico * SOGLIA_DEBOLEZZA[livelloValoreNumerico.toString()];
+                        const isMenoPerformante100Debole = puntiMenoPerformanti100 < sogliaDebolezzaPunti;
+
+                        if (isMenoPerformante100Debole) {
+                            console.log(`[Strategia] ${tipoGara} - Gara meno performante al 100% (${puntiMenoPerformanti100} pts) è DEBOLE (soglia: ${sogliaDebolezzaPunti}).`);
+                            const puntiTargetRealistici = sogliaDebolezzaPunti + 1;
+                            const classificaTargetRealistica = calcolaClassificaPerPuntiTarget(livelloValoreNumerico, puntiTargetRealistici);
+                            suggerimentoTestoCompleto = `${icona} ${infoStrategia.testoSlotPienoDeboleBase(puntiMenoPerformanti100)}`;
+                            if (infoStrategia.testoAzioneMiglioramento) {
+                                suggerimentoTestoCompleto += ` ${infoStrategia.testoAzioneMiglioramento(classificaTargetRealistica)}`;
+                            }
+                        } else {
+                            console.log(`[Strategia] ${tipoGara} - Gara meno performante al 100% (${puntiMenoPerformanti100} pts) NON è debole.`);
+                            suggerimentoTestoCompleto = `${infoStrategia.testoSlotPienoOKBase(puntiMenoPerformanti100)}`;
+                            const garaMenoPerformanteComplessiva = gareCat.length > 0 ? gareCat[gareCat.length - 1] : null;
+                            if (tipoGara !== "HC" && garaMenoPerformanteComplessiva && !idsGareConScadenze.has(garaMenoPerformanteComplessiva.id)) {
+                                suggerimentoTestoCompleto += ` Monitora le scadenze per mantenere questo livello.`;
+                            } else if (tipoGara === "HC" && infoStrategia.testoSlotPienoOKBase && garaMenoPerformanteComplessiva && !idsGareConScadenze.has(garaMenoPerformanteComplessiva.id)) {
+                                if (!suggerimentoTestoCompleto.includes("Monitora")) {
+                                    suggerimentoTestoCompleto = infoStrategia.testoSlotPienoOKBase(puntiMenoPerformanti100);
+                                }
+                            }
+                        }
+                    } else { // Non debole
+                        console.warn(`[Strategia] ${tipoGara} - numGareNecessariePerFascia100 è 0, ma gare100Attuali è vuoto. Questo non dovrebbe accadere se limitePerFascia > 0.`);
+                        suggerimentoTestoCompleto = `${icona} Situazione anomala per ${infoStrategia.nomeBreve}. Controllare i dati.`;
+                    }
                 }
 
-                // Aggiungi avviso di scadenza/dimezzamento se presente per la gara meno performante
-                if (garaMenoPerformante && idsGareConScadenze.has(garaMenoPerformante.id)) {
-                    const garaInScadenza = gareConScadenze.find(g => g.id === garaMenoPerformante.id);
-                    if (garaInScadenza) {
-                        const tipoEvento = garaInScadenza.tipoEvento;
-                        const dataEvento = garaInScadenza.dataEvento;
-                        const impattoPunti = garaInScadenza.impattoPunti;
-                        const [day, month, year] = dataEvento.split('/');
-                        const dataEventoDate = new Date(`${year}-${month}-${day}`);
-                        const giorniRimanenti = calcolaGiorniTraDate(new Date(), dataEventoDate);
+                if (gareCat.length > 0) {
+                    const garaMenoPerformante = gareCat.length > 0 ? gareCat[gareCat.length - 1] : null;
+                    console.log(`[Strategia] ${tipoGara} - Gara meno performante complessiva:`, garaMenoPerformante ? garaMenoPerformante.nome : 'Nessuna');
+                    if (garaMenoPerformante && idsGareConScadenze.has(garaMenoPerformante.id)) {
+                        const garaInScadenza = gareConScadenze.find(g => g.id === garaMenoPerformante.id);
+                        if (garaInScadenza) {
+                            const tipoEvento = garaInScadenza.tipoEvento;
+                            const dataEvento = garaInScadenza.dataEvento;
+                            const impattoPunti = garaInScadenza.impattoPunti;
+                            const [day, month, year] = dataEvento.split('/');
+                            const dataEventoDate = new Date(`${year}-${month}-${day}`);
+                            const giorniRimanenti = calcolaGiorniTraDate(new Date(), dataEventoDate);
 
-                        if (garaInScadenza.isUrgente) {
-                            if (tipoEvento === "Dimezzamento" && infoStrategia.testoUrgenzaDimezzamento) {
-                                suggerimentoTestoCompleto += infoStrategia.testoUrgenzaDimezzamento(dataEvento, giorniRimanenti, impattoPunti);
-                            } else if (tipoEvento === "Scadenza" && infoStrategia.testoUrgenzaScadenza) {
-                                suggerimentoTestoCompleto += infoStrategia.testoUrgenzaScadenza(dataEvento, giorniRimanenti, impattoPunti);
+                            console.log(`[Strategia] ${tipoGara} - Gara meno performante (${garaMenoPerformante.nome}) è in scadenza/dimezzamento.`);
+                            // Assicurati che suggerimentoTestoCompleto sia una stringa prima di concatenare
+                            if (typeof suggerimentoTestoCompleto !== 'string') suggerimentoTestoCompleto = '';
+
+                            if (garaInScadenza.isUrgente) {
+                                if (tipoEvento === "Dimezzamento" && infoStrategia.testoUrgenzaDimezzamento) {
+                                    suggerimentoTestoCompleto += infoStrategia.testoUrgenzaDimezzamento(dataEvento, giorniRimanenti, impattoPunti, tipoEvento);
+                                } else if (tipoEvento === "Scadenza" && infoStrategia.testoUrgenzaScadenza) {
+                                    suggerimentoTestoCompleto += infoStrategia.testoUrgenzaScadenza(dataEvento, giorniRimanenti, impattoPunti, tipoEvento);
+                                }
+                            } else if (infoStrategia.testoPreavviso) {
+                                suggerimentoTestoCompleto += infoStrategia.testoPreavviso(dataEvento, tipoEvento, impattoPunti);
                             }
-                        } else if (infoStrategia.testoPreavviso) { // Preavviso non urgente
-                            suggerimentoTestoCompleto += infoStrategia.testoPreavviso(dataEvento, tipoEvento, impattoPunti);
                         }
                     }
-                } else if (!isDebole && tipoGara === "HC" && infoStrategia.testoSlotPienoOKBase) {
-                    // Caso HC OK senza preavvisi, assicurati che il testo di monitoraggio sia presente
-                    // Questo è un po' ridondante se testoSlotPienoOKBase già lo include, ma per sicurezza.
-                    if (!suggerimentoTestoCompleto.includes("Monitora")) { // Evita duplicati
-                         suggerimentoTestoCompleto = infoStrategia.testoSlotPienoOKBase(puntiDaBattere);
-                    }
                 }
-            }
-            if (suggerimentoTestoCompleto) suggerimentiStrategici.push(suggerimentoTestoCompleto);
-        });
-
-
-        // Aggiungi un suggerimento generale se ci sono scadenze importanti
-        if (gareConScadenze.length > 0) {
-            let testoScadenzeImportanti = "Ricorda di monitorare le tue gare in scadenza/dimezzamento. Sostituirle tempestivamente è cruciale, specialmente se contribuiscono significativamente al tuo VSR.";
-            const gareHCoL1InScadenza = gareConScadenze.filter(g => { // Filtra per HC o LIV1
-                const tipoGara = livelliVsrStoricoMap[g.livello] ? livelliVsrStoricoMap[g.livello].tipo : null; // Usa il tipo dalla mappa
-                return tipoGara === "HC" || tipoGara === "LIV1";
+                if (suggerimentoTestoCompleto) {
+                    console.log(`[Strategia] ${tipoGara} - Suggerimento generato: ${suggerimentoTestoCompleto.replace(/<[^>]*>/g, "")}`); // Log senza HTML
+                    suggerimentiStrategici.push(suggerimentoTestoCompleto);
+                }
             });
 
-            if (gareHCoL1InScadenza.length > 0) {
-                // Trova la scadenza più imminente tra HC/L1
-                 gareHCoL1InScadenza.sort((a,b) => new Date(a.dataEvento.split('/').reverse().join('-')) - new Date(b.dataEvento.split('/').reverse().join('-')));
-                 const scadenzaPiuImminente = gareHCoL1InScadenza[0]; // La prima dopo l'ordinamento è la più imminente
-                 const [day, month, year] = scadenzaPiuImminente.dataEvento.split('/');
-                 const dataEventoDate = new Date(`${year}-${month}-${day}`);
-                 const giorniRimanenti = calcolaGiorniTraDate(new Date(), dataEventoDate);
-                 const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
-                 const testoGiorni = `tra ${giorniRimanenti} ${pluraleGiorni} (${scadenzaPiuImminente.dataEvento})`;
+            if (gareConScadenze.length > 0) {
+                let testoScadenzeImportanti = "Ricorda di monitorare le tue gare in scadenza/dimezzamento. Sostituirle tempestivamente è cruciale, specialmente se contribuiscono significativamente al tuo VSR.";
+                const gareHCoL1InScadenza = gareConScadenze.filter(g => {
+                    const tipoGara = livelliVsrStoricoMap[g.livello] ? livelliVsrStoricoMap[g.livello].tipo : null;
+                    return tipoGara === "HC" || tipoGara === "LIV1";
+                });
 
-                testoScadenzeImportanti = `<strong>Priorità Scadenze:</strong> Hai gare importanti (HC/Liv.1) in ${scadenzaPiuImminente.tipoEvento} ${testoGiorni}. La loro sostituzione dovrebbe essere una priorità alta per non perdere punti preziosi! Controlla il "Monitoraggio Scadenze" per i dettagli.`;
+                if (gareHCoL1InScadenza.length > 0) {
+                    gareHCoL1InScadenza.sort((a, b) => new Date(a.dataEvento.split('/').reverse().join('-')) - new Date(b.dataEvento.split('/').reverse().join('-')));
+                    const scadenzaPiuImminente = gareHCoL1InScadenza[0];
+                    const [day, month, year] = scadenzaPiuImminente.dataEvento.split('/');
+                    const dataEventoDate = new Date(`${year}-${month}-${day}`);
+                    const giorniRimanenti = calcolaGiorniTraDate(new Date(), dataEventoDate);
+                    const pluraleGiorni = Math.abs(giorniRimanenti) === 1 ? "giorno" : "giorni";
+                    const testoGiorni = `tra ${giorniRimanenti} ${pluraleGiorni} (${scadenzaPiuImminente.dataEvento})`;
+                    testoScadenzeImportanti = `<strong>Priorità Scadenze:</strong> Hai gare importanti (HC/Liv.1) in ${scadenzaPiuImminente.tipoEvento} ${testoGiorni}. La loro sostituzione dovrebbe essere una priorità alta per non perdere punti preziosi! Controlla il "Monitoraggio Scadenze" per i dettagli.`;
+                }
+                suggerimentiStrategici.unshift(`<span class="warning-triangle calendar-icon">🗓️</span> ${testoScadenzeImportanti}`);
             }
-            suggerimentiStrategici.unshift(`<span class="warning-triangle calendar-icon">🗓️</span> ${testoScadenzeImportanti}`);
-        }
 
-        listaSuggerimentiStrategiciSlot.innerHTML = '';
-        if (suggerimentiStrategici.length > 0) {
-            suggerimentiStrategici.forEach(sugg => {
-                const li = document.createElement('li');
-                li.innerHTML = sugg;
-                listaSuggerimentiStrategiciSlot.appendChild(li);
-            });
-        } else {
-             listaSuggerimentiStrategiciSlot.innerHTML = '<li class="no-data">Nessuna azione strategica prioritaria identificata per gli slot. Controlla le scadenze.</li>';
+            listaSuggerimentiStrategiciSlot.innerHTML = '';
+            if (suggerimentiStrategici.length > 0) {
+                suggerimentiStrategici.forEach(sugg => {
+                    const li = document.createElement('li');
+                    li.innerHTML = sugg;
+                    listaSuggerimentiStrategiciSlot.appendChild(li);
+                });
+            } else {
+                listaSuggerimentiStrategiciSlot.innerHTML = '<li class="no-data">Nessuna azione strategica prioritaria identificata per gli slot. Controlla le scadenze.</li>';
+            }
+        } catch (error) {
+            // Questo errore è già gestito e loggato
+            console.error("Errore in aggiornaValutazioneStrategicaSlot:", error);
+            if (listaSuggerimentiStrategiciSlot) {
+                listaSuggerimentiStrategiciSlot.innerHTML = '<li class="no-data text-danger">Errore durante la generazione dei suggerimenti. Controlla la console per dettagli.</li>';
+            }
         }
     }
 
@@ -1857,217 +2165,235 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Funzioni Grafico Torta Strategia ---
     function aggiornaGraficoTortaStatoStrategia() {
-        if (!canvasGraficoTorta) return;
-
-        const gareContributive = getGareContributiveConDettagli();
-
-        // Calcola i punti VSR attuali per ogni categoria per il tooltip
-        const puntiAttualiPerCategoriaGrafico = {};
-        const categorieOrdineTooltip = ["HC", "LIV1", "LIV2", "LIV3"]; // Stesso ordine del grafico
-        categorieOrdineTooltip.forEach(tipoGara => {
-            const gareCat = gareContributive[tipoGara] || [];
-            let sommaPunti = 0;
-            gareCat.forEach(g => sommaPunti += g.puntiEffettivi);
-            puntiAttualiPerCategoriaGrafico[tipoGara] = sommaPunti;
-        });
-        // Calcola il potenziale massimo di punti per ogni categoria e il totale
-        const potenzialePuntiCategoria = {
-            "HC": (livelliVsrStoricoMap["HC"]?.valoreNumerico || 0) * LIMITI_GARE_PER_CATEGORIA["HC"] * 2, // Limite * 2
-            "LIV1": (livelliVsrStoricoMap["LIV1"]?.valoreNumerico || 0) * LIMITI_GARE_PER_CATEGORIA["LIV1"] * 2, // Limite * 2
-            "LIV2": (livelliVsrStoricoMap["LIV2"]?.valoreNumerico || 0) * LIMITI_GARE_PER_CATEGORIA["LIV2"] * 2, // Limite * 2
-            "LIV3": (livelliVsrStoricoMap["LIV3"]?.valoreNumerico || 0) * LIMITI_GARE_PER_CATEGORIA["LIV3"] * 2 // Limite * 2
-        };
-
-        let totalPotentialPoints = 0;
-        for (const tipo in potenzialePuntiCategoria) {
-            totalPotentialPoints += potenzialePuntiCategoria[tipo];
+        if (!canvasGraficoTorta) {
+            console.warn("Elemento canvasGraficoTorta non trovato. Impossibile aggiornare il grafico a torta.");
+            return;
         }
-        // Rendi disponibili queste variabili per la callback del tooltip
-        potenzialePuntiPerGraficoTorta = potenzialePuntiCategoria;
-        totalePotenzialePuntiPerGraficoTorta = totalPotentialPoints > 0 ? totalPotentialPoints : 1;
+        try {
+            const saluteCategoriePerTooltip = {}; // Oggetto per memorizzare i punteggi salute per il tooltip
+            const gareContributive = getGareContributiveConDettagli();
+            const puntiAttualiPerCategoriaGrafico = {};
+            const categorieOrdineTooltip = ["HC", "LIV1", "LIV2", "LIV3"];
+            categorieOrdineTooltip.forEach(tipoGara => {
+                const gareCat = gareContributive[tipoGara] || [];
+                let sommaPunti = 0;
+                gareCat.forEach(g => sommaPunti += g.puntiEffettivi);
+                puntiAttualiPerCategoriaGrafico[tipoGara] = sommaPunti;
+            });
 
-        if (totalPotentialPoints === 0) totalPotentialPoints = 1; // Evita divisione per zero se tutti i potenziali sono 0
+            const potenzialePuntiCategoria = {
+                "HC": (livelliVsrStoricoMap["HC"]?.valoreNumerico || 0) * LIMITI_GARE_PER_CATEGORIA["HC"] * 1.5,
+                "LIV1": (livelliVsrStoricoMap["LIV1"]?.valoreNumerico || 0) * LIMITI_GARE_PER_CATEGORIA["LIV1"] * 1.5,
+                "LIV2": (livelliVsrStoricoMap["LIV2"]?.valoreNumerico || 0) * LIMITI_GARE_PER_CATEGORIA["LIV2"] * 1.5,
+                "LIV3": (livelliVsrStoricoMap["LIV3"]?.valoreNumerico || 0) * LIMITI_GARE_PER_CATEGORIA["LIV3"] * 1.5
+            };
 
-        const labels = [];
-        const dataValues = [];
-        const backgroundColors = [];
-        const borderColors = []; // Array per i colori dei bordi
-        const borderWidths = []; // Array per gli spessori dei bordi
-
-        // Definisci l'ordine e i colori per le categorie
-        const categorieOrdine = ["HC", "LIV1", "LIV2", "LIV3"];
-        const colori = {
-            "HC":   { good: 'rgba(220, 53, 69, 0.8)', needsImprovement: 'rgba(220, 53, 69, 0.3)' },   // Rosso Bootstrap (danger) per HC
-            "LIV1": { good: 'rgba(25, 135, 84, 0.8)', needsImprovement: 'rgba(25, 135, 84, 0.3)' },   // Verde Bootstrap (success)
-            "LIV2": { good: 'rgba(255, 193, 7, 0.8)', needsImprovement: 'rgba(255, 193, 7, 0.3)' },   // Giallo Bootstrap (warning)
-            "LIV3": { good: 'rgba(13, 110, 253, 0.8)', needsImprovement: 'rgba(13, 110, 253, 0.3)' }   // Blu Bootstrap (primary)
-        };
-
-        categorieOrdine.forEach(tipoGara => {
-            const gareCat = gareContributive[tipoGara] || [];
-            const maxSlotPerFascia = LIMITI_GARE_PER_CATEGORIA[tipoGara];
-            const totaleSlotCategoria = maxSlotPerFascia * 2; // Totale slot per categoria
-
-            // Trova il valore numerico del livello dalla mappa
-            let chiaveMappaPerValoreNumerico = null;
-            for (const key in livelliVsrStoricoMap) {
-                if (livelliVsrStoricoMap[key].tipo === tipoGara) chiaveMappaPerValoreNumerico = key;
+            let totalPotentialPoints = 0;
+            for (const tipo in potenzialePuntiCategoria) {
+                totalPotentialPoints += potenzialePuntiCategoria[tipo];
             }
-            const infoLivelloDaMappa = chiaveMappaPerValoreNumerico ? livelliVsrStoricoMap[chiaveMappaPerValoreNumerico] : null;
-            const livelloValoreNumerico = infoLivelloDaMappa ? infoLivelloDaMappa.valoreNumerico : null;
-            const nomeCatBreve = infoLivelloDaMappa ? infoLivelloDaMappa.testo : tipoGara;
+            potenzialePuntiPerGraficoTorta = potenzialePuntiCategoria;
+            totalePotenzialePuntiPerGraficoTorta = totalPotentialPoints > 0 ? totalPotentialPoints : 1;
 
-            if (totaleSlotCategoria === 0 || !livelloValoreNumerico) {
-                 // Non includere categorie senza slot o senza valore numerico
-                 return;
+            if (totalPotentialPoints === 0) totalPotentialPoints = 1;
+
+            const labels = [];
+            const dataValues = [];
+            const backgroundColors = [];
+            const borderColors = [];
+            const borderWidths = [];
+
+            const categorieOrdine = ["HC", "LIV1", "LIV2", "LIV3"];
+            const colori = {
+                "HC":   { good: 'rgba(220, 53, 69, 0.8)', needsImprovement: 'rgba(220, 53, 69, 0.3)' },
+                "LIV1": { good: 'rgba(25, 135, 84, 0.8)', needsImprovement: 'rgba(25, 135, 84, 0.3)' },
+                "LIV2": { good: 'rgba(255, 193, 7, 0.8)', needsImprovement: 'rgba(255, 193, 7, 0.3)' },
+                "LIV3": { good: 'rgba(13, 110, 253, 0.8)', needsImprovement: 'rgba(13, 110, 253, 0.3)' }
+            };
+
+            categorieOrdine.forEach(tipoGara => {
+                const gareCat = gareContributive[tipoGara] || [];
+                const maxSlotPerFascia = LIMITI_GARE_PER_CATEGORIA[tipoGara];
+                const totaleSlotCategoria = maxSlotPerFascia * 2;
+
+                let chiaveMappaPerValoreNumerico = null;
+                for (const key in livelliVsrStoricoMap) {
+                    if (livelliVsrStoricoMap[key].tipo === tipoGara) chiaveMappaPerValoreNumerico = key;
+                }
+                const infoLivelloDaMappa = chiaveMappaPerValoreNumerico ? livelliVsrStoricoMap[chiaveMappaPerValoreNumerico] : null;
+                const livelloValoreNumerico = infoLivelloDaMappa ? infoLivelloDaMappa.valoreNumerico : null;
+                const nomeCatBreve = infoLivelloDaMappa ? infoLivelloDaMappa.testo : tipoGara;
+
+                if (totaleSlotCategoria === 0 || !livelloValoreNumerico) return;
+
+                const percentualeRiempimento = (gareCat.length / totaleSlotCategoria);
+                let qualitaMediaPunti = 0;
+                if (gareCat.length > 0 && livelloValoreNumerico > 0) {
+                    let sommaQualitaPercentuale = 0;
+                    gareCat.forEach(g => {
+                        // La qualità di una singola gara è rapportata al massimo potenziale di QUELLO SLOT
+                        // (es. 15000 per slot 100% HC, 7500 per slot 50% HC)
+                        const potenzialeMaxSlotSpecifico = livelloValoreNumerico * g.fattoreDecadimento;
+                        if (potenzialeMaxSlotSpecifico > 0) {
+                            sommaQualitaPercentuale += (g.puntiEffettivi / potenzialeMaxSlotSpecifico);
+                        }
+                    });
+                    qualitaMediaPunti = gareCat.length > 0 ? sommaQualitaPercentuale / gareCat.length : 0;
+                }
+
+                let pesoRiempimento = 0.5, pesoQualita = 0.5;
+                if (maxSlotPerFascia === 1) { pesoRiempimento = 0.4; pesoQualita = 0.6; }
+                else if (maxSlotPerFascia === 3) { pesoRiempimento = 0.45; pesoQualita = 0.55; }
+                else if (maxSlotPerFascia === 10) { pesoRiempimento = 0.6; pesoQualita = 0.4; }
+
+                const punteggioSalute = (percentualeRiempimento * pesoRiempimento) + (qualitaMediaPunti * pesoQualita);
+                const punteggioSalutePercent = Math.min(1, Math.max(0, punteggioSalute)) * 100;
+                saluteCategoriePerTooltip[tipoGara] = punteggioSalutePercent; // Salva per il tooltip
+
+                const pesoPuntiCategoria = potenzialePuntiCategoria[tipoGara] / totalPotentialPoints;
+                const dimensioneBuona = pesoPuntiCategoria * (punteggioSalutePercent / 100);
+                const dimensioneMigliorabile = pesoPuntiCategoria * (1 - (punteggioSalutePercent / 100));
+
+                if (dimensioneBuona > 0.001) {
+                    labels.push(`${nomeCatBreve} (Ottimizzato)`);
+                    dataValues.push(dimensioneBuona);
+                    backgroundColors.push(colori[tipoGara].good);
+                    borderColors.push('#444');
+                    borderWidths.push(0);
+                }
+                if (dimensioneMigliorabile > 0.001) {
+                    labels.push(`${nomeCatBreve} (Migliorabile)`);
+                    dataValues.push(dimensioneMigliorabile);
+                    backgroundColors.push(colori[tipoGara].needsImprovement);
+                    borderColors.push('#fff');
+                    borderWidths.push(0);
+                }
+            });
+
+            if (dataValues.length === 0) {
+                labels.push("Nessun dato disponibile");
+                dataValues.push(1);
+                backgroundColors.push('#e9ecef');
+                borderColors.push('#ccc');
+                borderWidths.push(0);
             }
 
-            // Calcola il punteggio salute basato sul riempimento e sulla qualità media
-            const percentualeRiempimento = (gareCat.length / totaleSlotCategoria); // Valore da 0 a 1 sul totale di 40
-            let qualitaMediaPunti = 0; // Valore da 0 a 1
-            if (gareCat.length > 0 && livelloValoreNumerico > 0) {
-                 let sommaQualitaPercentuale = 0;
-                 gareCat.forEach(g => sommaQualitaPercentuale += (g.puntiEffettivi / livelloValoreNumerico));
-                 qualitaMediaPunti = sommaQualitaPercentuale / gareCat.length; // Media dei rapporti puntiEffettivi/puntiMaxGara
-            }
+            const data = {
+                labels: labels,
+                datasets: [{
+                    label: 'Stato Ottimizzazione Slot',
+                    data: dataValues,
+                    backgroundColor: backgroundColors,
+                    borderColor: borderColors,
+                    borderWidth: borderWidths
+                }]
+            };
 
-            // Pesi per il punteggio salute (stessi usati nel radar)
-            let pesoRiempimento = 0.5;
-            let pesoQualita = 0.5;
-            if (maxSlotPerFascia === 1) { // HC (totale 2 slot)
-                pesoRiempimento = 0.4;
-                pesoQualita = 0.6;
-            } else if (maxSlotPerFascia === 3) { // LIV1 (totale 6 slot)
-                pesoRiempimento = 0.45;
-                pesoQualita = 0.55;
-            } else if (maxSlotPerFascia === 10) { // LIV3 (totale 20 slot)
-                pesoRiempimento = 0.6;
-                pesoQualita = 0.4;
-            }
-            // LIV2 usa i pesi di default 0.5/0.5
+            if (graficoTortaIstanza) {
+                graficoTortaIstanza.data = data;
+                graficoTortaIstanza.update();
+            } else {
+                graficoTortaIstanza = new Chart(canvasGraficoTorta, {
+                    type: 'pie',
+                    data: data,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'right', labels: { boxWidth: 20, padding: 15 } },
+                            title: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(tooltipItem) {
+                                        const labelOriginal = tooltipItem.label || '';
 
-            const punteggioSalute = (percentualeRiempimento * pesoRiempimento) + (qualitaMediaPunti * pesoQualita);
-            const punteggioSalutePercent = Math.min(1, Math.max(0, punteggioSalute)) * 100; // Risultato da 0 a 100
+                                        if (labelOriginal === "Nessun dato disponibile") return labelOriginal;
 
-            // Calcola la dimensione delle fette in base al POTENZIALE DI PUNTEGGIO della categoria e al punteggio di salute
-            const pesoPuntiCategoria = potenzialePuntiCategoria[tipoGara] / totalPotentialPoints; // Peso della categoria sul totale dei punti potenziali (0-1)
+                                        const match = labelOriginal.match(/^(.+?)\s*\((.+?)\)$/);
+                                        const nomeCatBase = match ? match[1].trim() : labelOriginal;
+                                        const statoFetta = match ? match[2].trim().toLowerCase() : '';
+                                        const tipoGaraPerTooltip = mappaTestoLabelGraficoATipoGara[nomeCatBase];
+                                        if (!tipoGaraPerTooltip) return labelOriginal; // Fallback
 
-            const dimensioneBuona = pesoPuntiCategoria * (punteggioSalutePercent / 100);
-            const dimensioneMigliorabile = pesoPuntiCategoria * (1 - (punteggioSalutePercent / 100));
+                                        const tooltipLines = [];
+                                        // Riga 1: Nome Categoria (Stato Fetta) - Mantenuta per chiarezza su quale fetta si sta guardando
+                                        tooltipLines.push(`${nomeCatBase} (${statoFetta.charAt(0).toUpperCase() + statoFetta.slice(1)})`); 
 
-            // Aggiungi i dati per la fetta "Buona"
-            if (dimensioneBuona > 0.001) { // Aggiungi solo se la dimensione è > 0 per evitare fette invisibili e problemi di rendering
-                labels.push(`${nomeCatBreve} (Ottimizzato)`);
-                dataValues.push(dimensioneBuona);
-                backgroundColors.push(colori[tipoGara].good);
-                borderColors.push('#444'); // Bordo scuro per l'inizio di una nuova categoria
-                borderWidths.push(0);     // Nessun bordo
-            }
+                                        // Informazioni globali della categoria, come da spiegazione HTML
+                                        const salutePercentualeCategoria = saluteCategoriePerTooltip[tipoGaraPerTooltip] || 0;
+                                        tooltipLines.push(`Salute Slot (Cat.): ${salutePercentualeCategoria.toFixed(1)}%`);
+                                        tooltipLines.push(`Miglioramento Potenziale (Cat.): ${(100 - salutePercentualeCategoria).toFixed(1)}%`);
 
-            // Aggiungi i dati per la fetta "Migliorabile"
-            if (dimensioneMigliorabile > 0.001) { // Aggiungi solo se la dimensione è > 0
-                 labels.push(`${nomeCatBreve} (Migliorabile)`);
-                 dataValues.push(dimensioneMigliorabile);
-                 backgroundColors.push(colori[tipoGara].needsImprovement);
-                 borderColors.push('#fff'); // Bordo bianco standard per la parte migliorabile
-                 borderWidths.push(0);     // Nessun bordo per la parte migliorabile
-            }
-        });
+                                        const gareContributivePerTooltip = getGareContributiveConDettagli();
+                                        const gareCatPerTooltip = gareContributivePerTooltip[tipoGaraPerTooltip] || [];
+                                        
+                                        const potenzialeMaxCategoria = potenzialePuntiPerGraficoTorta[tipoGaraPerTooltip] || 0;
+                                        const puntiAttualiDellaCategoria = puntiAttualiPerCategoriaGrafico[tipoGaraPerTooltip] || 0;
+                                        let percentualePuntiVSRPerCategoria = 0;
+                                        if (potenzialeMaxCategoria > 0) {
+                                            percentualePuntiVSRPerCategoria = (puntiAttualiDellaCategoria / potenzialeMaxCategoria) * 100;
+                                        }
+                                        tooltipLines.push(`Punti VSR (Cat.): ${formatNumber(puntiAttualiDellaCategoria,0)} / ${formatNumber(potenzialeMaxCategoria,0)}`);
+                                        tooltipLines.push(`(${percentualePuntiVSRPerCategoria.toFixed(1)}% del potenziale cat.)`);
 
-        // Se non ci sono dati (es. nessuna gara salvata), mostra un grafico vuoto o un messaggio
-        if (dataValues.length === 0) {
-             // Potremmo mostrare un grafico vuoto o nascondere il canvas e mostrare un messaggio
-             // Per ora, creiamo un grafico con dati 0 che risulterà vuoto
-             labels.push("Nessun dato disponibile");
-             dataValues.push(1); // Una singola fetta che occupa tutto lo spazio
-             backgroundColors.push('#e9ecef'); // Grigio chiaro
-             borderColors.push('#ccc'); // Irrilevante con spessore 0
-             borderWidths.push(0);      // Nessun bordo
-        }
+                                        // Dettaglio Punti per Fascia
+                                        if (tipoGaraPerTooltip !== "Generale") { // Non mostrare per la fetta "Non Assegnato" se mai ci fosse
+                                            let punti100 = 0;
+                                            let punti50 = 0;
+                                            gareCatPerTooltip.forEach(g => {
+                                                if (g.fattoreDecadimento === 1.0) punti100 += g.puntiEffettivi;
+                                                else if (g.fattoreDecadimento === 0.5) punti50 += g.puntiEffettivi;
+                                            });
+                                            if (punti100 > 0 || punti50 > 0 || potenzialeMaxCategoria > 0) { // Mostra anche se 0 ma c'è potenziale
+                                                tooltipLines.push(`  Da fascia 100%: ${formatNumber(punti100,0)}`);
+                                                tooltipLines.push(`  Da fascia 50%: ${formatNumber(punti50,0)}`);
+                                            }
+                                        }
 
+                                        // Stato della Fascia 100% (suggerimentoBreve)
+                                        let suggerimentoBreveTooltip = "";
+                                        const limitePerFasciaTooltip = LIMITI_GARE_PER_CATEGORIA[tipoGaraPerTooltip];
+                                        const gare100AttualiTooltip = gareCatPerTooltip.filter(g => g.fattoreDecadimento === 1.0);
+                                        const numGare100AttualiTooltip = gare100AttualiTooltip.length;
+                                        const gare100InDimezzamentoTooltip = gare100AttualiTooltip.filter(g => g.mesiTrascorsi >= 9 && g.mesiTrascorsi < 12).length;
+                                        const slotVuoti100Tooltip = limitePerFasciaTooltip - numGare100AttualiTooltip;
+                                        const numGareNecessarie100Tooltip = slotVuoti100Tooltip + gare100InDimezzamentoTooltip;
 
-        const data = {
-            labels: labels,
-            datasets: [{
-                label: 'Stato Ottimizzazione Slot',
-                data: dataValues,
-                backgroundColor: backgroundColors,
-                borderColor: borderColors, // Usa l'array dei colori dei bordi
-                borderWidth: borderWidths  // Usa l'array degli spessori dei bordi
-            }]
-        };
-
-        if (graficoTortaIstanza) {
-            graficoTortaIstanza.data = data;
-            graficoTortaIstanza.update();
-        } else {
-            graficoTortaIstanza = new Chart(canvasGraficoTorta, {
-                type: 'pie',
-                data: data,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false, // Permette al CSS di controllare l'altezza
-                    plugins: {
-                        legend: {
-                            position: 'right', // Legenda a destra
-                            labels: { boxWidth: 20, padding: 15 }
-                        },
-                        title: { display: false }, // Titolo già presente nell'HTML
-                        tooltip: { // Configurazione Tooltip
-                            callbacks: {
-                                label: function(tooltipItem) { // Rinominato context in tooltipItem per chiarezza
-                                    const labelOriginal = tooltipItem.label || ''; // e.g., "Livello 1 (Ottimizzato)"
-                                    const rawValue = tooltipItem.parsed || 0; // Proporzione della fetta sul totale potenziale VSR
-
-                                    if (labelOriginal === "Nessun dato disponibile") {
-                                        return labelOriginal;
+                                        if (numGareNecessarie100Tooltip > 0) {
+                                            suggerimentoBreveTooltip = `Fascia 100%: da completare/stabilizzare.`;
+                                        } else if (gare100AttualiTooltip.length > 0) {
+                                            const gare100OrdinateTooltip = [...gare100AttualiTooltip].sort((a, b) => a.puntiEffettivi - b.puntiEffettivi);
+                                            const garaMenoPerformante100Tooltip = gare100OrdinateTooltip[0];
+                                            const valoreNumericoTooltip = livelliVsrStoricoMap[garaMenoPerformante100Tooltip.livello]?.valoreNumerico || 0;
+                                            const sogliaDebolezzaPuntiTooltip = valoreNumericoTooltip * SOGLIA_DEBOLEZZA[valoreNumericoTooltip.toString()];
+                                            if (garaMenoPerformante100Tooltip.puntiEffettivi < sogliaDebolezzaPuntiTooltip) {
+                                                suggerimentoBreveTooltip = `Fascia 100%: migliorare gara debole.`;
+                                            } else {
+                                                suggerimentoBreveTooltip = `Fascia 100%: OK.`;
+                                            }
+                                        } else {
+                                            suggerimentoBreveTooltip = `Fascia 100%: OK (o non applicabile).`;
+                                        }
+                                        if (suggerimentoBreveTooltip) tooltipLines.push(suggerimentoBreveTooltip);
+                                        return tooltipLines;
                                     }
-
-                                    // Estrai nome base categoria (es. "Livello 1") e stato fetta (es. "Ottimizzato")
-                                    const match = labelOriginal.match(/^(.+?)\s*\((.+?)\)$/);
-                                    const nomeCatBase = match ? match[1].trim() : labelOriginal;
-                                    const statoFetta = match ? match[2].trim().toLowerCase() : '';
-
-                                    const tipoGara = mappaTestoLabelGraficoATipoGara[nomeCatBase];
-                                    if (!tipoGara) return labelOriginal; // Fallback
-
-                                    const potenzialeMaxCategoria = potenzialePuntiPerGraficoTorta[tipoGara] || 0;
-                                    const puntiAttualiDellaCategoria = puntiAttualiPerCategoriaGrafico[tipoGara] || 0;
-
-                                    let percentualePuntiVSRPerCategoria = 0;
-                                    if (potenzialeMaxCategoria > 0) {
-                                        percentualePuntiVSRPerCategoria = (puntiAttualiDellaCategoria / potenzialeMaxCategoria) * 100;
-                                    }
-
-                                    // Calcola la percentuale di "salute" o "miglioramento" per la fetta specifica
-                                    let percentualeFettaSpecifics = 0;
-                                    const proporzioneCatSulTotale = (potenzialeMaxCategoria / totalePotenzialePuntiPerGraficoTorta);
-                                    if (proporzioneCatSulTotale > 0) {
-                                        percentualeFettaSpecifics = (rawValue / proporzioneCatSulTotale) * 100;
-                                        percentualeFettaSpecifics = Math.min(100, Math.max(0, percentualeFettaSpecifics)); // Clamp 0-100
-                                    }
-
-                                    const tooltipLines = [];
-                                    tooltipLines.push(`${nomeCatBase} (${statoFetta.charAt(0).toUpperCase() + statoFetta.slice(1)})`); // Es. Livello 1 (Ottimizzato)
-
-                                    if (statoFetta === 'ottimizzato') {
-                                        tooltipLines.push(`  Salute slot: ${percentualeFettaSpecifics.toFixed(2)}%`);
-                                    } else if (statoFetta === 'migliorabile') {
-                                        tooltipLines.push(`  Miglioramento potenziale: ${percentualeFettaSpecifics.toFixed(2)}%`);
-                                    } else {
-                                        // Caso in cui lo statoFetta non è né ottimizzato né migliorabile (improbabile)
-                                        tooltipLines.push(`  Valore fetta: ${percentualeFettaSpecifics.toFixed(2)}%`);
-                                    }
-                                    tooltipLines.push(`  Punti VSR: ${formatNumber(puntiAttualiDellaCategoria,0)} / ${formatNumber(potenzialeMaxCategoria,0)}`);
-                                    tooltipLines.push(`  (${percentualePuntiVSRPerCategoria.toFixed(2)}% del potenziale cat.)`);
-
-                                    return tooltipLines;
                                 }
                             }
                         }
                     }
-                }
-            });
+                });
+            }
+        } catch (error) {
+            console.error("Errore in aggiornaGraficoTortaStatoStrategia:", error);
+            // Potresti voler nascondere il grafico o mostrare un messaggio di errore nel canvas
+            if (graficoTortaIstanza) {
+                graficoTortaIstanza.destroy();
+                graficoTortaIstanza = null;
+            }
+            const ctx = canvasGraficoTorta.getContext('2d');
+            ctx.clearRect(0, 0, canvasGraficoTorta.width, canvasGraficoTorta.height);
+            ctx.textAlign = 'center';
+            ctx.fillText('Errore nel caricamento del grafico.', canvasGraficoTorta.width / 2, canvasGraficoTorta.height / 2);
         }
     }
 
@@ -2084,9 +2410,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (gareCat.length > 0 && valoreMaxPuntiGara > 0) {
             let sommaQualitaPercentuale = 0;
             gareCat.forEach(g => {
-                sommaQualitaPercentuale += (g.puntiEffettivi / valoreMaxPuntiGara); // Rapporto puntiEffettivi / PuntiMaxGaraOriginale
+                // La qualità di una singola gara è rapportata al massimo potenziale di QUELLO SLOT
+                // (es. 15000 per slot 100% HC, 7500 per slot 50% HC)
+                const potenzialeMaxSlotSpecifico = valoreMaxPuntiGara * g.fattoreDecadimento;
+                if (potenzialeMaxSlotSpecifico > 0) {
+                    sommaQualitaPercentuale += (g.puntiEffettivi / potenzialeMaxSlotSpecifico);
+                }
             });
-            qualitaMediaPunti = sommaQualitaPercentuale / gareCat.length; // Media dei rapporti puntiEffettivi/puntiMaxGara
+            // Media dei rapporti (puntiEffettivi / potenzialeMaxDelloSlotSpecifico)
+            qualitaMediaPunti = gareCat.length > 0 ? sommaQualitaPercentuale / gareCat.length : 0;
         }
 
         // Pesi: diamo più importanza al riempimento per slot con molte gare (LIV3),
@@ -2175,7 +2507,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (graficoRadarIstanza) {
             graficoRadarIstanza.data = data;
             graficoRadarIstanza.update();
-            // console.log("Grafico radar AGGIORNATO");
+            // console.log("Grafico radar AGGIORNATO con dati:", datiPercentualePotenziale);
             // console.log("Grafico radar AGGIORNATO con dati:", datiPercentualePotenziale);
         } else {
             graficoRadarIstanza = new Chart(canvasGraficoRadar, {
@@ -2208,4 +2540,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // console.log("Grafico radar CREATO", graficoRadarIstanza);
         }
     }
+
+
 });

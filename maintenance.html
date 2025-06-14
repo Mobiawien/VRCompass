@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VR Compass - In Manutenzione</title>
+    <title id="page-title">VR Compass - In Manutenzione</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -42,11 +42,48 @@
 </head>
 <body>
     <div class="maintenance-box">
-        <h1>VR Compass - In Manutenzione</h1>
-        <p>Stiamo effettuando alcuni aggiornamenti per migliorare la tua esperienza.</p>
-        <p>L'applicazione tornerà online a breve con nuove funzionalità e miglioramenti.</p>
-        <p>Grazie per la comprensione.</p>
-        <p class="signature">- Team VR Compass</p>
+        <h1 id="main-heading">VR Compass - In Manutenzione</h1>
+        <p id="message-line1">Stiamo effettuando alcuni aggiornamenti per migliorare la tua esperienza.</p>
+        <p id="message-line2">L'applicazione tornerà online a breve con nuove funzionalità e miglioramenti.</p>
+        <p id="message-line3">Grazie per la comprensione.</p>
+        <p class="signature" id="signature">- Team VR Compass</p>
     </div>
+
+    <script>
+        const translations = {
+            en: {
+                "PAGE_TITLE": "VR Compass - Under Maintenance",
+                "MAIN_HEADING": "VR Compass - Under Maintenance",
+                "MESSAGE_LINE1": "We are currently performing some updates to enhance your experience.",
+                "MESSAGE_LINE2": "The application will be back online shortly with new features and improvements.",
+                "MESSAGE_LINE3": "Thank you for your understanding.",
+                "SIGNATURE": "- The VR Compass Team"
+            },
+            it: {
+                "PAGE_TITLE": "VR Compass - In Manutenzione",
+                "MAIN_HEADING": "VR Compass - In Manutenzione",
+                "MESSAGE_LINE1": "Stiamo effettuando alcuni aggiornamenti per migliorare la tua esperienza.",
+                "MESSAGE_LINE2": "L'applicazione tornerà online a breve con nuove funzionalità e miglioramenti.",
+                "MESSAGE_LINE3": "Grazie per la comprensione.",
+                "SIGNATURE": "- Team VR Compass"
+            }
+        };
+
+        function setLanguage() {
+            // Prova a ottenere la lingua dal browser, default a 'it' se non specificata o non supportata
+            let lang = (navigator.language || navigator.userLanguage || 'it').split('-')[0];
+            if (!translations[lang]) {
+                lang = 'it'; // Fallback alla lingua di default se quella del browser non è tra le traduzioni
+            }
+
+            document.getElementById('page-title').textContent = translations[lang]['PAGE_TITLE'];
+            document.getElementById('main-heading').textContent = translations[lang]['MAIN_HEADING'];
+            document.getElementById('message-line1').textContent = translations[lang]['MESSAGE_LINE1'];
+            document.getElementById('message-line2').textContent = translations[lang]['MESSAGE_LINE2'];
+            document.getElementById('message-line3').textContent = translations[lang]['MESSAGE_LINE3'];
+            document.getElementById('signature').textContent = translations[lang]['SIGNATURE'];
+        }
+        window.onload = setLanguage;
+    </script>
 </body>
 </html>

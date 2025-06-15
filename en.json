@@ -211,6 +211,7 @@
 
     "STRATEGY_SUGGESTION_LIV1_ICON": "🎯",
     "STRATEGY_SUGGESTION_LIV1_EMPTY_SLOT": "<strong>{{categoryName}} Action:</strong> To optimize your 100% band, you should add {{numRacesToAdd}} {{raceWord}}. {{examplePointsText}} {{noteHalvingText}} <em>This category offers a good balance of points/accessibility. Aim for solid results.</em>",
+    "STRATEGY_SUGGESTION_LIV1_OPTIMAL_REBALANCED": "✅ <strong>Optimal {{categoryName}} Status:</strong> Your 100% band is full. Any races approaching halving appear to be compensated by other valid ones. Monitor deadlines.",
     "STRATEGY_SUGGESTION_LIV1_WEAK_SLOT_BASE": "<strong>Level 1 Action:</strong> Improve your lowest performing result ({{points}} points).",
     "STRATEGY_SUGGESTION_LIV1_OK_SLOT_BASE": "✅ <strong>Optimal Level 1 Status:</strong> Slot covered with solid results (minimum {{points}} points).",
     "STRATEGY_SUGGESTION_LIV1_IMPROVEMENT_ACTION": "Aim for a ranking of {{targetRank}}th or better to replace the lowest performing race.",
@@ -220,6 +221,7 @@
 
     "STRATEGY_SUGGESTION_LIV2_ICON": "🎯",
     "STRATEGY_SUGGESTION_LIV2_EMPTY_SLOT": "<strong>{{categoryName}} Action:</strong> To optimize your 100% band, you should add {{numRacesToAdd}} {{raceWord}}. {{examplePointsText}} {{noteHalvingText}} <em>Useful for completing the ranking and adding \"volume\". Don't neglect it and aim for solid results.</em>",
+    "STRATEGY_SUGGESTION_LIV2_OPTIMAL_REBALANCED": "✅ <strong>Optimal {{categoryName}} Status:</strong> Your 100% band is full. Any races approaching halving appear to be compensated by other valid ones. Monitor deadlines.",
     "STRATEGY_SUGGESTION_LIV2_WEAK_SLOT_BASE": "<strong>Level 2 Action:</strong> Improve your lowest performing result ({{points}} points).",
     "STRATEGY_SUGGESTION_LIV2_OK_SLOT_BASE": "✅ <strong>Optimal Level 2 Status:</strong> Slot covered with solid results (minimum {{points}} points).",
     "STRATEGY_SUGGESTION_LIV2_IMPROVEMENT_ACTION": "Aim for a ranking of {{targetRank}}th or better to replace the lowest performing race.",
@@ -229,6 +231,7 @@
 
     "STRATEGY_SUGGESTION_LIV3_ICON": "🎯",
     "STRATEGY_SUGGESTION_LIV3_EMPTY_SLOT": "<strong>{{categoryName}} Action:</strong> To optimize your 100% band, you should add {{numRacesToAdd}} {{raceWord}}. {{examplePointsText}} {{noteHalvingText}} <em>The primary goal is to have {{totalSlots}} contributing races. Even modest scores are useful.</em>",
+    "STRATEGY_SUGGESTION_LIV3_OPTIMAL_REBALANCED": "✅ <strong>Optimal {{categoryName}} Status:</strong> Your 100% band is full. Any races approaching halving appear to be compensated by other valid ones. Monitor deadlines.",
     "STRATEGY_SUGGESTION_LIV3_WEAK_SLOT_BASE": "<strong>Level 3 Action:</strong> Improve your lowest performing result ({{points}} points).",
     "STRATEGY_SUGGESTION_LIV3_OK_SLOT_BASE": "✅ <strong>Optimal Level 3 Status:</strong> Slot covered with solid results (minimum {{points}} points).",
     "STRATEGY_SUGGESTION_LIV3_IMPROVEMENT_ACTION": "Aim for a ranking of {{targetRank}}th or better to replace the lowest performing race.",
@@ -249,12 +252,18 @@
     "STRATEGY_SUGGESTION_NOTE_HALVING_TEXT_PLURAL": "<strong class='text-info'>Note: {{numRaces}} of your 100% races will soon be halved to 50% (see \"Deadline Monitoring\").</strong>",
     "STRATEGY_SUGGESTION_REMAINING_TIME_TEXT_FORMAT": "in {{remainingDays}} {{daysText}} ({{eventDate}})",
     "STRATEGY_SUGGESTION_MONITOR_DEADLINES_TEXT": "Monitor deadlines to maintain this level.",
-    "EVENT_TYPE_HALVING": "Halving",
-    "EVENT_TYPE_EXPIRY": "Expiry",
     "STRATEGY_DEADLINE_ITEM_NOT_CONTRIBUTING_SUFFIX": "(Currently not contributing to current VSR)",
     "STRATEGY_AUTHOR_TEXT": "Strategy by Velatopiano-La Casa di Hilde",
-    "STRATEGY_DEADLINE_ITEM_URGENT": "❗URGENT: {{remainingDays}} {{daysText}} left until {{eventType}} ({{eventDate}}) for {{raceName}} ({{raceLevel}}). Impact: -{{impactPoints}} pts.",
-    "STRATEGY_DEADLINE_ITEM_NORMAL": "{{raceName}} ({{raceLevel}}) - {{eventType}} on {{eventDate}}. Impact: -{{impactPoints}} pts.",
+    "STRATEGY_DEADLINE_ITEM_URGENT_REBALANCE_POSITIVE": "❗URGENT: {{remainingDays}} {{daysText}} left until {{eventType}} ({{eventDate}}) for {{raceName}} ({{raceLevel}}). Est. net VSR change: {{netImpactPoints}} pts (thanks to the return to the ranking of '{{beneficiaryRaceName}}' - {{beneficiaryRaceLevel}}).",
+    "STRATEGY_DEADLINE_ITEM_URGENT_SIMPLE": "❗URGENT: {{remainingDays}} {{daysText}} left until {{eventType}} ({{eventDate}}) for {{raceName}} ({{raceLevel}}). Direct impact: -{{directImpactPoints}} pts. (Est. net VSR change: {{netImpactPoints}} pts)",
+    "STRATEGY_DEADLINE_ITEM_URGENT_SIMPLE_NO_NET": "❗URGENT: {{remainingDays}} {{daysText}} left until {{eventType}} ({{eventDate}}) for {{raceName}} ({{raceLevel}}). VSR Impact: -{{directImpactPoints}} pts.",    
+    "STRATEGY_DEADLINE_ITEM_URGENT_ENTERS_ON_EVENT": "❗URGENT: {{remainingDays}} {{daysText}} left until {{eventType}} ({{eventDate}}) for {{raceName}} ({{raceLevel}}). Currently not in ranking, but with this {{eventType}} it would become 50% and, if it then entered, would contribute approx. {{netImpactPoints}} pts.",
+    "STRATEGY_DEADLINE_ITEM_NORMAL_REBALANCE_POSITIVE": "{{raceName}} ({{raceLevel}}) - {{eventType}} on {{eventDate}}. Est. net VSR change: {{netImpactPoints}} pts (thanks to '{{beneficiaryRaceName}}' - {{beneficiaryRaceLevel}}).",
+    "STRATEGY_DEADLINE_ITEM_NORMAL_SIMPLE": "{{raceName}} ({{raceLevel}}) - {{eventType}} on {{eventDate}}. Direct impact: -{{directImpactPoints}} pts. (Est. net VSR change: {{netImpactPoints}} pts)",
+    "STRATEGY_DEADLINE_ITEM_NORMAL_SIMPLE_NO_NET": "{{raceName}} ({{raceLevel}}) - {{eventType}} on {{eventDate}}. VSR Impact: -{{directImpactPoints}} pts.",    
+    "STRATEGY_DEADLINE_ITEM_NORMAL_ENTERS_ON_EVENT": "{{raceName}} ({{raceLevel}}) - {{eventType}} on {{eventDate}}. Currently not in ranking, but with this {{eventType}} it would become 50% and, if it then entered, would contribute approx. {{netImpactPoints}} pts.",
+    "EVENT_TYPE_HALVING": "Halving",
+    "EVENT_TYPE_EXPIRY": "Expiry",
 
 
     "DASHBOARD_BOAT_NAME_LABEL": "Boat Name:",

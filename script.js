@@ -164,7 +164,6 @@ document.addEventListener('DOMContentLoaded', () => {
     Object.values(livelliVsrStoricoMap).forEach(level => {
         if (level.chiaveTraduzione && level.tipo !== "N/D") {
             // Questa mappa verrà popolata correttamente dopo il caricamento delle traduzioni
-            // Per ora, la lasciamo così, e la useremo quando getTranslation è disponibile
         }
     });
 
@@ -173,6 +172,21 @@ document.addEventListener('DOMContentLoaded', () => {
     let cellaCreditiTab3Ref = null;
     let cellaNettoTab3Ref = null;
     let cellaPuntiTab3Ref = null;
+
+    // --- Costanti Applicazione ---
+    const RACE_TYPES = { HC: "HC", L1: "LIV1", L2: "LIV2", L3: "LIV3", ND: "N/D" };
+    const VIEW_MODES = {
+        VALID_FOR_RANKING: 'valide',
+        ALL_HISTORY: 'tutte',
+        HISTORY_HC: 'storico_hc',
+        HISTORY_L1: 'storico_liv1',
+        HISTORY_L2: 'storico_liv2',
+        HISTORY_L3: 'storico_liv3'
+    };
+    const EVENT_TYPES = {
+        HALVING: "Dimezzamento", // Usato internamente per logica, la traduzione avviene al display
+        EXPIRY: "Scadenza"      // Usato internamente per logica
+    };
 
     // --- Funzioni Helper Globali per Calcoli VSR ---
     function calcolaPuntiPerClassifica(livelloValoreNumerico, classifica) {
@@ -237,58 +251,40 @@ document.addEventListener('DOMContentLoaded', () => {
             targetSection.style.display = 'block';
             event.currentTarget.classList.add('active');
 
-            // Chiamate per aggiornare il contenuto dinamico della sezione attivata
             try {
                 switch (targetViewId) {
                     case 'dashboard-view':
-                        aggiornaInfoClassificaView(); // Aggiorna il punteggio VSR visualizzato
+                        aggiornaInfoClassificaView();
                         aggiornaGraficoRadarSaluteSlot();
                         break;
                     case 'gestione-crediti-view':
-                        aggiornaTabella2(); // Assicura che la logica di selezione della categoria sia riflessa
-                        aggiornaTabella3(); // Ricostruisce la tabella con le opzioni select tradotte
+                        aggiornaTabella2();
+                        aggiornaTabella3();
                         break;
                     case 'classifica-vsr-view':
-                        // La logica di quale filtro è attivo e come visualizzare il form/tabella
-                        // è gestita da `impostaFiltro` e dallo stato di `vistaStoricoAttuale`.
-                        // Qui ci assicuriamo solo che la tabella e le info siano aggiornate.
                         aggiornaInfoClassificaView();
-                        aggiornaTestiPulsantiFormGara(); // Per il testo del pulsante Modifica/Aggiungi
-                        aggiornaTabellaGare(); // Questo aggiornerà la tabella in base a vistaStoricoAttuale
+                        aggiornaTestiPulsantiFormGara();
+                        aggiornaTabellaGare();
                         break;
                     case 'analisi-view':
-                        aggiornaSezioneAnalisi(); // Chiama aggiornaPanoramicaSlotVSR()
+                        aggiornaSezioneAnalisi();
                         break;
                     case 'strategia-view':
-                        aggiornaSezioneStrategia(); // Chiama aggiornaMonitoraggioScadenze e aggiornaValutazioneStrategicaSlot
+                        aggiornaSezioneStrategia();
                         aggiornaGraficoTortaStatoStrategia();
                         break;
                 }
             } catch (error) {
                 console.error(`Errore durante l'aggiornamento della sezione ${targetViewId}:`, error);
-                // Potresti voler mostrare un messaggio all'utente qui
             }
         }
     }
 
     async function init() {
-        await initI18n(); // Questo chiamerà setLanguage, che a sua volta chiamerà handleNavClick per la dashboard
-        // La chiamata a handleNavClick per la dashboard è ora gestita da setLanguage -> initI18n
-        // const initialButton = document.getElementById('btn-show-dashboard');
-        // if (initialButton) {
-        //     // Simula un click per attivare la sezione e il suo contenuto
-        //     handleNavClick({ currentTarget: initialButton });
-        // }
-
-        caricaDatiDashboard(); // Carica nome barca, ecc.
-        // Le seguenti sono già coperte da handleNavClick o sono specifiche di altre sezioni
-        // aggiornaPunteggioVsrTotale(); // Chiamato da aggiornaTabellaGare o altre azioni
-        // aggiornaInfoClassificaView(); // Chiamato da handleNavClick per dashboard e VSR
-        // aggiornaTabella2(); // Chiamato da handleNavClick per gestione-crediti
-        // aggiornaTabella3(); // Chiamato da handleNavClick per gestione-crediti
+        await initI18n();
+        caricaDatiDashboard();
         setupCalcolatriceListeners();
         if (btnMostraTutteGare && btnMostraGareValide && btnStoricoHC && btnStoricoLiv1 && btnStoricoLiv2 && btnStoricoLiv3) {
-            // Assicurati che il filtro di default sia applicato correttamente se necessario
             setupFiltriStoricoListeners();
         }
         setupClassificaListeners();
@@ -298,9 +294,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (fileImportaRegateSuggeriteInput) fileImportaRegateSuggeriteInput.addEventListener('change', preparaImportazioneRegateSuggerite);
         setupModaleAvvisoRegateListeners();
         if (btnApriModalElencoRegate) btnApriModalElencoRegate.addEventListener('click', apriEPopolaModalElencoRegate);
-        // aggiornaSezioneAnalisi(); // Chiamato da handleNavClick
-        // aggiornaSezioneStrategia(); // Chiamato da handleNavClick
-        // aggiornaGraficoRadarSaluteSlot(); // Chiamato da handleNavClick
         if (btnChiudiModalElencoRegate) btnChiudiModalElencoRegate.addEventListener('click', chiudiModalElencoRegate);
         if (modalElencoRegate) modalElencoRegate.addEventListener('click', (event) => { if (event.target === modalElencoRegate) chiudiModalElencoRegate(); });
     }
@@ -325,9 +318,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error(`Errore nel caricamento del file di traduzione per ${lang}: ${response.statusText}`);
             translations[lang] = await response.json();
             console.log(`Traduzioni per ${lang} caricate.`);
-            // Popola mappaTestoLabelGraficoATipoGara dopo aver caricato le traduzioni
             Object.values(livelliVsrStoricoMap).forEach(level => {
-                if (level.chiaveTraduzione && level.tipo !== "N/D") {
+                if (level.chiaveTraduzione && level.tipo !== RACE_TYPES.ND) {
                     mappaTestoLabelGraficoATipoGara[getTranslation(level.chiaveTraduzione)] = level.tipo;
                 }
             });
@@ -350,15 +342,10 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (element.tagName === 'INPUT' && element.placeholder) element.placeholder = translation;
             else element.innerHTML = translation;
         });
-        // Aggiorna solo testi semplici che non richiedono ricostruzione del DOM complesso
         aggiornaTestiPulsantiFormGara();
-        // Le chiamate per aggiornare tabelle, grafici, ecc., sono ora in handleNavClick
-        // e verranno eseguite DOPO che setLanguage ha riattivato la sezione corretta.
     }
 
     async function setLanguage(lang) {
-        // Memorizza l'ID del pulsante di navigazione attualmente attivo
-        // PRIMA di cambiare lingua e applicare le traduzioni.
         let currentActiveButtonId = null;
         const activeButtonBeforeChange = document.querySelector('nav > .nav-button.active');
         if (activeButtonBeforeChange) {
@@ -369,14 +356,12 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('vrCompassLanguage', lang);
         if (languageSelector) languageSelector.value = lang;
         document.documentElement.lang = lang;
-        await loadTranslations(lang); // Questo ora chiamerà applyTranslations internamente
+        await loadTranslations(lang);
 
-        // DOPO che le traduzioni sono state applicate, ripristina la vista
-        // basandoti sul pulsante che ERA attivo, con un piccolo ritardo.
         setTimeout(() => {
             const buttonToReactivate = currentActiveButtonId ? document.getElementById(currentActiveButtonId) : document.getElementById('btn-show-dashboard');
             if (buttonToReactivate) handleNavClick({ currentTarget: buttonToReactivate });
-        }, 0); // Un ritardo di 0ms è spesso sufficiente per spostare l'esecuzione alla fine della coda degli eventi.
+        }, 0);
     }
     async function initI18n() {
         const savedLang = localStorage.getItem('vrCompassLanguage') || DEFAULT_LANGUAGE;
@@ -637,7 +622,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const formInputs = [dataGaraInput, livelloGaraVsrStoricoSelect, nomeRegataInput, classificaFinaleStoricoInput];
         formInputs.forEach(input => {
             input.addEventListener('focus', () => {
-                if (vistaStoricoAttuale === 'valide' && btnMostraTutteGare) {
+                if (vistaStoricoAttuale === VIEW_MODES.VALID_FOR_RANKING && btnMostraTutteGare) {
                     if (formAggiungiGara) formAggiungiGara.style.display = 'block';
                     btnMostraTutteGare.click();
                 }
@@ -661,17 +646,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (puntiVsrCalcolatiInput) puntiVsrCalcolatiInput.value = '';
             idGaraInModifica = null;
             aggiornaTestiPulsantiFormGara();
-            if (nuovaVista === 'valide') {
+            if (nuovaVista === VIEW_MODES.VALID_FOR_RANKING) {
                 if (formAggiungiGara) formAggiungiGara.style.display = 'none';
                 if (titoloFormGara) titoloFormGara.style.display = 'none';
                 const headerAzioni = document.getElementById('header-colonna-azioni');
                 if (headerAzioni) headerAzioni.style.display = 'none';
                 if (tabellaClassificaVsr) tabellaClassificaVsr.classList.remove('vista-tutte-attiva');
             } else {
-                if (formAggiungiGara) formAggiungiGara.style.display = 'block'; // Assicurati che sia 'block' o il display corretto
+                if (formAggiungiGara) formAggiungiGara.style.display = 'block';
                 if (titoloFormGara) {
-                    titoloFormGara.style.display = 'block'; // Assicurati che sia 'block' o il display corretto
-                    // Il titolo verrà aggiornato da aggiornaTestiPulsantiFormGara
+                    titoloFormGara.style.display = 'block';
                 }
                 const headerAzioni = document.getElementById('header-colonna-azioni');
                 if (headerAzioni) headerAzioni.style.display = '';
@@ -679,12 +663,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             aggiornaTabellaGare();
         }
-        if (btnMostraGareValide) btnMostraGareValide.addEventListener('click', () => impostaFiltro('valide', btnMostraGareValide));
-        if (btnMostraTutteGare) btnMostraTutteGare.addEventListener('click', () => impostaFiltro('tutte', btnMostraTutteGare));
-        if (btnStoricoHC) btnStoricoHC.addEventListener('click', () => impostaFiltro('storico_hc', btnStoricoHC));
-        if (btnStoricoLiv1) btnStoricoLiv1.addEventListener('click', () => impostaFiltro('storico_liv1', btnStoricoLiv1));
-        if (btnStoricoLiv2) btnStoricoLiv2.addEventListener('click', () => impostaFiltro('storico_liv2', btnStoricoLiv2));
-        if (btnStoricoLiv3) btnStoricoLiv3.addEventListener('click', () => impostaFiltro('storico_liv3', btnStoricoLiv3));
+        if (btnMostraGareValide) btnMostraGareValide.addEventListener('click', () => impostaFiltro(VIEW_MODES.VALID_FOR_RANKING, btnMostraGareValide));
+        if (btnMostraTutteGare) btnMostraTutteGare.addEventListener('click', () => impostaFiltro(VIEW_MODES.ALL_HISTORY, btnMostraTutteGare));
+        if (btnStoricoHC) btnStoricoHC.addEventListener('click', () => impostaFiltro(VIEW_MODES.HISTORY_HC, btnStoricoHC));
+        if (btnStoricoLiv1) btnStoricoLiv1.addEventListener('click', () => impostaFiltro(VIEW_MODES.HISTORY_L1, btnStoricoLiv1));
+        if (btnStoricoLiv2) btnStoricoLiv2.addEventListener('click', () => impostaFiltro(VIEW_MODES.HISTORY_L2, btnStoricoLiv2));
+        if (btnStoricoLiv3) btnStoricoLiv3.addEventListener('click', () => impostaFiltro(VIEW_MODES.HISTORY_L3, btnStoricoLiv3));
     }
 
     function calcolaEPopolaPuntiVSRStorico() {
@@ -703,13 +687,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const gareSalvate = JSON.parse(localStorage.getItem('gareSalvate')) || [];
         const garaDaModificare = gareSalvate.find(g => g.id === idGara);
         if (garaDaModificare) {
-            if (vistaStoricoAttuale === 'valide') {
-                vistaStoricoAttuale = 'tutte';
+            if (vistaStoricoAttuale === VIEW_MODES.VALID_FOR_RANKING) {
+                vistaStoricoAttuale = VIEW_MODES.ALL_HISTORY;
                 const tuttiIBottoniFiltro = [btnMostraGareValide, btnMostraTutteGare, btnStoricoHC, btnStoricoLiv1, btnStoricoLiv2, btnStoricoLiv3];
                 tuttiIBottoniFiltro.forEach(btn => btn.classList.remove('active'));
                 if (btnMostraTutteGare) btnMostraTutteGare.classList.add('active');
             }
-            if (vistaStoricoAttuale !== 'valide') {
+            if (vistaStoricoAttuale !== VIEW_MODES.VALID_FOR_RANKING) {
                 if (formAggiungiGara) formAggiungiGara.style.display = 'block';
                 if (titoloFormGara) titoloFormGara.style.display = 'block';
                 const headerAzioni = document.getElementById('header-colonna-azioni');
@@ -766,32 +750,66 @@ document.addEventListener('DOMContentLoaded', () => {
         aggiornaPunteggioVsrTotale();
         formAggiungiGara.reset();
         puntiVsrCalcolatiInput.value = '';
-        aggiornaTestiPulsantiFormGara(); // Assicura che il titolo e il pulsante tornino corretti
+        aggiornaTestiPulsantiFormGara();
     }
 
-    function selezionaGareContributivePerClassifica(gareSalvateRaw) {
-        const gareRecenti = []; const gareMenoRecenti = [];
-        gareSalvateRaw.forEach(gara => {
-            const mesiTrascorsi = calcolaMesiTrascorsi(gara.data);
-            let fattoreDecadimento = 0;
-            if (mesiTrascorsi < 12) fattoreDecadimento = 1.0;
-            else if (mesiTrascorsi < 24) fattoreDecadimento = 0.5;
-            const infoLivello = livelliVsrStoricoMap[gara.livello];
-            if (fattoreDecadimento > 0 && gara.puntiVSR > 0 && infoLivello) {
-                const garaConPuntiEffettivi = { ...gara, puntiEffettivi: Math.round(gara.puntiVSR * fattoreDecadimento), fattoreDecadimento: fattoreDecadimento, mesiTrascorsi: mesiTrascorsi, tipoGara: infoLivello.tipo };
-                if (mesiTrascorsi < 12) gareRecenti.push(garaConPuntiEffettivi);
-                else gareMenoRecenti.push(garaConPuntiEffettivi);
+    function calcolaVsrTotaleDaContributive(gareContributive) {
+        let punteggioFinaleTotale = 0;
+        for (const tipoGara in gareContributive) {
+            if (gareContributive.hasOwnProperty(tipoGara)) {
+                gareContributive[tipoGara].forEach(gara => {
+                    if (gara && typeof gara.puntiEffettivi === 'number') {
+                        punteggioFinaleTotale += gara.puntiEffettivi;
+                    }
+                });
             }
+        }
+        return Math.round(punteggioFinaleTotale);
+    }
+
+    function selezionaGareContributivePerClassifica(gareSalvateRaw, simulazioni = null) {
+        const gareConDettagli = gareSalvateRaw.map(gara => {
+            let mesiTrascorsiEffettivi = calcolaMesiTrascorsi(gara.data);
+            let fattoreDecadimentoEffettivo = 0;
+
+            if (simulazioni) {
+                const simulazionePerQuestaGara = simulazioni.find(s => s.id === gara.id);
+                if (simulazionePerQuestaGara && typeof simulazionePerQuestaGara.nuovoFattoreDecadimento === 'number') {
+                    fattoreDecadimentoEffettivo = simulazionePerQuestaGara.nuovoFattoreDecadimento;
+                    if (fattoreDecadimentoEffettivo === 1.0) mesiTrascorsiEffettivi = 0;
+                    else if (fattoreDecadimentoEffettivo === 0.5) mesiTrascorsiEffettivi = 12;
+                    else mesiTrascorsiEffettivi = 24;
+                } else {
+                    if (mesiTrascorsiEffettivi < 12) fattoreDecadimentoEffettivo = 1.0;
+                    else if (mesiTrascorsiEffettivi < 24) fattoreDecadimentoEffettivo = 0.5;
+                }
+            } else {
+                if (mesiTrascorsiEffettivi < 12) fattoreDecadimentoEffettivo = 1.0;
+                else if (mesiTrascorsiEffettivi < 24) fattoreDecadimentoEffettivo = 0.5;
+            }
+
+            const infoLivello = livelliVsrStoricoMap[gara.livello];
+            if (fattoreDecadimentoEffettivo > 0 && gara.puntiVSR > 0 && infoLivello) {
+                return { ...gara, puntiEffettivi: Math.round(gara.puntiVSR * fattoreDecadimentoEffettivo), fattoreDecadimento: fattoreDecadimentoEffettivo, mesiTrascorsi: mesiTrascorsiEffettivi, tipoGara: infoLivello.tipo };
+            }
+            return null;
+        }).filter(g => g !== null);
+
+        const gareRecenti = []; const gareMenoRecenti = [];
+        gareConDettagli.forEach(gara => {
+            if (gara.mesiTrascorsi < 12) gareRecenti.push(gara);
+            else if (gara.mesiTrascorsi < 24) gareMenoRecenti.push(gara);
         });
+
         const gareRecentiRaggruppate = {}; const gareMenoRecentiRaggruppate = {};
-        Object.values(livelliVsrStoricoMap).filter(l => l.tipo !== "N/D").forEach(l => {
+        Object.values(livelliVsrStoricoMap).filter(l => l.tipo !== RACE_TYPES.ND).forEach(l => {
             gareRecentiRaggruppate[l.tipo] = [];
             gareMenoRecentiRaggruppate[l.tipo] = [];
         });
         gareRecenti.forEach(gara => { if (gareRecentiRaggruppate.hasOwnProperty(gara.tipoGara)) gareRecentiRaggruppate[gara.tipoGara].push(gara); });
         gareMenoRecenti.forEach(gara => { if (gareMenoRecentiRaggruppate.hasOwnProperty(gara.tipoGara)) gareMenoRecentiRaggruppate[gara.tipoGara].push(gara); });
         const gareContributiveFinali = {};
-        Object.values(livelliVsrStoricoMap).filter(l => l.tipo !== "N/D").forEach(l => gareContributiveFinali[l.tipo] = []);
+        Object.values(livelliVsrStoricoMap).filter(l => l.tipo !== RACE_TYPES.ND).forEach(l => gareContributiveFinali[l.tipo] = []);
         for (const tipo in LIMITI_GARE_PER_CATEGORIA) {
             if (LIMITI_GARE_PER_CATEGORIA.hasOwnProperty(tipo)) {
                 const limite = LIMITI_GARE_PER_CATEGORIA[tipo];
@@ -818,10 +836,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function aggiornaTabellaGare() {
         let gareDaMostrare = JSON.parse(localStorage.getItem('gareSalvate')) || [];
         classificaVsrtbody.innerHTML = '';
-        let livelloPrecedentePerSeparatore = null;
         const headerAzioni = document.getElementById('header-colonna-azioni');
         if (tabellaClassificaVsr) {
-            if (vistaStoricoAttuale === 'valide') {
+            if (vistaStoricoAttuale === VIEW_MODES.VALID_FOR_RANKING) {
                 tabellaClassificaVsr.classList.remove('vista-tutte-attiva');
                 if (headerAzioni) headerAzioni.style.display = 'none';
             } else {
@@ -830,16 +847,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         let contributingGareIds = new Set();
-        if (vistaStoricoAttuale === 'valide') {
+        let livelloPrecedentePerSeparatore = null;
+
+        if (vistaStoricoAttuale === VIEW_MODES.VALID_FOR_RANKING) {
             const gareContributivePerClassifica = selezionaGareContributivePerClassifica(gareDaMostrare);
             let gareFiltrateEOrdinate = [];
-            const ordineVisualizzazioneTipi = ["HC", "LIV1", "LIV2", "LIV3"];
+            const ordineVisualizzazioneTipi = [RACE_TYPES.HC, RACE_TYPES.L1, RACE_TYPES.L2, RACE_TYPES.L3];
             ordineVisualizzazioneTipi.forEach(tipoGara => {
                 if (gareContributivePerClassifica.hasOwnProperty(tipoGara)) gareFiltrateEOrdinate = gareFiltrateEOrdinate.concat(gareContributivePerClassifica[tipoGara]);
             });
             gareDaMostrare = gareFiltrateEOrdinate;
             contributingGareIds = getContributingGareIds();
-        } else if (vistaStoricoAttuale === 'tutte') {
+        } else if (vistaStoricoAttuale === VIEW_MODES.ALL_HISTORY) {
             gareDaMostrare.sort((a, b) => new Date(b.data) - new Date(a.data));
             contributingGareIds = getContributingGareIds();
         } else if (vistaStoricoAttuale.startsWith('storico_')) {
@@ -857,8 +876,8 @@ document.addEventListener('DOMContentLoaded', () => {
         gareDaMostrare.forEach(gara => {
             const row = classificaVsrtbody.insertRow();
             const infoLivelloGara = livelliVsrStoricoMap[gara.livello];
-            const tipoGaraCorrente = infoLivelloGara ? infoLivelloGara.tipo : 'N/D';
-            if (vistaStoricoAttuale === 'valide' && tipoGaraCorrente !== livelloPrecedentePerSeparatore) {
+            const tipoGaraCorrente = infoLivelloGara ? infoLivelloGara.tipo : RACE_TYPES.ND;
+            if (vistaStoricoAttuale === VIEW_MODES.VALID_FOR_RANKING && tipoGaraCorrente !== livelloPrecedentePerSeparatore) {
                 if (livelloPrecedentePerSeparatore !== null) row.classList.add('nuovo-gruppo-livello');
                 livelloPrecedentePerSeparatore = tipoGaraCorrente;
             }
@@ -871,7 +890,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 statoPunti = "50%"; classeStato = "stato-50";
                 if (mesiTrascorsi >= 21) { row.classList.add('in-preavviso'); inPreavvisoTesto = ` ${getTranslation('VSR_TABLE_STATUS_WARNING_SUFFIX')}`; }
             } else { statoPunti = "Scaduta"; classeStato = "stato-scaduta"; }
-            if (vistaStoricoAttuale !== 'valide' && classeStato !== "stato-scaduta" && contributingGareIds && !contributingGareIds.has(gara.id)) {
+            if (vistaStoricoAttuale !== VIEW_MODES.VALID_FOR_RANKING && classeStato !== "stato-scaduta" && contributingGareIds && !contributingGareIds.has(gara.id)) {
                 classeStato = "stato-scaduta"; row.classList.remove('in-preavviso'); inPreavvisoTesto = "";
             }
             row.classList.add(classeStato);
@@ -881,26 +900,26 @@ document.addEventListener('DOMContentLoaded', () => {
             row.insertCell(2).textContent = infoLivelloGara ? getTranslation(infoLivelloGara.chiaveTraduzione) : gara.livello;
             row.insertCell(3).textContent = gara.classificaFinale;
             let puntiDaMostrare; let colorePunti = '';
-            if (vistaStoricoAttuale === 'valide') {
+            if (vistaStoricoAttuale === VIEW_MODES.VALID_FOR_RANKING) {
                 puntiDaMostrare = gara.puntiEffettivi;
                 if (gara.fattoreDecadimento === 0.5 || puntiDaMostrare < 0) colorePunti = 'red';
                 else if (puntiDaMostrare >= 0) colorePunti = 'green';
             } else {
                 puntiDaMostrare = gara.puntiVSR;
-                if (classeStato !== "stato-scaduta" && puntiDaMostrare >= 0) colorePunti = 'green';
-                else if (puntiDaMostrare < 0 && classeStato !== "stato-scaduta") colorePunti = 'red';
+                if (classeStato !== "stato-scaduta" && contributingGareIds.has(gara.id)) colorePunti = 'green';
+                else if (classeStato === "stato-scaduta") colorePunti = '';
             }
             const puntiFormatted = puntiDaMostrare >= 0 ? `+${formatNumber(Math.round(puntiDaMostrare), 0)}` : formatNumber(Math.round(puntiDaMostrare), 0);
             const cellPunti = row.insertCell(4);
             cellPunti.textContent = puntiFormatted;
             if (colorePunti) cellPunti.style.color = colorePunti;
             const cellaStatoPunti = row.insertCell(5);
-            let testoStato = (vistaStoricoAttuale === 'valide' ? statoPunti : '') + inPreavvisoTesto.trim();
-            if (vistaStoricoAttuale !== 'valide' && classeStato === 'stato-scaduta' && !contributingGareIds.has(gara.id)) {
+            let testoStato = (vistaStoricoAttuale === VIEW_MODES.VALID_FOR_RANKING ? statoPunti : '') + inPreavvisoTesto.trim();
+            if (vistaStoricoAttuale !== VIEW_MODES.VALID_FOR_RANKING && classeStato === 'stato-scaduta' && !contributingGareIds.has(gara.id)) {
                  testoStato = getTranslation('VSR_TABLE_STATUS_NOT_CONTRIBUTING');
             }
             cellaStatoPunti.textContent = testoStato;
-            if (vistaStoricoAttuale !== 'valide') {
+            if (vistaStoricoAttuale !== VIEW_MODES.VALID_FOR_RANKING) {
                 const cellaAzioni = row.insertCell(6);
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = getTranslation('BTN_DELETE');
@@ -926,7 +945,7 @@ document.addEventListener('DOMContentLoaded', () => {
         aggiornaGraficoTortaStatoStrategia();
         aggiornaGraficoRadarSaluteSlot();
         aggiornaSezioneAnalisi();
-        aggiornaSezioneStrategia(); // Aggiunto per aggiornare anche i suggerimenti strategici
+        aggiornaSezioneStrategia();
     }
 
     function aggiornaPunteggioVsrTotale() {
@@ -939,17 +958,61 @@ document.addEventListener('DOMContentLoaded', () => {
             aggiornaGraficoRadarSaluteSlot();
             return;
         }
-        const gareContributive = selezionaGareContributivePerClassifica(gareSalvate);
-        let punteggioFinaleTotale = 0;
-        for (const tipoGara in gareContributive) {
-            if (gareContributive.hasOwnProperty(tipoGara)) {
-                gareContributive[tipoGara].forEach(gara => punteggioFinaleTotale += gara.puntiEffettivi);
-            }
-        }
-        const totaleArrotondato = Math.round(punteggioFinaleTotale);
+        const gareContributive = selezionaGareContributivePerClassifica(gareSalvate, null);
+        const totaleArrotondato = calcolaVsrTotaleDaContributive(gareContributive);
+
         if (classificaVsrAttualeInput) classificaVsrAttualeInput.textContent = formatNumber(totaleArrotondato, 0);
         localStorage.setItem('classificaVsrAttuale', totaleArrotondato.toString());
         aggiornaInfoClassificaView();
+    }
+
+    function simulaImpattoNettoEVariazioneClassifica(garaCheCambia, nuovoFattoreDecadimentoSimulato) {
+        const gareSalvate = JSON.parse(localStorage.getItem('gareSalvate')) || [];
+        if (gareSalvate.length === 0) return {
+            impattoNettoEffettivo: 0,
+            vsrCorrente: 0,
+            vsrDopoSimulazione: 0,
+            gareBeneficiarie: []
+        };
+
+        const gareContributiveCorrenti = selezionaGareContributivePerClassifica(gareSalvate, null);
+        const vsrCorrente = calcolaVsrTotaleDaContributive(gareContributiveCorrenti);
+        const mappaContributiveCorrenti = new Map();
+        Object.values(gareContributiveCorrenti).flat().forEach(g => {
+            if (g && g.id !== undefined) {
+                mappaContributiveCorrenti.set(g.id, { puntiEffettivi: g.puntiEffettivi, fattoreDecadimento: g.fattoreDecadimento });
+            }
+        });
+
+        const simulazioniArray = [{ id: garaCheCambia.id, nuovoFattoreDecadimento: nuovoFattoreDecadimentoSimulato }];
+        const gareContributiveSimulate = selezionaGareContributivePerClassifica(gareSalvate, simulazioniArray);
+        const vsrDopoSimulazione = calcolaVsrTotaleDaContributive(gareContributiveSimulate);
+        const mappaContributiveSimulate = new Map();
+        Object.values(gareContributiveSimulate).flat().forEach(g => {
+            if (g && g.id !== undefined) {
+                mappaContributiveSimulate.set(g.id, {
+                    puntiEffettivi: g.puntiEffettivi,
+                    fattoreDecadimento: g.fattoreDecadimento,
+                    nome: g.nome,
+                    livello: g.livello,
+                    data: g.data
+                });
+            }
+        });
+
+        const gareBeneficiarie = [];
+        for (const [idSimulata, infoSimulata] of mappaContributiveSimulate.entries()) {
+            if (idSimulata === garaCheCambia.id && nuovoFattoreDecadimentoSimulato < (mappaContributiveCorrenti.get(idSimulata)?.fattoreDecadimento || 0)) {
+                continue;
+            }
+            if (!mappaContributiveCorrenti.has(idSimulata) || (infoSimulata.puntiEffettivi > (mappaContributiveCorrenti.get(idSimulata)?.puntiEffettivi || 0))) {
+                if (infoSimulata.puntiEffettivi > 0) {
+                     gareBeneficiarie.push({ id: idSimulata, nome: infoSimulata.nome, livello: infoSimulata.livello, puntiEffettiviNuovi: infoSimulata.puntiEffettivi, fattoreDecadimentoNuovo: infoSimulata.fattoreDecadimento, azione: !mappaContributiveCorrenti.has(idSimulata) ? 'entrata' : 'migliorata' });
+                }
+            }
+        }
+
+        return { impattoNettoEffettivo: vsrDopoSimulazione - vsrCorrente, vsrCorrente, vsrDopoSimulazione, gareBeneficiarie };
     }
 
     // --- Funzioni Esportazione/Importazione Dati ---
@@ -1044,7 +1107,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modalElencoRegate.style.display = 'block';
         caricaDatiElencoRegate();
     }
-    
+
     function chiudiModalElencoRegate() { if (modalElencoRegate) modalElencoRegate.style.display = 'none'; }
 
     async function caricaDatiElencoRegate() {
@@ -1120,7 +1183,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Funzioni Sezione Analisi ---
     function aggiornaSezioneAnalisi() { aggiornaPanoramicaSlotVSR(); }
-    function getGareContributiveConDettagli() { return selezionaGareContributivePerClassifica(JSON.parse(localStorage.getItem('gareSalvate')) || []); }
+    function getGareContributiveConDettagli() { return selezionaGareContributivePerClassifica(JSON.parse(localStorage.getItem('gareSalvate')) || [], null); }
 
     function aggiornaPanoramicaSlotVSR() {
         const gareContributive = getGareContributiveConDettagli();
@@ -1133,7 +1196,7 @@ document.addEventListener('DOMContentLoaded', () => {
             elOccupati.textContent = gareCat.length;
             if (elGareSlot) elGareSlot.innerHTML = '';
             else { console.warn(`Elemento DOM elGareSlot non trovato per '${nomeCatBreve}'.`); return; }
-            
+
             let idContainerBase = tipoGara.toLowerCase();
             const slotCategoriaContainer = document.getElementById(`slot-${idContainerBase}-container`);
             if (slotCategoriaContainer) {
@@ -1154,7 +1217,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (g.fattoreDecadimento === 1.0) punti100 += g.puntiEffettivi;
                     else if (g.fattoreDecadimento === 0.5) punti50 += g.puntiEffettivi;
                 });
-                const potenzialeMaxPuntiCategoria = livelloValoreNumerico * maxSlotPerFascia * 1.5; 
+                const potenzialeMaxPuntiCategoria = livelloValoreNumerico * maxSlotPerFascia * 1.5;
                 let perc100 = 0, perc50 = 0, percEmpty = 100;
                 if (potenzialeMaxPuntiCategoria > 0) {
                     perc100 = (punti100 / potenzialeMaxPuntiCategoria) * 100;
@@ -1184,7 +1247,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (gareCat.length > 0) {
                 if (elMinPunti) elMinPunti.textContent = formatNumber(gareCat[gareCat.length - 1].puntiEffettivi, 0);
-                else if (tipoGara === "HC" && hcPuntiAttuali) hcPuntiAttuali.textContent = gareCat.length > 0 ? formatNumber(gareCat[0].puntiEffettivi, 0) : getTranslation('TEXT_NA_DETAILED');
+                else if (tipoGara === RACE_TYPES.HC && hcPuntiAttuali) hcPuntiAttuali.textContent = gareCat.length > 0 ? formatNumber(gareCat[0].puntiEffettivi, 0) : getTranslation('TEXT_NA_DETAILED');
                 gareCat.forEach(g => {
                     if (elGareSlot) {
                         const p = document.createElement('p'); p.classList.add('gara-dettaglio');
@@ -1195,35 +1258,60 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             } else {
                 if (elMinPunti) elMinPunti.textContent = getTranslation('TEXT_NA_DETAILED');
-                else if (tipoGara === "HC" && hcPuntiAttuali) hcPuntiAttuali.textContent = getTranslation('TEXT_NA_DETAILED');
+                else if (tipoGara === RACE_TYPES.HC && hcPuntiAttuali) hcPuntiAttuali.textContent = getTranslation('TEXT_NA_DETAILED');
                 if (elGareSlot) elGareSlot.innerHTML = `<p class="no-data">${getTranslation('TEXT_NO_VALID_RACES_IN_SLOT')}</p>`;
             }
         }
-        popolaCategoriaSlot("HC", gareContributive["HC"] || [], LIMITI_GARE_PER_CATEGORIA["HC"], hcOccupati, null, hcGareSlot, hcProgressBar, getTranslation(livelliVsrStoricoMap["HC"].chiaveTraduzione), hcPuntiCategoria, hcStackedPointsBarContainer, hcPointsBar100, hcPointsBar50, hcPointsBarEmpty);
-        popolaCategoriaSlot("LIV1", gareContributive["LIV1"] || [], LIMITI_GARE_PER_CATEGORIA["LIV1"], liv1Occupati, liv1MinPunti, liv1GareSlot, liv1ProgressBar, getTranslation(livelliVsrStoricoMap["LIV1"].chiaveTraduzione), liv1PuntiCategoria, liv1StackedPointsBarContainer, liv1PointsBar100, liv1PointsBar50, liv1PointsBarEmpty);
-        popolaCategoriaSlot("LIV2", gareContributive["LIV2"] || [], LIMITI_GARE_PER_CATEGORIA["LIV2"], liv2Occupati, liv2MinPunti, liv2GareSlot, liv2ProgressBar, getTranslation(livelliVsrStoricoMap["LIV2"].chiaveTraduzione), liv2PuntiCategoria, liv2StackedPointsBarContainer, liv2PointsBar100, liv2PointsBar50, liv2PointsBarEmpty);
-        popolaCategoriaSlot("LIV3", gareContributive["LIV3"] || [], LIMITI_GARE_PER_CATEGORIA["LIV3"], liv3Occupati, liv3MinPunti, liv3GareSlot, liv3ProgressBar, getTranslation(livelliVsrStoricoMap["LIV3"].chiaveTraduzione), liv3PuntiCategoria, liv3StackedPointsBarContainer, liv3PointsBar100, liv3PointsBar50, liv3PointsBarEmpty);
+        popolaCategoriaSlot(RACE_TYPES.HC, gareContributive[RACE_TYPES.HC] || [], LIMITI_GARE_PER_CATEGORIA[RACE_TYPES.HC], hcOccupati, null, hcGareSlot, hcProgressBar, getTranslation(livelliVsrStoricoMap[RACE_TYPES.HC].chiaveTraduzione), hcPuntiCategoria, hcStackedPointsBarContainer, hcPointsBar100, hcPointsBar50, hcPointsBarEmpty);
+        popolaCategoriaSlot(RACE_TYPES.L1, gareContributive[RACE_TYPES.L1] || [], LIMITI_GARE_PER_CATEGORIA[RACE_TYPES.L1], liv1Occupati, liv1MinPunti, liv1GareSlot, liv1ProgressBar, getTranslation(livelliVsrStoricoMap[RACE_TYPES.L1].chiaveTraduzione), liv1PuntiCategoria, liv1StackedPointsBarContainer, liv1PointsBar100, liv1PointsBar50, liv1PointsBarEmpty);
+        popolaCategoriaSlot(RACE_TYPES.L2, gareContributive[RACE_TYPES.L2] || [], LIMITI_GARE_PER_CATEGORIA[RACE_TYPES.L2], liv2Occupati, liv2MinPunti, liv2GareSlot, liv2ProgressBar, getTranslation(livelliVsrStoricoMap[RACE_TYPES.L2].chiaveTraduzione), liv2PuntiCategoria, liv2StackedPointsBarContainer, liv2PointsBar100, liv2PointsBar50, liv2PointsBarEmpty);
+        popolaCategoriaSlot(RACE_TYPES.L3, gareContributive[RACE_TYPES.L3] || [], LIMITI_GARE_PER_CATEGORIA[RACE_TYPES.L3], liv3Occupati, liv3MinPunti, liv3GareSlot, liv3ProgressBar, getTranslation(livelliVsrStoricoMap[RACE_TYPES.L3].chiaveTraduzione), liv3PuntiCategoria, liv3StackedPointsBarContainer, liv3PointsBar100, liv3PointsBar50, liv3PointsBarEmpty);
     }
 
     function aggiornaMonitoraggioScadenze() {
         const gareSalvate = JSON.parse(localStorage.getItem('gareSalvate')) || [];
         const gareInDimezzamento = []; const gareInScadenza = [];
-        const contributingIds = getContributingGareIds(); // Ottieni gli ID delle gare che contribuiscono
+        const contributingIds = getContributingGareIds();
         gareSalvate.forEach(gara => {
             const mesiTrascorsi = calcolaMesiTrascorsi(gara.data);
             const dataGaraDate = new Date(gara.data);
-            let isUrgente = false; let tipoEventoPerLista = null;
+            let isUrgente = false;
+            let impattoDirettoGara = 0;
+            let simulazioneRisultato = null;
+
             if (mesiTrascorsi >= 9 && mesiTrascorsi < 12) {
                 const dataDimezzamento = new Date(dataGaraDate); dataDimezzamento.setMonth(dataGaraDate.getMonth() + 12);
-                const impatto = Math.round(gara.puntiVSR * 0.5); isUrgente = (mesiTrascorsi === 11); tipoEventoPerLista = "Dimezzamento";
+                impattoDirettoGara = Math.round(gara.puntiVSR * 0.5);
+                isUrgente = (mesiTrascorsi === 11);
                 const isContributing = contributingIds.has(gara.id);
-                gareInDimezzamento.push({ ...gara, dataEvento: dataDimezzamento.toLocaleDateString(currentLanguage === 'it' ? 'it-IT' : 'en-GB'), impattoPunti: impatto, isUrgente, tipoEvento: tipoEventoPerLista, isContributing });
+                simulazioneRisultato = simulaImpattoNettoEVariazioneClassifica(gara, 0.5);
+                gareInDimezzamento.push({
+                    ...gara,
+                    dataEvento: dataDimezzamento.toLocaleDateString(currentLanguage === 'it' ? 'it-IT' : 'en-GB'),
+                    impattoPunti: impattoDirettoGara,
+                    isUrgente,
+                    tipoEvento: EVENT_TYPES.HALVING,
+                    isContributing,
+                    impattoNettoStimato: simulazioneRisultato.impattoNettoEffettivo,
+                    gareBeneficiarie: simulazioneRisultato.gareBeneficiarie
+                });
             }
             if (mesiTrascorsi >= 21 && mesiTrascorsi < 24) {
                 const dataScadenza = new Date(dataGaraDate); dataScadenza.setMonth(dataGaraDate.getMonth() + 24);
-                const impatto = Math.round(gara.puntiVSR * 0.5); isUrgente = (mesiTrascorsi === 23); tipoEventoPerLista = "Scadenza";
+                impattoDirettoGara = Math.round(gara.puntiVSR * 0.5);
+                isUrgente = (mesiTrascorsi === 23);
                 const isContributing = contributingIds.has(gara.id);
-                gareInScadenza.push({ ...gara, dataEvento: dataScadenza.toLocaleDateString(currentLanguage === 'it' ? 'it-IT' : 'en-GB'), impattoPunti: impatto, isUrgente, tipoEvento: tipoEventoPerLista, isContributing });
+                simulazioneRisultato = simulaImpattoNettoEVariazioneClassifica(gara, 0);
+                gareInScadenza.push({
+                    ...gara,
+                    dataEvento: dataScadenza.toLocaleDateString(currentLanguage === 'it' ? 'it-IT' : 'en-GB'),
+                    impattoPunti: impattoDirettoGara,
+                    isUrgente,
+                    tipoEvento: EVENT_TYPES.EXPIRY,
+                    isContributing,
+                    impattoNettoStimato: simulazioneRisultato.impattoNettoEffettivo,
+                    gareBeneficiarie: simulazioneRisultato.gareBeneficiarie
+                });
             }
         });
         function popolaListaScadenze(listaElement, gare, tipoEvento) {
@@ -1233,41 +1321,87 @@ document.addEventListener('DOMContentLoaded', () => {
                 gare.forEach(g => {
                     const li = document.createElement('li');
                     const livelloTesto = getTranslation(livelliVsrStoricoMap[g.livello]?.chiaveTraduzione || g.livello);
+
+                    const impattoDirettoGaraVal = g.impattoPunti;
+                    const impattoNettoStimatoVal = g.impattoNettoStimato;
+                    const gareBeneficiarieSim = g.gareBeneficiarie || [];
+
                     let params = {
-                        raceName: g.nome, // Questo è il nome della gara, non il tipo di evento
+                        raceName: g.nome,
                         raceLevel: livelloTesto,
-                        eventType: g.tipoEvento.toLowerCase(), // Questo rimane 'dimezzamento' o 'scadenza' per la logica interna
+                        eventType: getTranslation(g.tipoEvento === EVENT_TYPES.HALVING ? 'EVENT_TYPE_HALVING' : 'EVENT_TYPE_EXPIRY').toLowerCase(),
                         eventDate: g.dataEvento,
-                        impactPoints: formatNumber(g.impattoPunti, 0)
+                        directImpactPoints: formatNumber(Math.abs(impattoDirettoGaraVal), 0),
+                        netImpactPoints: formatNumber(impattoNettoStimatoVal, 0)
                     };
+
+                    let testoAvvisoKey = "";
+                    let mostraInfoRibilanciamento = false;
+
+                    if (impattoNettoStimatoVal > (-Math.abs(impattoDirettoGaraVal)) && gareBeneficiarieSim.length > 0) {
+                        const altraGaraBeneficiaria = gareBeneficiarieSim.find(b => b.id !== g.id);
+                        if (altraGaraBeneficiaria) {
+                            mostraInfoRibilanciamento = true;
+                            params.beneficiaryRaceName = altraGaraBeneficiaria.nome;
+                            params.beneficiaryRaceLevel = getTranslation(livelliVsrStoricoMap[altraGaraBeneficiaria.livello]?.chiaveTraduzione || altraGaraBeneficiaria.livello);
+                        }
+                     }
+
+                    let laGaraStessaEntraDaNonContribuente = false;
+                    if (!g.isContributing && impattoNettoStimatoVal > 0) {
+                        laGaraStessaEntraDaNonContribuente = true;
+                        params.netImpactPoints = formatNumber(Math.round(g.puntiVSR * (g.tipoEvento === EVENT_TYPES.HALVING ? 0.5 : 0)), 0);
+                        if (g.tipoEvento === EVENT_TYPES.EXPIRY) laGaraStessaEntraDaNonContribuente = false;
+                    }
+
+                    const differenzaImpattoTrascurabile = Math.abs(impattoNettoStimatoVal - (-Math.abs(impattoDirettoGaraVal))) < 10;
+
                     if (g.isUrgente) {
                         li.classList.add('scadenza-urgente');
                         const [day, month, year] = g.dataEvento.split('/');
                         const dataEventoDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
                         params.remainingDays = calcolaGiorniTraDate(new Date(), dataEventoDate);
                         params.daysText = Math.abs(params.remainingDays) === 1 ? getTranslation('STRATEGY_SUGGESTION_DAY_SINGLE') : getTranslation('STRATEGY_SUGGESTION_DAYS_PLURAL');
-                        // params.pluralSuffix = "";  // Rimosso, non più necessario per questa logica
-
-                        let verboMancareIt = "";
                         if (currentLanguage === 'it') {
-                            verboMancareIt = (Math.abs(params.remainingDays) === 1) ? "Manca" : "Mancano";
+                            params.verboMancareIt = (Math.abs(params.remainingDays) === 1) ? "Manca" : "Mancano";
                         }
-                        const translatedEventType = g.tipoEvento === "Dimezzamento" ? getTranslation('EVENT_TYPE_HALVING') : getTranslation('EVENT_TYPE_EXPIRY');
-                        li.innerHTML = getTranslation('STRATEGY_DEADLINE_ITEM_URGENT', { ...params, eventType: translatedEventType.toLowerCase(), verboMancareIt: verboMancareIt });
+
+                        if (!g.isContributing && g.tipoEvento === EVENT_TYPES.HALVING) {
+                            testoAvvisoKey = 'STRATEGY_DEADLINE_ITEM_URGENT_ENTERS_ON_EVENT';
+                        } else if (mostraInfoRibilanciamento) {
+                            testoAvvisoKey = 'STRATEGY_DEADLINE_ITEM_URGENT_REBALANCE_POSITIVE';
+                        } else if (laGaraStessaEntraDaNonContribuente) {
+                            testoAvvisoKey = 'STRATEGY_DEADLINE_ITEM_URGENT_ENTERS_ON_EVENT';
+                        } else if (differenzaImpattoTrascurabile) {
+                            testoAvvisoKey = 'STRATEGY_DEADLINE_ITEM_URGENT_SIMPLE_NO_NET';
+                        } else {
+                            testoAvvisoKey = 'STRATEGY_DEADLINE_ITEM_URGENT_SIMPLE';
+                        }
                     } else {
                         li.classList.add('scadenza-in-preavviso-non-urgente');
-                        const translatedEventType = g.tipoEvento === "Dimezzamento" ? getTranslation('EVENT_TYPE_HALVING') : getTranslation('EVENT_TYPE_EXPIRY');
-                        li.innerHTML = getTranslation('STRATEGY_DEADLINE_ITEM_NORMAL', { ...params, eventType: translatedEventType.toLowerCase() });
+                        if (!g.isContributing && g.tipoEvento === EVENT_TYPES.HALVING) {
+                            testoAvvisoKey = 'STRATEGY_DEADLINE_ITEM_NORMAL_ENTERS_ON_EVENT';
+                        } else if (mostraInfoRibilanciamento) {
+                            testoAvvisoKey = 'STRATEGY_DEADLINE_ITEM_NORMAL_REBALANCE_POSITIVE';
+                        } else if (laGaraStessaEntraDaNonContribuente) {
+                            testoAvvisoKey = 'STRATEGY_DEADLINE_ITEM_NORMAL_ENTERS_ON_EVENT';
+                        } else if (differenzaImpattoTrascurabile) {
+                            testoAvvisoKey = 'STRATEGY_DEADLINE_ITEM_NORMAL_SIMPLE_NO_NET';
+                        } else {
+                            testoAvvisoKey = 'STRATEGY_DEADLINE_ITEM_NORMAL_SIMPLE';
+                        }
                     }
-                    if (!g.isContributing) {
+                    li.innerHTML = getTranslation(testoAvvisoKey, params);
+
+                    if (!g.isContributing && testoAvvisoKey.indexOf("_ENTERS_ON_EVENT") === -1) {
                         li.innerHTML += ` <span class="non-contributing-suffix">${getTranslation('STRATEGY_DEADLINE_ITEM_NOT_CONTRIBUTING_SUFFIX')}</span>`;
                     }
                     listaElement.appendChild(li);
                 });
-            } else listaElement.innerHTML = `<li class="no-data">${getTranslation('TEXT_NO_IMMINENT_EVENT_RACES', {eventType: tipoEvento.toLowerCase()})}</li>`;
+            } else listaElement.innerHTML = `<li class="no-data">${getTranslation('TEXT_NO_IMMINENT_EVENT_RACES', {eventType: getTranslation(tipoEvento === EVENT_TYPES.HALVING ? 'EVENT_TYPE_HALVING' : 'EVENT_TYPE_EXPIRY').toLowerCase()})}</li>`;
         }
-        popolaListaScadenze(listaGareDimezzamento, gareInDimezzamento, "Dimezzamento");
-        popolaListaScadenze(listaGareScadenza, gareInScadenza, "Scadenza");
+        popolaListaScadenze(listaGareDimezzamento, gareInDimezzamento, EVENT_TYPES.HALVING);
+        popolaListaScadenze(listaGareScadenza, gareInScadenza, EVENT_TYPES.EXPIRY);
     }
 
     // --- Funzioni Sezione Strategia ---
@@ -1284,13 +1418,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const dataGaraDate = new Date(gara.data);
             let tipoEvento = null; let dataEventoObj = null; let isUrgente = false; let impattoPuntiStimato = 0;
             if (mesiTrascorsi >= 9 && mesiTrascorsi < 12) {
-                tipoEvento = "Dimezzamento"; dataEventoObj = new Date(dataGaraDate); dataEventoObj.setMonth(dataGaraDate.getMonth() + 12);
+                tipoEvento = EVENT_TYPES.HALVING; dataEventoObj = new Date(dataGaraDate); dataEventoObj.setMonth(dataGaraDate.getMonth() + 12);
                 isUrgente = (mesiTrascorsi === 11); impattoPuntiStimato = Math.round(gara.puntiVSR * 0.5);
             } else if (mesiTrascorsi >= 21 && mesiTrascorsi < 24) {
-                tipoEvento = "Scadenza"; dataEventoObj = new Date(dataGaraDate); dataEventoObj.setMonth(dataGaraDate.getMonth() + 24);
+                tipoEvento = EVENT_TYPES.EXPIRY; dataEventoObj = new Date(dataGaraDate); dataEventoObj.setMonth(dataGaraDate.getMonth() + 24);
                 isUrgente = (mesiTrascorsi === 23); impattoPuntiStimato = Math.round(gara.puntiVSR * 0.5);
             }
-            if (tipoEvento && dataEventoObj) scadenze.push({ ...gara, tipoEvento, dataEvento: dataEventoObj.toLocaleDateString(currentLanguage === 'it' ? 'it-IT' : 'en-GB'), isUrgente, impattoPunti: impattoPuntiStimato });
+            if (tipoEvento && dataEventoObj) scadenze.push({ ...gara, tipoEvento: tipoEvento, dataEvento: dataEventoObj.toLocaleDateString(currentLanguage === 'it' ? 'it-IT' : 'en-GB'), isUrgente, impattoPunti: impattoPuntiStimato });
         });
         return scadenze;
     }
@@ -1302,7 +1436,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const suggerimentiStrategici = [];
             const gareConScadenze = getGareConScadenzeImminenti();
             const idsGareConScadenze = new Set(gareConScadenze.map(g => g.id));
-            const ordineTipiPerStrategia = ["HC", "LIV1", "LIV2", "LIV3"];
+            const ordineTipiPerStrategia = [RACE_TYPES.HC, RACE_TYPES.L1, RACE_TYPES.L2, RACE_TYPES.L3];
 
             ordineTipiPerStrategia.forEach(tipoGara => {
                 const gareCat = gareContributive[tipoGara] || [];
@@ -1314,30 +1448,56 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!livelloValoreNumerico) return;
 
                 let icona = getTranslation(`STRATEGY_SUGGESTION_${tipoGara}_ICON`);
-                icona = icona ? `<span class="warning-triangle">${icona}</span>` : `<span class="warning-triangle">⚠️</span>`;
                 let suggerimentoTestoCompleto = "";
                 const limitePerFascia = LIMITI_GARE_PER_CATEGORIA[tipoGara];
+
                 const gare100Attuali = gareCat.filter(g => g.fattoreDecadimento === 1.0);
                 const numGare100Attuali = gare100Attuali.length;
-                const gare100InDimezzamentoImminente = gare100Attuali.filter(g => g.mesiTrascorsi >= 9 && g.mesiTrascorsi < 12).length;
+                const gare100InDimezzamentoImminenteObj = gare100Attuali.filter(g => g.mesiTrascorsi >= 9 && g.mesiTrascorsi < 12);
+                const numGare100InDimezzamentoImminente = gare100InDimezzamentoImminenteObj.length;
                 const slotAttualmenteVuoti100 = limitePerFascia - numGare100Attuali;
-                const numGareNecessariePerFascia100 = slotAttualmenteVuoti100 + gare100InDimezzamentoImminente;
+
+                let numSlotVuoti100ConsideratiPerSuggerimento = slotAttualmenteVuoti100;
+                let gare100ConsideratePerAnalisiDebolezza = [...gare100Attuali];
+                let dimezzamentiSonoStatiCompensati = false;
+
+                if (numGare100InDimezzamentoImminente > 0) {
+                    const simulazioni = gare100InDimezzamentoImminenteObj
+                        .map(g => ({ id: g.id, nuovoFattoreDecadimento: 0.5 }));
+
+                    const gareSalvate = JSON.parse(localStorage.getItem('gareSalvate')) || [];
+                    const gareContributiveDopoSimulazioneObj = selezionaGareContributivePerClassifica(gareSalvate, simulazioni);
+
+                    const gare100PostSimulazionePerQuestoTipo = (gareContributiveDopoSimulazioneObj[tipoGara] || [])
+                                                    .filter(g => g.fattoreDecadimento === 1.0)
+                                                    .sort((a,b) => b.puntiEffettivi - a.puntiEffettivi)
+                                                    .slice(0, limitePerFascia);
+
+                    numSlotVuoti100ConsideratiPerSuggerimento = limitePerFascia - gare100PostSimulazionePerQuestoTipo.length;
+                    gare100ConsideratePerAnalisiDebolezza = gare100PostSimulazionePerQuestoTipo;
+
+                    if (slotAttualmenteVuoti100 <= 0 && numSlotVuoti100ConsideratiPerSuggerimento <= 0) {
+                        dimezzamentiSonoStatiCompensati = true;
+                    }
+                }
 
                 let params = { categoryName: nomeCategoriaTradotto, totalSlots: limitePerFascia * 2 };
 
-                if (numGareNecessariePerFascia100 > 0) {
+                if (dimezzamentiSonoStatiCompensati && slotAttualmenteVuoti100 <= 0) {
+                    suggerimentoTestoCompleto = `${icona} ${getTranslation(`STRATEGY_SUGGESTION_${tipoGara}_OPTIMAL_REBALANCED`, params)}`;
+                } else if (numSlotVuoti100ConsideratiPerSuggerimento > 0) {
                     let puntiEsempio = calcolaPuntiPerClassifica(livelloValoreNumerico, 50);
-                    params.numRacesToAdd = numGareNecessariePerFascia100;
-                    params.raceWord = numGareNecessariePerFascia100 > 1 ? getTranslation('STRATEGY_SUGGESTION_RACES_PLURAL') : getTranslation('STRATEGY_SUGGESTION_RACE_SINGLE');
+                    params.numRacesToAdd = numSlotVuoti100ConsideratiPerSuggerimento;
+                    params.raceWord = numSlotVuoti100ConsideratiPerSuggerimento > 1 ? getTranslation('STRATEGY_SUGGESTION_RACES_PLURAL') : getTranslation('STRATEGY_SUGGESTION_RACE_SINGLE');
                     params.examplePointsText = puntiEsempio ? getTranslation('STRATEGY_SUGGESTION_EXAMPLE_POINTS_TEXT', { targetRank: 50, points: formatNumber(puntiEsempio,0) }) : "";
                     params.noteHalvingText = "";
-                    if (gare100InDimezzamentoImminente > 0) {
-                        const keyHalving = gare100InDimezzamentoImminente > 1 ? 'STRATEGY_SUGGESTION_NOTE_HALVING_TEXT_PLURAL' : 'STRATEGY_SUGGESTION_NOTE_HALVING_TEXT_SINGLE';
-                        params.noteHalvingText = getTranslation(keyHalving, { numRaces: gare100InDimezzamentoImminente });
+                    if (numGare100InDimezzamentoImminente > 0 && !dimezzamentiSonoStatiCompensati) {
+                         const keyHalving = numGare100InDimezzamentoImminente > 1 ? 'STRATEGY_SUGGESTION_NOTE_HALVING_TEXT_PLURAL' : 'STRATEGY_SUGGESTION_NOTE_HALVING_TEXT_SINGLE';
+                        params.noteHalvingText = getTranslation(keyHalving, { numRaces: numGare100InDimezzamentoImminente });
                     }
                     suggerimentoTestoCompleto = `${icona} ${getTranslation(`STRATEGY_SUGGESTION_${tipoGara}_EMPTY_SLOT`, params)}`;
-                } else if (gare100Attuali.length > 0) {
-                    const gare100Ordinate = [...gare100Attuali].sort((a, b) => a.puntiEffettivi - b.puntiEffettivi);
+                } else if (gare100ConsideratePerAnalisiDebolezza.length > 0) {
+                    const gare100Ordinate = [...gare100ConsideratePerAnalisiDebolezza].sort((a, b) => a.puntiEffettivi - b.puntiEffettivi);
                     const garaMenoPerformante100 = gare100Ordinate[0];
                     const puntiMenoPerformanti100 = garaMenoPerformante100.puntiEffettivi;
                     params.points = formatNumber(puntiMenoPerformanti100, 0);
@@ -1351,7 +1511,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else {
                         suggerimentoTestoCompleto = `${icona} ${getTranslation(`STRATEGY_SUGGESTION_${tipoGara}_OK_SLOT_BASE`, params)}`;
                         const garaMenoPerformanteComplessiva = gareCat.length > 0 ? gareCat[gareCat.length - 1] : null;
-                        if (tipoGara !== "HC" && garaMenoPerformanteComplessiva && !idsGareConScadenze.has(garaMenoPerformanteComplessiva.id)) {
+                        if (tipoGara !== RACE_TYPES.HC && garaMenoPerformanteComplessiva && !idsGareConScadenze.has(garaMenoPerformanteComplessiva.id)) {
                             suggerimentoTestoCompleto += ` ${getTranslation('STRATEGY_SUGGESTION_MONITOR_DEADLINES_TEXT')}`;
                         }
                     }
@@ -1367,23 +1527,21 @@ document.addEventListener('DOMContentLoaded', () => {
                             const dataEventoDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
                             let warningParams = {
                                 eventType: tipoEvento.toLowerCase(), eventDate: dataEvento, impactPoints: formatNumber(impattoPunti, 0),
-                                remainingDays: calcolaGiorniTraDate(new Date(), dataEventoDate), // Calcola una volta
-                                daysText: "", // Verrà impostato dopo
-                                pluralDays: "" // Per l'inglese, 'pluralDays' è per 'mancano/manca'
+                                remainingDays: calcolaGiorniTraDate(new Date(), dataEventoDate),
+                                daysText: "",
                             };
-                            // warningParams.pluralDays rimosso perché la logica del verbo è gestita diversamente
                             warningParams.daysText = Math.abs(warningParams.remainingDays) === 1 ? getTranslation('STRATEGY_SUGGESTION_DAY_SINGLE') : getTranslation('STRATEGY_SUGGESTION_DAYS_PLURAL');
-                            
+
                             let verboMancareItWarning = "";
                             if (currentLanguage === 'it') {
                                 verboMancareItWarning = (Math.abs(warningParams.remainingDays) === 1) ? "Manca" : "Mancano";
                             }
 
                             let warningKey = "";
-                            const translatedEventTypeForWarning = tipoEvento === "Dimezzamento" ? getTranslation('EVENT_TYPE_HALVING') : getTranslation('EVENT_TYPE_EXPIRY');
-                            if (isUrgente) warningKey = tipoEvento === "Dimezzamento" ? `STRATEGY_SUGGESTION_${tipoGara}_URGENT_HALVING_WARNING` : `STRATEGY_SUGGESTION_${tipoGara}_URGENT_EXPIRY_WARNING`;
+                            const translatedEventTypeForWarning = tipoEvento === EVENT_TYPES.HALVING ? getTranslation('EVENT_TYPE_HALVING') : getTranslation('EVENT_TYPE_EXPIRY');
+                            if (isUrgente) warningKey = tipoEvento === EVENT_TYPES.HALVING ? `STRATEGY_SUGGESTION_${tipoGara}_URGENT_HALVING_WARNING` : `STRATEGY_SUGGESTION_${tipoGara}_URGENT_EXPIRY_WARNING`;
                             else warningKey = `STRATEGY_SUGGESTION_${tipoGara}_PRE_WARNING`;
-                            
+
                             if (warningKey) suggerimentoTestoCompleto += ` ${getTranslation(warningKey, {...warningParams, eventType: translatedEventTypeForWarning.toLowerCase(), verboMancareIt: verboMancareItWarning })}`;
                         }
                     }
@@ -1395,7 +1553,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 let testoScadenzeImportanti = getTranslation('STRATEGY_SUGGESTION_IMPORTANT_DEADLINES_BASE');
                 const gareHCoL1InScadenza = gareConScadenze.filter(g => {
                     const tipoGara = livelliVsrStoricoMap[g.livello]?.tipo;
-                    return tipoGara === "HC" || tipoGara === "LIV1";
+                    return tipoGara === RACE_TYPES.HC || tipoGara === RACE_TYPES.L1;
                 });
                 if (gareHCoL1InScadenza.length > 0) {
                     gareHCoL1InScadenza.sort((a, b) => new Date(a.dataEvento.split('/').reverse().join('-')) - new Date(b.dataEvento.split('/').reverse().join('-')));
@@ -1405,7 +1563,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const giorniRimanenti = calcolaGiorniTraDate(new Date(), dataEventoDate);
                     const daysText = Math.abs(giorniRimanenti) === 1 ? getTranslation('STRATEGY_SUGGESTION_DAY_SINGLE') : getTranslation('STRATEGY_SUGGESTION_DAYS_PLURAL');
                     const remainingTimeText = getTranslation('STRATEGY_SUGGESTION_REMAINING_TIME_TEXT_FORMAT', { remainingDays: giorniRimanenti, daysText: daysText, eventDate: scadenzaPiuImminente.dataEvento });
-                    const translatedDeadlineEventType = scadenzaPiuImminente.tipoEvento === "Dimezzamento" ? getTranslation('EVENT_TYPE_HALVING') : getTranslation('EVENT_TYPE_EXPIRY');
+                    const translatedDeadlineEventType = scadenzaPiuImminente.tipoEvento === EVENT_TYPES.HALVING ? getTranslation('EVENT_TYPE_HALVING') : getTranslation('EVENT_TYPE_EXPIRY');
                     testoScadenzeImportanti = getTranslation('STRATEGY_SUGGESTION_IMPORTANT_DEADLINES_PRIORITY', { eventType: translatedDeadlineEventType.toLowerCase(), remainingTimeText: remainingTimeText });
                 }
                 suggerimentiStrategici.unshift(`<span class="warning-triangle calendar-icon">🗓️</span> ${testoScadenzeImportanti}`);
@@ -1428,26 +1586,26 @@ document.addEventListener('DOMContentLoaded', () => {
             const saluteCategoriePerTooltip = {};
             const gareContributive = getGareContributiveConDettagli();
             const puntiAttualiPerCategoriaGrafico = {};
-            const categorieOrdineTooltip = ["HC", "LIV1", "LIV2", "LIV3"];
+            const categorieOrdineTooltip = [RACE_TYPES.HC, RACE_TYPES.L1, RACE_TYPES.L2, RACE_TYPES.L3];
             categorieOrdineTooltip.forEach(tipoGara => {
                 const gareCat = gareContributive[tipoGara] || [];
                 puntiAttualiPerCategoriaGrafico[tipoGara] = gareCat.reduce((sum, g) => sum + g.puntiEffettivi, 0);
             });
 
             potenzialePuntiPerGraficoTorta = {
-                "HC": (livelliVsrStoricoMap["HC"]?.valoreNumerico || 0) * LIMITI_GARE_PER_CATEGORIA["HC"] * 1.5,
-                "LIV1": (livelliVsrStoricoMap["LIV1"]?.valoreNumerico || 0) * LIMITI_GARE_PER_CATEGORIA["LIV1"] * 1.5,
-                "LIV2": (livelliVsrStoricoMap["LIV2"]?.valoreNumerico || 0) * LIMITI_GARE_PER_CATEGORIA["LIV2"] * 1.5,
-                "LIV3": (livelliVsrStoricoMap["LIV3"]?.valoreNumerico || 0) * LIMITI_GARE_PER_CATEGORIA["LIV3"] * 1.5
+                [RACE_TYPES.HC]: (livelliVsrStoricoMap[RACE_TYPES.HC]?.valoreNumerico || 0) * LIMITI_GARE_PER_CATEGORIA[RACE_TYPES.HC] * 1.5,
+                [RACE_TYPES.L1]: (livelliVsrStoricoMap[RACE_TYPES.L1]?.valoreNumerico || 0) * LIMITI_GARE_PER_CATEGORIA[RACE_TYPES.L1] * 1.5,
+                [RACE_TYPES.L2]: (livelliVsrStoricoMap[RACE_TYPES.L2]?.valoreNumerico || 0) * LIMITI_GARE_PER_CATEGORIA[RACE_TYPES.L2] * 1.5,
+                [RACE_TYPES.L3]: (livelliVsrStoricoMap[RACE_TYPES.L3]?.valoreNumerico || 0) * LIMITI_GARE_PER_CATEGORIA[RACE_TYPES.L3] * 1.5
             };
             totalePotenzialePuntiPerGraficoTorta = Object.values(potenzialePuntiPerGraficoTorta).reduce((sum, val) => sum + val, 0) || 1;
 
             const labels = []; const dataValues = []; const backgroundColors = [];
             const colori = {
-                "HC":   { good: 'rgba(220, 53, 69, 0.8)', needsImprovement: 'rgba(220, 53, 69, 0.3)' },
-                "LIV1": { good: 'rgba(25, 135, 84, 0.8)', needsImprovement: 'rgba(25, 135, 84, 0.3)' },
-                "LIV2": { good: 'rgba(255, 193, 7, 0.8)', needsImprovement: 'rgba(255, 193, 7, 0.3)' },
-                "LIV3": { good: 'rgba(13, 110, 253, 0.8)', needsImprovement: 'rgba(13, 110, 253, 0.3)' }
+                [RACE_TYPES.HC]:   { good: 'rgba(220, 53, 69, 0.8)', needsImprovement: 'rgba(220, 53, 69, 0.3)' },
+                [RACE_TYPES.L1]: { good: 'rgba(25, 135, 84, 0.8)', needsImprovement: 'rgba(25, 135, 84, 0.3)' },
+                [RACE_TYPES.L2]: { good: 'rgba(255, 193, 7, 0.8)', needsImprovement: 'rgba(255, 193, 7, 0.3)' },
+                [RACE_TYPES.L3]: { good: 'rgba(13, 110, 253, 0.8)', needsImprovement: 'rgba(13, 110, 253, 0.3)' }
             };
 
             categorieOrdineTooltip.forEach(tipoGara => {
@@ -1581,7 +1739,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!canvasGraficoRadar) return;
         const gareContributive = getGareContributiveConDettagli();
         const datiPercentualePotenziale = [];
-        const categorieRadar = ["HC", "LIV1", "LIV2", "LIV3"];
+        const categorieRadar = [RACE_TYPES.HC, RACE_TYPES.L1, RACE_TYPES.L2, RACE_TYPES.L3];
         const etichetteRadar = [];
 
         categorieRadar.forEach(tipoGara => {
@@ -1596,7 +1754,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 datiPercentualePotenziale.push(0); return;
             }
             let puntiAttuali = gareCat.reduce((sum, g) => sum + g.puntiEffettivi, 0);
-            // Il potenziale massimo qui è il massimo teorico per la categoria, considerando il 100% per la prima fascia e 50% per la seconda
             const potenzialeMaxCategoria = livelloValoreNumerico * maxSlotPerFascia * 1.5;
             let percentualeRaggiunta = (potenzialeMaxCategoria > 0) ? (puntiAttuali / potenzialeMaxCategoria) * 100 : 0;
             datiPercentualePotenziale.push(Math.min(100, Math.max(0, percentualeRaggiunta)));
@@ -1605,7 +1762,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = {
             labels: etichetteRadar,
             datasets: [{
-                label: getTranslation('DASHBOARD_RADAR_CHART_TITLE'), // Usa una chiave per il titolo del dataset se necessario
+                label: getTranslation('DASHBOARD_RADAR_CHART_TITLE'),
                 data: datiPercentualePotenziale,
                 fill: true, backgroundColor: 'rgba(54, 162, 235, 0.2)', borderColor: 'rgb(54, 162, 235)',
                 pointBackgroundColor: 'rgb(54, 162, 235)', pointBorderColor: '#fff',

@@ -251,6 +251,7 @@
     "STRATEGY_SUGGESTION_MONITOR_DEADLINES_TEXT": "Monitor deadlines to maintain this level.",
     "EVENT_TYPE_HALVING": "Halving",
     "EVENT_TYPE_EXPIRY": "Expiry",
+    "STRATEGY_DEADLINE_ITEM_NOT_CONTRIBUTING_SUFFIX": "(Currently not contributing to current VSR)",
     "STRATEGY_AUTHOR_TEXT": "Strategy by Velatopiano-La Casa di Hilde",
     "STRATEGY_DEADLINE_ITEM_URGENT": "❗URGENT: {{remainingDays}} {{daysText}} left until {{eventType}} ({{eventDate}}) for {{raceName}} ({{raceLevel}}). Impact: -{{impactPoints}} pts.",
     "STRATEGY_DEADLINE_ITEM_NORMAL": "{{raceName}} ({{raceLevel}}) - {{eventType}} on {{eventDate}}. Impact: -{{impactPoints}} pts.",

@@ -1323,3 +1323,15 @@ input[type=number] {
 #strategia-view #monitoraggio-scadenze .scadenze-categoria {
     margin-bottom: 0.5em; /* Riduce lo spazio tra le categorie di scadenze */
 }
+
+/* Stile per la dicitura "Non contribuisce al VSR attuale" */
+.non-contributing-suffix {
+    color: #212529; /* Testo nero per massimo contrasto su sfondo chiaro */
+    font-weight: bold; /* Grassetto per evidenziare */
+    font-size: 0.9em; /* Leggermente più piccolo del testo principale dell'elemento li */
+    margin-left: 3px; /* Piccolo spazio dal testo precedente */
+    background-color: #e9ecef; /* Sfondo grigio chiaro (simile a Bootstrap 'light') */
+    padding: 2px 5px; /* Padding per dare respiro allo sfondo */
+    border-radius: 3px; /* Bordi arrotondati per effetto etichetta */
+    border: 1px solid #ced4da; /* Bordo sottile per definire meglio l'etichetta */
+}

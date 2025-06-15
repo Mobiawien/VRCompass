@@ -1208,6 +1208,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function aggiornaMonitoraggioScadenze() {
         const gareSalvate = JSON.parse(localStorage.getItem('gareSalvate')) || [];
         const gareInDimezzamento = []; const gareInScadenza = [];
+        const contributingIds = getContributingGareIds(); // Ottieni gli ID delle gare che contribuiscono
         gareSalvate.forEach(gara => {
             const mesiTrascorsi = calcolaMesiTrascorsi(gara.data);
             const dataGaraDate = new Date(gara.data);
@@ -1215,12 +1216,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (mesiTrascorsi >= 9 && mesiTrascorsi < 12) {
                 const dataDimezzamento = new Date(dataGaraDate); dataDimezzamento.setMonth(dataGaraDate.getMonth() + 12);
                 const impatto = Math.round(gara.puntiVSR * 0.5); isUrgente = (mesiTrascorsi === 11); tipoEventoPerLista = "Dimezzamento";
-                gareInDimezzamento.push({ ...gara, dataEvento: dataDimezzamento.toLocaleDateString(currentLanguage === 'it' ? 'it-IT' : 'en-GB'), impattoPunti: impatto, isUrgente, tipoEvento: tipoEventoPerLista });
+                const isContributing = contributingIds.has(gara.id);
+                gareInDimezzamento.push({ ...gara, dataEvento: dataDimezzamento.toLocaleDateString(currentLanguage === 'it' ? 'it-IT' : 'en-GB'), impattoPunti: impatto, isUrgente, tipoEvento: tipoEventoPerLista, isContributing });
             }
             if (mesiTrascorsi >= 21 && mesiTrascorsi < 24) {
                 const dataScadenza = new Date(dataGaraDate); dataScadenza.setMonth(dataGaraDate.getMonth() + 24);
                 const impatto = Math.round(gara.puntiVSR * 0.5); isUrgente = (mesiTrascorsi === 23); tipoEventoPerLista = "Scadenza";
-                gareInScadenza.push({ ...gara, dataEvento: dataScadenza.toLocaleDateString(currentLanguage === 'it' ? 'it-IT' : 'en-GB'), impattoPunti: impatto, isUrgente, tipoEvento: tipoEventoPerLista });
+                const isContributing = contributingIds.has(gara.id);
+                gareInScadenza.push({ ...gara, dataEvento: dataScadenza.toLocaleDateString(currentLanguage === 'it' ? 'it-IT' : 'en-GB'), impattoPunti: impatto, isUrgente, tipoEvento: tipoEventoPerLista, isContributing });
             }
         });
         function popolaListaScadenze(listaElement, gare, tipoEvento) {
@@ -1255,6 +1258,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         li.classList.add('scadenza-in-preavviso-non-urgente');
                         const translatedEventType = g.tipoEvento === "Dimezzamento" ? getTranslation('EVENT_TYPE_HALVING') : getTranslation('EVENT_TYPE_EXPIRY');
                         li.innerHTML = getTranslation('STRATEGY_DEADLINE_ITEM_NORMAL', { ...params, eventType: translatedEventType.toLowerCase() });
+                    }
+                    if (!g.isContributing) {
+                        li.innerHTML += ` <span class="non-contributing-suffix">${getTranslation('STRATEGY_DEADLINE_ITEM_NOT_CONTRIBUTING_SUFFIX')}</span>`;
                     }
                     listaElement.appendChild(li);
                 });

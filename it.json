@@ -251,6 +251,7 @@
     "STRATEGY_SUGGESTION_MONITOR_DEADLINES_TEXT": "Monitora le scadenze per mantenere questo livello.",
     "STRATEGY_DEADLINE_ITEM_URGENT": "❗URGENTE: {{verboMancareIt}} {{remainingDays}} {{daysText}} alla {{eventType}} ({{eventDate}}) per {{raceName}} ({{raceLevel}}). Impatto: -{{impactPoints}} pts.",
     "STRATEGY_DEADLINE_ITEM_NORMAL": "{{raceName}} ({{raceLevel}}) - {{eventType}} il {{eventDate}}. Impatto: -{{impactPoints}} pts.",
+    "STRATEGY_DEADLINE_ITEM_NOT_CONTRIBUTING_SUFFIX": "(Al momento non contribuisce al VSR attuale)",
     "EVENT_TYPE_HALVING": "Dimezzamento",
     "EVENT_TYPE_EXPIRY": "Scadenza",
     "STRATEGY_AUTHOR_TEXT": "Strategia by Velatopiano-La Casa di Hilde",

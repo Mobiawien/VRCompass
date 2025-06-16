@@ -164,7 +164,7 @@ nav {
     padding: 8px 15px;
     margin-bottom: 15px;
     min-width: 300px;
-    max-width: 450px;
+    max-width: 550px; /* Aumentato da 450px a 550px */
     margin-left: auto;
     margin-right: auto;
     border-radius: 4px; /* Aggiunto per coerenza visiva */
@@ -289,28 +289,29 @@ nav {
 
 /* Stili per la Dashboard */
 .dashboard-item {
-    margin-bottom: 10px; /* Ridotto da 15px */
+    margin-bottom: 12px; /* Aumentato leggermente per più spazio verticale */
     display: flex;
-    align-items: center;
-    gap: 8px; /* Ridotto da 10px */
+    align-items: baseline; /* Allinea alla baseline per testo e input */
+    gap: 10px; /* Aumentato leggermente per più spazio orizzontale */
     width: 100%;  /* Assicura che l'item occupi tutta la larghezza disponibile */
 }
 
 /* Nuova classe per dashboard-item con elementi distribuiti */
 .dashboard-item-flex-space-between {
-    display: flex; /* Già presente in .dashboard-item, ma lo specifichiamo per chiarezza o se .dashboard-item cambiasse */
+    display: flex;
     justify-content: space-between;
-    align-items: center; /* Già presente in .dashboard-item */
+    align-items: baseline; /* Coerente con .dashboard-item */
 }
 
 .dashboard-item label {
-    width: 120px;  /* Ridotto da 180px */
+    /* width: 120px; */  /* Rimosso: la larghezza sarà flessibile */
     flex-shrink: 0;
     font-weight: bold;
+    white-space: nowrap; /* Evita che l'etichetta vada a capo, se possibile */
 }
 /* Stile per i descrittori nella dashboard che non sono label di input */
 .dashboard-descriptor {
-    width: 180px; /* Mantieni la larghezza se desiderato */
+    /* width: 180px; */ /* Rimosso: la larghezza sarà flessibile */
     font-weight: bold; /* Mantieni il grassetto */
     flex-shrink: 0; /* Se è ancora in un contesto flex dove questo è rilevante */
     /* Puoi copiare qui altri stili da .dashboard-item label se necessario */
@@ -321,6 +322,13 @@ nav {
     font-weight: bold;
     color: #007bff;
     font-size: 1.1em;
+}
+
+/* Contenitore per i pulsanti di gestione dati per permettere il wrap */
+#gestione-dati-pulsanti .pulsanti-wrapper {
+    display: flex;
+    flex-wrap: wrap; /* Permette ai pulsanti di andare a capo se non c'è spazio */
+    gap: 8px; /* Spazio tra i pulsanti */
 }
 
 /* Stili per i pulsanti di azione nella Dashboard (Esporta/Importa) */
@@ -338,7 +346,7 @@ label.dashboard-action-button { /* Applica anche alle label con questa classe */
     display: inline-block;
     text-align: center;
     transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
-    margin-right: 10px; /* Spazio tra i pulsanti se sono affiancati */
+    /* margin-right: 10px; Rimosso, gestito da gap nel wrapper */
 }
 
 button.dashboard-action-button:hover,
@@ -364,13 +372,16 @@ label.dashboard-action-button:hover { /* Applica anche alle label con questa cla
 
 /* Stile per l'input del nome barca */
 #nome-barca {
-    width: 180px;  /* Larghezza fissa e contenuta */
+    /* width: 180px; */  /* Rimosso: la larghezza sarà flessibile */
+    flex-grow: 1; /* Permette all'input di espandersi per riempire lo spazio */
+    min-width: 150px; /* Larghezza minima per evitare che diventi troppo piccolo */
     padding: 4px 8px;
     height: 28px;
     box-sizing: border-box;
     border: 1px solid #ced4da;
     border-radius: 4px;
     font-size: 0.95em;
+
 }
 
 /* Stili specifici per la Gestione Crediti (#gestione-crediti-view) */
@@ -1322,4 +1333,16 @@ input[type=number] {
 
 #strategia-view #monitoraggio-scadenze .scadenze-categoria {
     margin-bottom: 0.5em; /* Riduce lo spazio tra le categorie di scadenze */
+}
+
+/* Stile per la dicitura "Non contribuisce al VSR attuale" */
+.non-contributing-suffix {
+    color: #212529; /* Testo nero per massimo contrasto su sfondo chiaro */
+    font-weight: bold; /* Grassetto per evidenziare */
+    font-size: 0.9em; /* Leggermente più piccolo del testo principale dell'elemento li */
+    margin-left: 3px; /* Piccolo spazio dal testo precedente */
+    background-color: #e9ecef; /* Sfondo grigio chiaro (simile a Bootstrap 'light') */
+    padding: 2px 5px; /* Padding per dare respiro allo sfondo */
+    border-radius: 3px; /* Bordi arrotondati per effetto etichetta */
+    border: 1px solid #ced4da; /* Bordo sottile per definire meglio l'etichetta */
 }

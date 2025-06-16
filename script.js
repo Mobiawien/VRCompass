@@ -205,7 +205,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Funzioni Helper ---
     function formatNumber(num, decimalPlaces = 0) {
         if (num === null || num === undefined || isNaN(num)) return getTranslation('TEXT_NA_DETAILED');
-        const numLocale = currentLanguage === 'it' ? 'it-IT' : 'en-US'; // Scegli il locale in base alla lingua
+        let numLocale = 'en-US'; // Default
+        if (currentLanguage === 'it') {
+            numLocale = 'it-IT';
+        } else if (currentLanguage === 'fr') {
+            numLocale = 'fr-FR';
+        }
         if (decimalPlaces === 0) {
             return Math.round(num).toLocaleString(numLocale);
         } else {
@@ -231,7 +236,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function calcolaGiorniTraDate(data1, data2) {
         const unGiorno = 24 * 60 * 60 * 1000;
         const primaData = new Date(data1);
-        const secondaData = new Date(data2);
+        let secondaData = new Date(data2); // Può essere una stringa 'gg/mm/aaaa'
+        if (typeof data2 === 'string' && data2.includes('/')) {
+            const parts = data2.split('/');
+            secondaData = new Date(parts[2], parseInt(parts[1]) - 1, parts[0]); // Mese è 0-indicizzato
+        }
         primaData.setHours(0,0,0,0);
         secondaData.setHours(0,0,0,0);
         return Math.round((secondaData - primaData) / unGiorno);
@@ -894,7 +903,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 classeStato = "stato-scaduta"; row.classList.remove('in-preavviso'); inPreavvisoTesto = "";
             }
             row.classList.add(classeStato);
-            const [year, month, day] = gara.data.split('-');
+            let [year, month, day] = gara.data.split('-'); // Formato YYYY-MM-DD
+            let dateLocale = 'en-GB'; // Default
+            if (currentLanguage === 'it') dateLocale = 'it-IT';
+            else if (currentLanguage === 'fr') dateLocale = 'fr-FR';
+
+            // Per la visualizzazione, usiamo toLocaleDateString, ma per lo split usiamo il formato YYYY-MM-DD
+            // La data viene mostrata come gg/mm/aaaa indipendentemente dal locale per coerenza con l'input
             row.insertCell(0).textContent = `${day}/${month}/${year}`;
             row.insertCell(1).textContent = gara.nome;
             row.insertCell(2).textContent = infoLivelloGara ? getTranslation(infoLivelloGara.chiaveTraduzione) : gara.livello;
@@ -1220,8 +1235,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const potenzialeMaxPuntiCategoria = livelloValoreNumerico * maxSlotPerFascia * 1.5;
                 let perc100 = 0, perc50 = 0, percEmpty = 100;
                 if (potenzialeMaxPuntiCategoria > 0) {
-                    perc100 = (punti100 / potenzialeMaxPuntiCategoria) * 100;
-                    perc50 = (punti50 / potenzialeMaxPuntiCategoria) * 100;
+                    const numPunti100 = Number(punti100) || 0;
+                    const numPunti50 = Number(punti50) || 0;
+                    perc100 = (numPunti100 / potenzialeMaxPuntiCategoria) * 100;
+                    perc50 = (numPunti50 / potenzialeMaxPuntiCategoria) * 100;
                     percEmpty = Math.max(0, 100 - perc100 - perc50);
                 }
                 elPointsBar100.style.width = `${perc100}%`;
@@ -1252,7 +1269,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (elGareSlot) {
                         const p = document.createElement('p'); p.classList.add('gara-dettaglio');
                         const statoPercentuale = g.fattoreDecadimento === 1.0 ? '100%' : '50%';
-                        p.textContent = `${g.nome}: ${formatNumber(g.puntiEffettivi, 0)} pts (${statoPercentuale}, Data: ${new Date(g.data).toLocaleDateString(currentLanguage === 'it' ? 'it-IT' : 'en-GB')})`;
+                        let dateLocale = 'en-GB';
+                        if (currentLanguage === 'it') dateLocale = 'it-IT';
+                        else if (currentLanguage === 'fr') dateLocale = 'fr-FR';
+                        p.textContent = `${g.nome}: ${formatNumber(g.puntiEffettivi, 0)} pts (${statoPercentuale}, Data: ${new Date(g.data).toLocaleDateString(dateLocale)})`;
                         elGareSlot.appendChild(p);
                     }
                 });
@@ -1280,6 +1300,9 @@ document.addEventListener('DOMContentLoaded', () => {
             let simulazioneRisultato = null;
 
             if (mesiTrascorsi >= 9 && mesiTrascorsi < 12) {
+                let dateLocale = 'en-GB';
+                if (currentLanguage === 'it') dateLocale = 'it-IT';
+                else if (currentLanguage === 'fr') dateLocale = 'fr-FR';
                 const dataDimezzamento = new Date(dataGaraDate); dataDimezzamento.setMonth(dataGaraDate.getMonth() + 12);
                 impattoDirettoGara = Math.round(gara.puntiVSR * 0.5);
                 isUrgente = (mesiTrascorsi === 11);
@@ -1287,7 +1310,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 simulazioneRisultato = simulaImpattoNettoEVariazioneClassifica(gara, 0.5);
                 gareInDimezzamento.push({
                     ...gara,
-                    dataEvento: dataDimezzamento.toLocaleDateString(currentLanguage === 'it' ? 'it-IT' : 'en-GB'),
+                    dataEvento: dataDimezzamento.toLocaleDateString(dateLocale),
                     impattoPunti: impattoDirettoGara,
                     isUrgente,
                     tipoEvento: EVENT_TYPES.HALVING,
@@ -1297,6 +1320,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
             if (mesiTrascorsi >= 21 && mesiTrascorsi < 24) {
+                let dateLocale = 'en-GB';
+                if (currentLanguage === 'it') dateLocale = 'it-IT';
+                else if (currentLanguage === 'fr') dateLocale = 'fr-FR';
                 const dataScadenza = new Date(dataGaraDate); dataScadenza.setMonth(dataGaraDate.getMonth() + 24);
                 impattoDirettoGara = Math.round(gara.puntiVSR * 0.5);
                 isUrgente = (mesiTrascorsi === 23);
@@ -1304,7 +1330,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 simulazioneRisultato = simulaImpattoNettoEVariazioneClassifica(gara, 0);
                 gareInScadenza.push({
                     ...gara,
-                    dataEvento: dataScadenza.toLocaleDateString(currentLanguage === 'it' ? 'it-IT' : 'en-GB'),
+                    dataEvento: dataScadenza.toLocaleDateString(dateLocale),
                     impattoPunti: impattoDirettoGara,
                     isUrgente,
                     tipoEvento: EVENT_TYPES.EXPIRY,
@@ -1362,7 +1388,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const dataEventoDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
                         params.remainingDays = calcolaGiorniTraDate(new Date(), dataEventoDate);
                         params.daysText = Math.abs(params.remainingDays) === 1 ? getTranslation('STRATEGY_SUGGESTION_DAY_SINGLE') : getTranslation('STRATEGY_SUGGESTION_DAYS_PLURAL');
-                        if (currentLanguage === 'it') {
+                        if (currentLanguage === 'it') { // Specifica per l'italiano
                             params.verboMancareIt = (Math.abs(params.remainingDays) === 1) ? "Manca" : "Mancano";
                         }
 
@@ -1424,7 +1450,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 tipoEvento = EVENT_TYPES.EXPIRY; dataEventoObj = new Date(dataGaraDate); dataEventoObj.setMonth(dataGaraDate.getMonth() + 24);
                 isUrgente = (mesiTrascorsi === 23); impattoPuntiStimato = Math.round(gara.puntiVSR * 0.5);
             }
-            if (tipoEvento && dataEventoObj) scadenze.push({ ...gara, tipoEvento: tipoEvento, dataEvento: dataEventoObj.toLocaleDateString(currentLanguage === 'it' ? 'it-IT' : 'en-GB'), isUrgente, impattoPunti: impattoPuntiStimato });
+            if (tipoEvento && dataEventoObj) {
+                let dateLocale = 'en-GB';
+                if (currentLanguage === 'it') dateLocale = 'it-IT';
+                else if (currentLanguage === 'fr') dateLocale = 'fr-FR';
+                scadenze.push({ ...gara, tipoEvento: tipoEvento, dataEvento: dataEventoObj.toLocaleDateString(dateLocale), isUrgente, impattoPunti: impattoPuntiStimato });
+            }
         });
         return scadenze;
     }
@@ -1525,9 +1556,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             const { tipoEvento, dataEvento, impattoPunti, isUrgente } = garaInScadenza;
                             const [day, month, year] = dataEvento.split('/');
                             const dataEventoDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                            const giorniRimanentiEffettivi = calcolaGiorniTraDate(new Date(), dataEventoDate);
+
                             let warningParams = {
                                 eventType: tipoEvento.toLowerCase(), eventDate: dataEvento, impactPoints: formatNumber(impattoPunti, 0),
-                                remainingDays: calcolaGiorniTraDate(new Date(), dataEventoDate),
+                                remainingDays: giorniRimanentiEffettivi,
                                 daysText: "",
                             };
                             warningParams.daysText = Math.abs(warningParams.remainingDays) === 1 ? getTranslation('STRATEGY_SUGGESTION_DAY_SINGLE') : getTranslation('STRATEGY_SUGGESTION_DAYS_PLURAL');
@@ -1541,8 +1574,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             const translatedEventTypeForWarning = tipoEvento === EVENT_TYPES.HALVING ? getTranslation('EVENT_TYPE_HALVING') : getTranslation('EVENT_TYPE_EXPIRY');
                             if (isUrgente) warningKey = tipoEvento === EVENT_TYPES.HALVING ? `STRATEGY_SUGGESTION_${tipoGara}_URGENT_HALVING_WARNING` : `STRATEGY_SUGGESTION_${tipoGara}_URGENT_EXPIRY_WARNING`;
                             else warningKey = `STRATEGY_SUGGESTION_${tipoGara}_PRE_WARNING`;
-
-                            if (warningKey) suggerimentoTestoCompleto += ` ${getTranslation(warningKey, {...warningParams, eventType: translatedEventTypeForWarning.toLowerCase(), verboMancareIt: verboMancareItWarning })}`;
+                            
+                            let finalWarningParams = {...warningParams, eventType: translatedEventTypeForWarning.toLowerCase()};
+                            if (currentLanguage === 'it') {
+                                finalWarningParams.verboMancareIt = verboMancareItWarning;
+                            }
+                            if (warningKey) suggerimentoTestoCompleto += ` ${getTranslation(warningKey, finalWarningParams)}`;
                         }
                     }
                 }

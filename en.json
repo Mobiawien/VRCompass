@@ -76,7 +76,17 @@
     "CREDITS_TABLE3_SELECT_LEVEL_OPTION_L2": "Lvl.2",
     "CREDITS_TABLE3_SELECT_LEVEL_OPTION_L3": "Lvl.3",
     "CREDITS_GUIDE_NOTE": "*Note: The \"Credits Won\" displayed may differ slightly from actual in-game values due to Virtual Regatta Offshore's specific rounding method.",
-    "CREDITS_AUTHOR_TEXT": "Calculator by Velatopiano-La Casa di Hilde"
+    "CREDITS_AUTHOR_TEXT": "Calculator by Velatopiano-La Casa di Hilde",
+
+    "CREDITS_EQUIPMENT_FOILS": "Foils",
+    "CREDITS_EQUIPMENT_REACHING_SAIL": "Reaching Sail",
+    "CREDITS_EQUIPMENT_LIGHT_SAILS": "Light Sails",
+    "CREDITS_EQUIPMENT_HARD_SAILS": "Hard Sails",
+    "CREDITS_EQUIPMENT_WINCHS_PRO": "Winchs pro",
+    "CREDITS_EQUIPMENT_HULL_POLISH": "Hull Polish",
+    "CREDITS_EQUIPMENT_MAGIC_FURLER": "Magic Furler",
+    "CREDITS_EQUIPMENT_VRTEX_JACKET": "VRTex Jacket",
+    "CREDITS_EQUIPMENT_COMFORT_LOUNGE": "Comfort lounge"
     ,
     "VSR_PAGE_TITLE": "VSR Ranking Management",
     "VSR_INFO_BOAT": "Boat:",

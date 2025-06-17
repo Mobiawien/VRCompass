@@ -120,7 +120,7 @@
     "VSR_GUIDE_TITLE": "Guide to VSR Ranking Management",
     "VSR_GUIDE_INTRO_P1": "This section allows you to store your race results and automatically calculate the VSR Points earned. VRCompass helps you monitor the validity of your scores and understand how they contribute to your VSR ranking.",
     "VSR_GUIDE_DATA_INSERTION_TITLE": "<strong>Data Entry:</strong>",
-    "VSR_GUIDE_DATA_INSERTION_STEP1": "<strong>Date:</strong> Enter the race completion date.",
+    "VSR_GUIDE_DATA_INSERTION_STEP1": "<strong>Date:</strong> Enter the regatta's <strong>closing</strong> date. Dates can be found in the VR historical calendar.",
     "VSR_GUIDE_DATA_INSERTION_STEP2": "<strong>Race Name:</strong> Enter an identifying name for the race.",
     "VSR_GUIDE_DATA_INSERTION_STEP3": "<strong>Race Level (VSR):</strong> Select the correct race level from the dropdown menu. These levels correspond to official VRO categories.",
     "VSR_GUIDE_DATA_INSERTION_STEP4": "<strong>Final Ranking:</strong> Enter your final position in the race.",
@@ -133,6 +133,7 @@
     "VSR_GUIDE_LOAD_SUGGESTED_STEP2_ACTION2": "Click the \"Add\" button next to the race.",
     "VSR_GUIDE_LOAD_SUGGESTED_STEP3": "The race will be added to your VSR history with points calculated based on the entered ranking. The \"Add\" button for that race in the suggested list will become \"Already Added\" and will be disabled.",
     "VSR_GUIDE_LOAD_SUGGESTED_STEP4": "You can click \"Hide Race List\" again (the button text changes) to close the list view.",
+    "VSR_GUIDE_INPUT_METHODS_INTRO": "To enter your race results, you have two main methods available:",
     "VSR_GUIDE_READ_TABLES_TITLE": "<strong>How to Read the Race Tables:</strong>",
     "VSR_GUIDE_READ_TABLES_INTRO": "The table shows your races. Use the filter buttons:",
     "VSR_GUIDE_READ_TABLES_FILTER_VALID": "<strong>Show Valid for Ranking:</strong> Displays only races that VRCompass considers for your Total VSR Score (maximum 40: 2 Off-Category, 6 Level 1, 12 Level 2, 20 Level 3, selecting the best for each level in the two timeframes: <12 months and 12-24 months). Races are grouped by level and sorted by effective points.",
@@ -300,7 +301,7 @@
 
     "DASHBOARD_INFO_DISCLAIMER_TITLE": "Information and Disclaimer",
     "DASHBOARD_INFO_DISCLAIMER_DATA_MANAGEMENT_P1": "<strong>Data Management:</strong> This application saves entered data (boat name, VSR score, race details) solely within your browser's <code>localStorage</code>. No data is transmitted or stored on external servers. The user has full control over their data and can delete it at any time through their browser settings or by using the provided export/import functionalities.",
-    "DASHBOARD_INFO_DISCLAIMER_ACCURACY_P1": "<strong>Accuracy and Purpose:</strong> VR Compass is an aid tool provided \"as is\", without explicit or implicit warranties regarding its accuracy, completeness, or continuous operation. Its main purpose is to help you <strong>track and organize your VSR ranking, providing guidance for your future racing strategies</strong>, as well as calculating credits and VSR points. These calculations are based on known formulas but may have slight discrepancies compared to official Virtual Regatta Offshore values due to specific rounding or internal game logic not fully documented. <strong>If you notice significant discrepancies, it might be a sign of an error in data entry for one or more races.</strong>",
+    "DASHBOARD_INFO_DISCLAIMER_ACCURACY_P1": "<strong>Accuracy and Purpose:</strong> VR Compass is an aid tool provided \"as is\", without explicit or implicit warranties regarding its accuracy, completeness, or continuous operation. Its main purpose is to help you <strong>track and organize your VSR ranking, providing guidance for your future racing strategies</strong>, as well as calculating credits and VSR points. These calculations are based on known formulas but may have slight discrepancies compared to official Virtual Regatta Offshore values due to specific rounding or internal game logic not fully documented. <strong>It is important to note that VRCompass updates VSR scores in real-time based on race halving and expiration dates, while Virtual Regatta Offshore may update the official ranking with some delay. Therefore, in some periods, the scores displayed here may not exactly match those shown in-game.</strong> If you notice significant discrepancies *not* due to this VRO update delay, it might be a sign of an error in data entry for one or more races.",
 
     "DASHBOARD_FOOTER_RESPONSIBILITY_P1": "<strong>Responsibility:</strong> The developers of VR Compass are not responsible for any data loss, damages, or other issues arising from the use of this application. It is recommended to use the export function to create regular backups of your data.",
     "DASHBOARD_FOOTER_COPYRIGHT_P1": "<strong>Copyright and License:</strong> The source code of this application is released under the terms of the <a href=\"https://raw.githubusercontent.com/mobiawien/VRCompass/main/LICENSE\" target=\"_blank\">MIT License</a>, which defines its conditions of use, modification, and distribution.",

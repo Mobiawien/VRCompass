@@ -987,7 +987,8 @@ document.addEventListener('DOMContentLoaded', () => {
             impattoNettoEffettivo: 0,
             vsrCorrente: 0,
             vsrDopoSimulazione: 0,
-            gareBeneficiarie: []
+            gareBeneficiarie: [],
+            laGaraSimulataContribuisceAncora: false
         };
 
         const gareContributiveCorrenti = selezionaGareContributivePerClassifica(gareSalvate, null);
@@ -1026,8 +1027,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
+        const laGaraSimulataContribuisceAncora = mappaContributiveSimulate.has(garaCheCambia.id);
 
-        return { impattoNettoEffettivo: vsrDopoSimulazione - vsrCorrente, vsrCorrente, vsrDopoSimulazione, gareBeneficiarie };
+        return {
+            impattoNettoEffettivo: vsrDopoSimulazione - vsrCorrente,
+            vsrCorrente,
+            vsrDopoSimulazione,
+            gareBeneficiarie,
+            laGaraSimulataContribuisceAncora
+        };
     }
 
     // --- Funzioni Esportazione/Importazione Dati ---
@@ -1308,7 +1316,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 isUrgente = (mesiTrascorsi === 11);
                 const isContributing = contributingIds.has(gara.id);
                 simulazioneRisultato = simulaImpattoNettoEVariazioneClassifica(gara, 0.5);
-                gareInDimezzamento.push({
+
+                const garaDaAggiungereHalving = {
                     ...gara,
                     dataEvento: dataDimezzamento.toLocaleDateString(dateLocale),
                     impattoPunti: impattoDirettoGara,
@@ -1316,8 +1325,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     tipoEvento: EVENT_TYPES.HALVING,
                     isContributing,
                     impattoNettoStimato: simulazioneRisultato.impattoNettoEffettivo,
-                    gareBeneficiarie: simulazioneRisultato.gareBeneficiarie
-                });
+                    gareBeneficiarie: simulazioneRisultato.gareBeneficiarie,
+                    simulazioneRisultato: simulazioneRisultato // Aggiungiamo il risultato della simulazione
+                };
+                gareInDimezzamento.push(garaDaAggiungereHalving);
             }
             if (mesiTrascorsi >= 21 && mesiTrascorsi < 24) {
                 let dateLocale = 'en-GB';
@@ -1328,7 +1339,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 isUrgente = (mesiTrascorsi === 23);
                 const isContributing = contributingIds.has(gara.id);
                 simulazioneRisultato = simulaImpattoNettoEVariazioneClassifica(gara, 0);
-                gareInScadenza.push({
+
+                const garaDaAggiungereExpiry = {
                     ...gara,
                     dataEvento: dataScadenza.toLocaleDateString(dateLocale),
                     impattoPunti: impattoDirettoGara,
@@ -1336,8 +1348,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     tipoEvento: EVENT_TYPES.EXPIRY,
                     isContributing,
                     impattoNettoStimato: simulazioneRisultato.impattoNettoEffettivo,
-                    gareBeneficiarie: simulazioneRisultato.gareBeneficiarie
-                });
+                    gareBeneficiarie: simulazioneRisultato.gareBeneficiarie,
+                    simulazioneRisultato: simulazioneRisultato // Aggiungiamo il risultato della simulazione
+                };
+                gareInScadenza.push(garaDaAggiungereExpiry);
             }
         });
         function popolaListaScadenze(listaElement, gare, tipoEvento) {
@@ -1347,10 +1361,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 gare.forEach(g => {
                     const li = document.createElement('li');
                     const livelloTesto = getTranslation(livelliVsrStoricoMap[g.livello]?.chiaveTraduzione || g.livello);
-
-                    const impattoDirettoGaraVal = g.impattoPunti;
-                    const impattoNettoStimatoVal = g.impattoNettoStimato;
-                    const gareBeneficiarieSim = g.gareBeneficiarie || [];
+                    const impattoDirettoGaraVal = g.impattoPunti; // Questo è l'impatto della singola gara se si dimezza/scade
+                    const impattoNettoStimatoVal = g.impattoNettoStimato; // Questo è l'impatto netto sul VSR totale
+                    const gareBeneficiarieSim = g.gareBeneficiarie || []; // Gare che entrano/migliorano grazie a questo evento
+                
+                // Determina se la gara esce dal ranking
+                const garaContribuivaPrima = g.isContributing; // g.isContributing è lo stato PRIMA della simulazione
+                const garaContribuisceDopo = g.simulazioneRisultato ? g.simulazioneRisultato.laGaraSimulataContribuisceAncora : false; // Stato DOPO la simulazione
+                const garaEsceDalRanking = garaContribuivaPrima && !garaContribuisceDopo;
 
                     let params = {
                         raceName: g.nome,
@@ -1365,25 +1383,26 @@ document.addEventListener('DOMContentLoaded', () => {
                     let mostraInfoRibilanciamento = false;
 
                     if (impattoNettoStimatoVal > (-Math.abs(impattoDirettoGaraVal)) && gareBeneficiarieSim.length > 0) {
-                        const altraGaraBeneficiaria = gareBeneficiarieSim.find(b => b.id !== g.id);
-                        if (altraGaraBeneficiaria) {
+                        const primaGaraBeneficiariaNonSimulata = gareBeneficiarieSim.find(b => b.id !== g.id);
+                        if (primaGaraBeneficiariaNonSimulata) {
                             mostraInfoRibilanciamento = true;
-                            params.beneficiaryRaceName = altraGaraBeneficiaria.nome;
-                            params.beneficiaryRaceLevel = getTranslation(livelliVsrStoricoMap[altraGaraBeneficiaria.livello]?.chiaveTraduzione || altraGaraBeneficiaria.livello);
+                            params.beneficiaryRaceName = primaGaraBeneficiariaNonSimulata.nome;
+                            params.beneficiaryRaceLevel = getTranslation(livelliVsrStoricoMap[primaGaraBeneficiariaNonSimulata.livello]?.chiaveTraduzione || primaGaraBeneficiariaNonSimulata.livello);
                         }
                      }
 
                     let laGaraStessaEntraDaNonContribuente = false;
                     if (!g.isContributing && impattoNettoStimatoVal > 0) {
                         laGaraStessaEntraDaNonContribuente = true;
-                        params.netImpactPoints = formatNumber(Math.round(g.puntiVSR * (g.tipoEvento === EVENT_TYPES.HALVING ? 0.5 : 0)), 0);
+                        // L'impattoNettoStimatoVal già considera questo scenario se la gara entra.
+                        // Se la gara entra, impattoNettoStimatoVal sarà positivo.
+                        params.netImpactPoints = formatNumber(Math.abs(impattoNettoStimatoVal), 0);
                         if (g.tipoEvento === EVENT_TYPES.EXPIRY) laGaraStessaEntraDaNonContribuente = false;
                     }
 
                     const differenzaImpattoTrascurabile = Math.abs(impattoNettoStimatoVal - (-Math.abs(impattoDirettoGaraVal))) < 10;
 
                     if (g.isUrgente) {
-                        li.classList.add('scadenza-urgente');
                         const [day, month, year] = g.dataEvento.split('/');
                         const dataEventoDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
                         params.remainingDays = calcolaGiorniTraDate(new Date(), dataEventoDate);
@@ -1391,28 +1410,49 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (currentLanguage === 'it') { // Specifica per l'italiano
                             params.verboMancareIt = (Math.abs(params.remainingDays) === 1) ? "Manca" : "Mancano";
                         }
+                    li.classList.add('scadenza-urgente');
 
-                        if (!g.isContributing && g.tipoEvento === EVENT_TYPES.HALVING) {
+                    if (garaEsceDalRanking) {
+                        if (g.tipoEvento === EVENT_TYPES.HALVING) {
+                            testoAvvisoKey = 'STRATEGY_DEADLINE_ITEM_URGENT_HALVING_EXITS_TEMPORARILY_RANKING';
+                        } else { // EVENT_TYPES.EXPIRY
+                            testoAvvisoKey = 'STRATEGY_DEADLINE_ITEM_URGENT_EXITS_RANKING';
+                        }
+                        params.netImpactPoints = formatNumber(Math.abs(impattoNettoStimatoVal), 0); 
+                    } else if (!g.isContributing && g.tipoEvento === EVENT_TYPES.HALVING && impattoNettoStimatoVal > 0) { // Entra nel ranking
                             testoAvvisoKey = 'STRATEGY_DEADLINE_ITEM_URGENT_ENTERS_ON_EVENT';
+                        params.netImpactPoints = formatNumber(Math.abs(impattoNettoStimatoVal),0);
                         } else if (mostraInfoRibilanciamento) {
                             testoAvvisoKey = 'STRATEGY_DEADLINE_ITEM_URGENT_REBALANCE_POSITIVE';
                         } else if (laGaraStessaEntraDaNonContribuente) {
                             testoAvvisoKey = 'STRATEGY_DEADLINE_ITEM_URGENT_ENTERS_ON_EVENT';
                         } else if (differenzaImpattoTrascurabile) {
                             testoAvvisoKey = 'STRATEGY_DEADLINE_ITEM_URGENT_SIMPLE_NO_NET';
+                    } else if (impattoNettoStimatoVal === 0 && !g.isContributing) { // Non contribuiva e non entra
+                        testoAvvisoKey = 'STRATEGY_DEADLINE_ITEM_URGENT_SIMPLE_NO_NET'; // O una chiave specifica se vuoi
                         } else {
                             testoAvvisoKey = 'STRATEGY_DEADLINE_ITEM_URGENT_SIMPLE';
                         }
                     } else {
                         li.classList.add('scadenza-in-preavviso-non-urgente');
-                        if (!g.isContributing && g.tipoEvento === EVENT_TYPES.HALVING) {
+                    if (garaEsceDalRanking) {
+                        if (g.tipoEvento === EVENT_TYPES.HALVING) {
+                            testoAvvisoKey = 'STRATEGY_DEADLINE_ITEM_NORMAL_HALVING_EXITS_TEMPORARILY_RANKING';
+                        } else { // EVENT_TYPES.EXPIRY
+                            testoAvvisoKey = 'STRATEGY_DEADLINE_ITEM_NORMAL_EXITS_RANKING';
+                        }
+                        params.netImpactPoints = formatNumber(Math.abs(impattoNettoStimatoVal), 0);
+                    } else if (!g.isContributing && g.tipoEvento === EVENT_TYPES.HALVING && impattoNettoStimatoVal > 0) { // Entra nel ranking
                             testoAvvisoKey = 'STRATEGY_DEADLINE_ITEM_NORMAL_ENTERS_ON_EVENT';
+                        params.netImpactPoints = formatNumber(Math.abs(impattoNettoStimatoVal),0);
                         } else if (mostraInfoRibilanciamento) {
                             testoAvvisoKey = 'STRATEGY_DEADLINE_ITEM_NORMAL_REBALANCE_POSITIVE';
                         } else if (laGaraStessaEntraDaNonContribuente) {
                             testoAvvisoKey = 'STRATEGY_DEADLINE_ITEM_NORMAL_ENTERS_ON_EVENT';
                         } else if (differenzaImpattoTrascurabile) {
                             testoAvvisoKey = 'STRATEGY_DEADLINE_ITEM_NORMAL_SIMPLE_NO_NET';
+                    } else if (impattoNettoStimatoVal === 0 && !g.isContributing) {
+                        testoAvvisoKey = 'STRATEGY_DEADLINE_ITEM_NORMAL_SIMPLE_NO_NET';
                         } else {
                             testoAvvisoKey = 'STRATEGY_DEADLINE_ITEM_NORMAL_SIMPLE';
                         }
@@ -1420,7 +1460,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     li.innerHTML = getTranslation(testoAvvisoKey, params);
 
                     if (!g.isContributing && testoAvvisoKey.indexOf("_ENTERS_ON_EVENT") === -1) {
-                        li.innerHTML += ` <span class="non-contributing-suffix">${getTranslation('STRATEGY_DEADLINE_ITEM_NOT_CONTRIBUTING_SUFFIX')}</span>`;
+                        // Aggiungi il suffisso solo se la gara non esce dal ranking e non entra
+                        if (!garaEsceDalRanking) {
+                            li.innerHTML += ` <span class="non-contributing-suffix">${getTranslation('STRATEGY_DEADLINE_ITEM_NOT_CONTRIBUTING_SUFFIX')}</span>`;
+                        }
                     }
                     listaElement.appendChild(li);
                 });

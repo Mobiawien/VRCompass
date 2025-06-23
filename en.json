@@ -278,7 +278,19 @@
     "STRATEGY_DEADLINE_ITEM_NOT_CONTRIBUTING_SUFFIX": "(Currently not contributing to current VSR)",
     "EVENT_TYPE_HALVING": "Halving",
     "EVENT_TYPE_EXPIRY": "Expiry",
-
+    "STRATEGY_CHANGES_BUTTON_TEXT": "Show recent events",
+    "SUMMARY_RECENT_EVENTS_TITLE": "Recent Events Summary",
+    "SUMMARY_NO_RECENT_EVENTS": "No recent events to show.",
+    "SUMMARY_EVENT_ITEM_HALVED": "<strong>Halving:</strong> Race '{{raceName}}' halved on {{eventDate}}.",
+    "SUMMARY_EVENT_ITEM_EXPIRED": "<strong>Expiry:</strong> Race '{{raceName}}' expired on {{eventDate}}.",
+    "SUMMARY_EVENT_IMPACT_TEXT": "Net VSR impact: {{netImpact}} pts.",
+    "SUMMARY_LOG_NOTE": "<strong>Note:</strong> This summary shows events from the last {{days}} days."
+    ,
+    "VSR_CHANGE_MODAL_TITLE": "Attention: VSR Score Change",
+    "VSR_CHANGE_MODAL_BODY": "Your VSR score has changed from <strong>{{oldScore}}</strong> to <strong>{{newScore}}</strong>. This is likely due to a time-based event such as the halving or expiration of one or more of your races.",
+    "VSR_CHANGE_MODAL_INSTRUCTION": "We recommend checking the recent events to understand the impact on your ranking.",
+    "VSR_CHANGE_MODAL_PRIMARY_BUTTON": "Show recent events",
+    "VSR_CHANGE_MODAL_SECONDARY_BUTTON": "Got it, close",
 
     "DASHBOARD_BOAT_NAME_LABEL": "Boat Name:",
     "DASHBOARD_BOAT_NAME_PLACEHOLDER": "Enter boat name",

@@ -15,14 +15,14 @@
         <button id="btn-show-classifica-vsr" class="nav-button" data-i18n-key="NAV_VSR_RANKING">Gestione Classifica VSR</button>
         <button id="btn-show-analisi" class="nav-button" data-i18n-key="NAV_ANALYSIS">Analisi</button>
         <button id="btn-show-strategia" class="nav-button" data-i18n-key="NAV_STRATEGY">Strategia</button>
-        <!-- Spostato qui il badge versione -->
-        <span class="version-badge">VRCompass v1.2.0</span>
         <!-- Selettore lingua -->
         <select id="language-selector" class="nav-button" style="font-style: normal;">
             <option value="en">English</option>
             <option value="it">Italiano</option>
             <option value="fr">Français</option>
         </select>
+        <!-- Spostato qui il badge versione -->
+        <span class="version-badge">VRCompass v1.3.0</span>
     </nav>
 
     <div id="dashboard-view" class="view-section">
@@ -551,7 +551,12 @@
             <div id="strategia-contenuto-box">
 
                 <div class="analisi-sezione" id="monitoraggio-scadenze">
-                    <h2 data-i18n-key="STRATEGY_DEADLINES_BOX_TITLE">Monitoraggio Scadenze e Dimezzamenti</h2>
+                    <div class="strategia-header-con-pulsante">
+                        <h2 data-i18n-key="STRATEGY_DEADLINES_BOX_TITLE">Monitoraggio Scadenze e Dimezzamenti</h2>
+                        <button id="btn-toggle-recent-events" class="toggle-summary-btn" data-i18n-key="STRATEGY_CHANGES_BUTTON_TEXT">Cosa è Cambiato?</button>
+                    </div>
+                    <!-- Contenitore per il riepilogo degli eventi passati -->
+                    <div id="recent-events-summary" class="summary-content" style="display: none;"></div>
                     <div id="scadenze-container">
                         <div class="scadenze-categoria">
                             <h4 data-i18n-key="STRATEGY_DEADLINES_SUBTITLE_HALVING">Gare in Dimezzamento Imminente (da 100% a 50%)</h4>
@@ -581,6 +586,20 @@
         </div> <!-- Fine strategia-layout-container -->
         <p id="autore-strategia" class="autore-credits" data-i18n-key="STRATEGY_AUTHOR_TEXT">Strategia by Velatopiano-La Casa di Hilde</p>
     </div>
+
+    <!-- Finestra Modale per Notifica Variazione VSR -->
+    <div id="vsr-change-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2 id="vsr-change-modal-title" data-i18n-key="VSR_CHANGE_MODAL_TITLE"></h2>
+            <p id="vsr-change-modal-body"></p>
+            <p id="vsr-change-modal-instruction" data-i18n-key="VSR_CHANGE_MODAL_INSTRUCTION"></p>
+            <div class="modal-footer">
+                <button id="vsr-change-modal-primary-btn" class="dashboard-action-button" data-i18n-key="VSR_CHANGE_MODAL_PRIMARY_BUTTON"></button>
+                <button id="vsr-change-modal-secondary-btn" class="nav-button" data-i18n-key="VSR_CHANGE_MODAL_SECONDARY_BUTTON"></button>
+            </div>
+        </div>
+    </div>
+
 
     <script src="script.js"></script>
 </body>

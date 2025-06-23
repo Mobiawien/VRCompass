@@ -87,6 +87,11 @@ nav {
     font-style: italic; /* Corsivo per indicare "in costruzione" */
 }
 
+/* Sposta il selettore della lingua e il badge della versione a destra */
+#language-selector {
+    margin-left: auto;
+}
+
 /* Stili per le Sezioni */
 .view-section {
     padding: 20px;
@@ -155,8 +160,7 @@ nav {
     background-color: #e9ecef;
     padding: 4px 8px;
     border-radius: 4px;
-    margin-left: auto;  /* Spinge il badge verso destra */
-    margin-right: 10px; /* Spazio tra il badge e il selettore lingua */
+    /* Il posizionamento a destra è ora gestito da #language-selector */
 }
 
 .dashboard-card {
@@ -978,6 +982,33 @@ td.calculated-result-cell {
     min-width: 300px;
 }
 
+/* Stili per la sezione "Cosa è Cambiato?" */
+.strategia-header-con-pulsante {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px; /* Spazio prima del contenuto sottostante */
+}
+
+.strategia-header-con-pulsante h2 {
+    margin-bottom: 0; /* Rimuove il margine dal titolo h2 */
+}
+
+.toggle-summary-btn {
+    padding: 6px 12px;
+    font-size: 0.85em;
+    background-color: #6c757d; /* Grigio (Bootstrap 'secondary') */
+    color: white;
+    border: 1px solid #6c757d;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.toggle-summary-btn:hover {
+    background-color: #5a6268; /* Grigio più scuro */
+}
+
 /* ----- INIZIO MODIFICHE PER GRAFICO TORTA STRATEGIA E SPIEGAZIONE ----- */
 #grafico-torta-container h2 {
     text-align: center;
@@ -1021,6 +1052,20 @@ td.calculated-result-cell {
     flex-grow: 1;
     flex-shrink: 1;
     min-height: 0;
+}
+
+/* Stile per il contenitore del riepilogo eventi passati */
+.summary-content {
+    background-color: #f0f8ff; /* AliceBlue, un azzurrino molto chiaro */
+    border: 1px solid #d6eaf8; /* Bordo azzurro leggermente più scuro */
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 20px; /* Spazio prima del monitoraggio scadenze future */
+}
+
+.summary-content ul {
+    list-style-type: none;
+    padding-left: 0;
 }
 /* ----- FINE MODIFICHE PER GRAFICO TORTA STRATEGIA E SPIEGAZIONE ----- */
 
@@ -1269,6 +1314,70 @@ input[type=number] {
     overflow: auto; /* Abilita lo scroll se il contenuto della modale è più grande della viewport */
     background-color: rgba(0,0,0,0.5); /* Sfondo semi-trasparente */
 }
+/* Stili per la nuova finestra modale di notifica VSR */
+#vsr-change-modal.modal {
+    display: flex; /* Usa flexbox per centrare il contenuto */
+    align-items: center; /* Centra verticalmente */
+    justify-content: center; /* Centra orizzontalmente */
+}
+
+#vsr-change-modal .modal-content {
+    background-color: #fefefe; /* Bianco puro per la modale di avviso */
+    margin: auto; /* Centra automaticamente */
+    padding: 30px; /* Più padding per un aspetto più spazioso */
+    border: 1px solid #888;
+    width: 90%; /* Larghezza della modale */
+    max-width: 500px; /* Larghezza massima per non essere troppo grande su schermi ampi */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+    animation-name: animatetop;
+    animation-duration: 0.4s;
+    text-align: center; /* Centra il testo all'interno della modale */
+    position: relative; /* Per posizionare il pulsante di chiusura */
+}
+
+/* Animazione per la modale */
+@keyframes animatetop {
+    from {top: -300px; opacity: 0}
+    to {top: 0; opacity: 1}
+}
+
+#vsr-change-modal .modal-content h2 {
+    color: #dc3545; /* Rosso per il titolo di attenzione */
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.5em;
+    border-bottom: none; /* Rimuovi il bordo inferiore */
+    padding-bottom: 0;
+}
+
+#vsr-change-modal .modal-content p {
+    font-size: 1.1em;
+    line-height: 1.5;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+#vsr-change-modal .modal-content p strong {
+    color: #007bff; /* Blu per i punteggi in grassetto */
+}
+
+#vsr-change-modal .modal-footer {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center; /* Centra i pulsanti */
+    gap: 15px; /* Spazio tra i pulsanti */
+}
+
+#vsr-change-modal .modal-footer button {
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Stili per il pulsante di chiusura della modale (la 'x' in alto a destra) */
 
 .modal-content {
     background-color: #eef4f8; /* Sfondo azzurrino molto chiaro */

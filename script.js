@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const LIMITI_GARE_PER_CATEGORIA = { "HC": 1, "LIV1": 3, "LIV2": 6, "LIV3": 10 };
     let potenzialePuntiPerGraficoTorta = {};
     let totalePotenzialePuntiPerGraficoTorta = 1;
-    const URL_ELENCO_REGATE = 'https://raw.githubusercontent.com/Mobiawien/VRCompass/main/elenco_regate.json';
+    const URL_ELENCO_REGATE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRufnoq1tMlyQJjCZEY9ifk7qykNYpxozBwuwHz2hjyv0qgIRWRGRNbkX7UFmfi_NVAp7Px62KgB_hO/pub?output=csv'; // URL del foglio Google Sheets pubblicato come CSV
 
     let currentLanguage = 'it';
     let translations = {};
@@ -1384,16 +1384,82 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(URL_ELENCO_REGATE);
             if (!response.ok) throw new Error(`Errore HTTP ${response.status} nel caricare l'elenco delle regate.`);
-            const datiElenco = await response.json();
-            if (datiElenco && datiElenco.dataAggiornamentoDatabase && Array.isArray(datiElenco.elencoRegateProposte)) {
-                infoAggiornamentoElencoRegate.innerHTML = `Elenco regate aggiornato il: <strong>${new Date(datiElenco.dataAggiornamentoDatabase).toLocaleDateString('it-IT')}</strong>. Aggiornamenti a cura di: <strong>ITA 86 FIV / Cristian</strong>.`;
-                popolaTabellaElencoRegateSuggerite(datiElenco.elencoRegateProposte);
-            } else throw new Error("Formato dati dell'elenco regate non valido.");
+            const csvText = await response.text();
+
+            // Logica di parsing avanzata per gestire data e tabella dallo stesso file CSV
+            const lines = csvText.trim().split(/\r\n?|\n/); // Split robusto per diverse terminazioni di riga
+            if (lines.length < 2) throw new Error("Il file CSV non ha abbastanza righe (data + intestazioni).");
+
+            // Rileva il separatore (virgola o tab) basandosi sulla riga delle intestazioni (la seconda riga)
+            const separator = lines[1].includes('\t') ? '\t' : ',';
+
+            // Estrai la data dalla prima riga
+            const dateLine = lines[0].split(separator);
+            let dataAggiornamentoDatabase = dateLine[0].trim();
+            // Validazione del formato data YYYY-MM-DD
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(dataAggiornamentoDatabase)) {
+                console.warn(`Formato data non valido ('${dataAggiornamentoDatabase}') nella prima riga del CSV. Uso la data odierna.`);
+                dataAggiornamentoDatabase = new Date().toISOString().split('T')[0];
+            }
+
+            // Passa il resto del CSV (dalla seconda riga in poi) alla funzione parseCsv
+            const tableCsvText = lines.slice(1).join('\n');
+            const parsedRegate = parseCsv(tableCsvText, separator);
+
+            // Definisci l'ordine desiderato per le categorie
+            const categoryOrder = {
+                "HC": 1,
+                "LIV1": 2,
+                "LIV2": 3,
+                "LIV3": 4
+            };
+
+            // Ordina le regate: prima per categoria, poi per data (dalla più recente alla meno recente)
+            parsedRegate.sort((a, b) => {
+                const categoryComparison = (categoryOrder[a.livello] || 99) - (categoryOrder[b.livello] || 99);
+                if (categoryComparison !== 0) return categoryComparison;
+                return new Date(b.data) - new Date(a.data);
+            });
+
+            // Ricostruisci la struttura dell'oggetto attesa
+            const datiElenco = {
+                dataAggiornamentoDatabase: dataAggiornamentoDatabase,
+                elencoRegateProposte: parsedRegate.map(row => ({
+                    idDatabase: row.idDatabase,
+                    data: row.data,
+                    livello: row.livello,
+                    nome: row.nome,
+                    puntiVSRBase: parseInt(row.puntiVSRBase) || 0 // Assicurati che i punti siano numeri interi
+                }))
+            };
+
+            infoAggiornamentoElencoRegate.innerHTML = `Elenco regate aggiornato il: <strong>${new Date(datiElenco.dataAggiornamentoDatabase).toLocaleDateString('it-IT')}</strong>. Aggiornamenti a cura di: <strong>ITA 86 FIV / Cristian</strong>.`;
+            popolaTabellaElencoRegateSuggerite(datiElenco.elencoRegateProposte);
         } catch (error) {
             console.error("Errore durante il caricamento dell'elenco regate:", error);
             infoAggiornamentoElencoRegate.textContent = getTranslation('TEXT_ERROR_LOADING_RACE_LIST');
             tbodyElencoRegateSuggerite.innerHTML = `<tr><td colspan="6" style="text-align:center; color: red;">${error.message}</td></tr>`;
         }
+    }
+
+    // Funzione helper per parsare il testo CSV in un array di oggetti
+    function parseCsv(csvString, separator = ',') {
+        const lines = csvString.trim().split(/\r\n?|\n/); // Split robusto
+        if (lines.length === 0) return [];
+
+        const headers = lines[0].split(separator).map(header => header.trim());
+        const result = [];
+
+        for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(separator);
+            if (values.length === 1 && values[0].trim() === '') continue; // Salta righe vuote
+            const obj = {};
+            headers.forEach((header, index) => {
+                obj[header] = values[index] ? values[index].trim() : ''; // Gestisce valori mancanti
+            });
+            result.push(obj);
+        }
+        return result;
     }
 
     function popolaTabellaElencoRegateSuggerite(regateProposte) {

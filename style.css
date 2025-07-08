@@ -658,6 +658,26 @@ td.calculated-result-cell {
     background-color: #218838;
 }
 
+/* Stile specifico per il pulsante "Carica da Elenco Regate" per differenziarlo.
+   Usiamo l'ID per essere più specifici della regola generica '#form-aggiungi-gara button'. */
+#form-aggiungi-gara #btn-apri-modal-elenco-regate {
+    background-color: #17a2b8; /* Colore verde acqua/ciano (Bootstrap 'info') */
+    border: none; /* Rimuoviamo il bordo per coerenza con l'altro pulsante */
+}
+
+/* Stile per l'hover del pulsante "Carica da Elenco Regate" */
+#form-aggiungi-gara #btn-apri-modal-elenco-regate:hover {
+    background-color: #138496; /* Versione più scura del ciano per l'hover */
+}
+
+/* Stili per il contenitore dei pulsanti di azione nel form VSR */
+.form-actions-container {
+    display: flex;
+    gap: 10px; /* Spazio tra i pulsanti */
+    margin-left: auto; /* Spinge il contenitore a destra */
+    align-items: center; /* Allinea i pulsanti verticalmente */
+}
+
 /* Stili per il contenitore dell'elenco regate suggerite */
 .elenco-regate-suggerite-container {
     margin-top: 20px;

@@ -258,7 +258,10 @@
                     <label for="punti-vsr-calcolati" data-i18n-key="VSR_FORM_LABEL_VSR_POINTS">Punti VSR:</label> <!-- Campo chiave per il calcolo -->
                     <input type="number" id="punti-vsr-calcolati" name="punti-vsr-calcolati" step="any" required readonly>
 
-                    <button type="submit">Aggiungi Gara</button>
+                    <div class="form-actions-container">
+                        <button type="submit">Aggiungi Gara</button>
+                        <button id="btn-apri-modal-elenco-regate" class="dashboard-action-button" data-i18n-key="VSR_BTN_LOAD_FROM_LIST">Carica da Elenco Regate</button>
+                    </div>
                 </form>
 
                 <!-- Pulsanti per filtrare la visualizzazione dello storico -->
@@ -269,8 +272,6 @@
                     <button id="btn-storico-liv1" class="nav-button filtro-btn" data-i18n-key="VSR_FILTER_BTN_L1">Liv. 1</button>
                     <button id="btn-storico-liv2" class="nav-button filtro-btn" data-i18n-key="VSR_FILTER_BTN_L2">Liv. 2</button>
                     <button id="btn-storico-liv3" class="nav-button filtro-btn" data-i18n-key="VSR_FILTER_BTN_L3">Liv. 3</button>
-                    <!-- Pulsante spostato qui -->
-                    <button id="btn-apri-modal-elenco-regate" class="dashboard-action-button filtro-btn" style="background-color: #17a2b8; border-color: #17a2b8; margin-left: 10px;" data-i18n-key="VSR_BTN_LOAD_FROM_LIST">Carica da Elenco Regate</button>
                 </div>
                 <!-- Tabella per visualizzare le gare salvate -->
                 <table id="tabella-classifica-vsr">

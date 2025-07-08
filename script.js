@@ -871,8 +871,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
     
             const infoLivello = livelliVsrStoricoMap[gara.livello];
-            if (fattoreDecadimentoEffettivo > 0 && gara.puntiVSR > 0 && infoLivello) {
-                return { ...gara, puntiEffettivi: Math.round(gara.puntiVSR * fattoreDecadimentoEffettivo), fattoreDecadimento: fattoreDecadimentoEffettivo, mesiTrascorsi: mesiTrascorsiEffettivi, tipoGara: infoLivello.tipo };
+            // Ricalcoliamo i punti da zero per massima precisione, arrotondando solo alla fine.
+            if (fattoreDecadimentoEffettivo > 0 && gara.classificaFinale > 0 && infoLivello && infoLivello.valoreNumerico) {
+                const puntiNonArrotondati = infoLivello.valoreNumerico / Math.pow(gara.classificaFinale, 0.125);
+                const puntiEffettiviArrotondati = Math.round(puntiNonArrotondati * fattoreDecadimentoEffettivo);
+                return { ...gara, puntiEffettivi: puntiEffettiviArrotondati, fattoreDecadimento: fattoreDecadimentoEffettivo, mesiTrascorsi: mesiTrascorsiEffettivi, tipoGara: infoLivello.tipo };
             }
             return null;
         }).filter(g => g !== null);

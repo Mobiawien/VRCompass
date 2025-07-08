@@ -199,8 +199,8 @@ document.addEventListener('DOMContentLoaded', () => {
         HISTORY_L3: 'storico_liv3'
     };
     const EVENT_TYPES = {
-        HALVING: "Dimezzamento", // Usato internamente per logica, la traduzione avviene al display
-        EXPIRY: "Scadenza"      // Usato internamente per logica
+        HALVING: "EVENT_TYPE_HALVING", // Usato internamente per logica, la traduzione avviene al display
+        EXPIRY: "EVENT_TYPE_EXPIRY"      // Usato internamente per logica
     };
     let statoVSRPrecedente = {
         punteggio: 0,

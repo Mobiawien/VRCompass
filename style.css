@@ -174,16 +174,19 @@ nav {
     border-radius: 4px; /* Aggiunto per coerenza visiva */
 }
 
-/* Rimuoviamo il margine sotto l'h3 dato che non c'è più il titolo */
+/* Stile per i titoli all'interno delle dashboard-card */
 .dashboard-card h3 {
-    display: block;
     text-align: center;
     margin-top: 3px;
     margin-bottom: 8px;
     color: #0056b3;
-    font-size: 1.1em;
-    font-weight: bold;
-    padding-bottom: 5px;
+    font-size: 1em;
+    font-weight: bold; /* Aggiunto per coerenza */
+    padding-bottom: 5px; /* Aggiunto per coerenza */
+    white-space: nowrap; /* Forza il testo su una sola riga */
+    overflow: hidden;    /* Nasconde il testo in eccesso */
+    text-overflow: ellipsis; /* Mostra ... se il testo è troppo lungo */
+    flex-shrink: 0;      /* Impedisce al titolo di restringersi in altezza */
 }
 
 /* Aggiustiamo il layout degli elementi interni */
@@ -196,19 +199,6 @@ nav {
 /* #info-gestione-card {
     background-color: #f7fafd;
 } */
-
-/* Stile per i titoli all'interno delle dashboard-card */
-.dashboard-card h3 {
-    text-align: center;
-    margin-top: 3px;
-    margin-bottom: 8px;
-    color: #0056b3;
-    font-size: 1em;
-    white-space: nowrap; /* Forza il testo su una sola riga */
-    overflow: hidden;    /* Nasconde il testo in eccesso */
-    text-overflow: ellipsis; /* Mostra ... se il testo è troppo lungo */
-    flex-shrink: 0;      /* Impedisce al titolo di restringersi in altezza */
-}
 
 /* Stile per la card info/gestione nella dashboard (colonna destra) */
 #info-gestione-card {
@@ -582,7 +572,6 @@ td.calculated-result-cell {
                         /* Puoi aggiustare 60px se necessario. */
 }
 
-/* Stili per risultati calcolati (Calcolatrice) */
 .calculated-cell {
     background-color: #e8f0fe; /* Azzurro chiaro */
     font-weight: bold;
@@ -594,6 +583,8 @@ td.calculated-result-cell {
     color: #28a745; /* Verde */
     font-weight: bold;
 }
+
+/* Stili per risultati calcolati (Calcolatrice) */
 .perdita {
     color: #dc3545; /* Rosso */
     font-weight: bold;
@@ -625,6 +616,7 @@ td.calculated-result-cell {
     gap: 15px 20px;
     align-items: center;
 }
+
 #form-aggiungi-gara label {
     font-weight: bold;
     margin-right: 5px;
@@ -632,16 +624,23 @@ td.calculated-result-cell {
 }
 #form-aggiungi-gara input[type="date"],
 #form-aggiungi-gara input[type="number"],
-#form-aggiungi-gara select {
+#form-aggiungi-gara select,
+#form-aggiungi-gara input[type="text"] { /* Unificato lo stile per tutti gli input del form */
     padding: 8px;
     border: 1px solid #ced4da;
     border-radius: 4px;
     font-size: 0.9em;
+    box-sizing: border-box; /* Assicura che padding e border non alterino la larghezza totale */
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out; /* Aggiunge transizione per il focus */
 }
 #form-aggiungi-gara input[type="date"] { width: 130px; }
 #form-aggiungi-gara select { width: 180px; }
 #form-aggiungi-gara input[type="number"] { width: 110px; text-align: right; }
-#form-aggiungi-gara input[type="text"] { width: 150px; }
+/* Rende il campo Nome Regata flessibile e più grande, come richiesto */
+#form-aggiungi-gara input#nome-regata {
+    flex-grow: 1; /* Permette al campo di espandersi per riempire lo spazio */
+    min-width: 200px; /* Aumenta la larghezza minima per una migliore visibilità */
+}
 #form-aggiungi-gara input#punteggio-vsr { background-color: #e9ecef; cursor: not-allowed; }
 #form-aggiungi-gara button {
     padding: 8px 15px;
@@ -652,7 +651,15 @@ td.calculated-result-cell {
     cursor: pointer;
     transition: background-color 0.2s ease;
     font-size: 0.9em;
-    margin-left: auto; /* Spinge il pulsante a destra */
+    /* margin-left: auto; */ /* Rimosso per un posizionamento flessibile */
+}
+
+/* Stile per il focus sugli input del form per evitare il "salto" del layout */
+#form-aggiungi-gara input:focus,
+#form-aggiungi-gara select:focus {
+    border-color: #86b7fe;
+    outline: 0; /* Rimuove l'outline di default che causa il salto */
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, .25); /* Usa box-shadow per l'effetto focus, che non altera le dimensioni */
 }
 #form-aggiungi-gara button:hover {
     background-color: #218838;
@@ -670,12 +677,9 @@ td.calculated-result-cell {
     background-color: #138496; /* Versione più scura del ciano per l'hover */
 }
 
-/* Stili per il contenitore dei pulsanti di azione nel form VSR */
-.form-actions-container {
-    display: flex;
-    gap: 10px; /* Spazio tra i pulsanti */
-    margin-left: auto; /* Spinge il contenitore a destra */
-    align-items: center; /* Allinea i pulsanti verticalmente */
+/* Nuovo stile per lo spacer che spinge il pulsante "Carica" a destra */
+.form-spacer {
+    flex-grow: 1; /* Questo elemento si espanderà per riempire lo spazio vuoto */
 }
 
 /* Stili per il contenitore dell'elenco regate suggerite */

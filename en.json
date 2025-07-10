@@ -132,7 +132,7 @@
     "VSR_GUIDE_LOAD_SUGGESTED_STEP2_ACTION1": "Enter your <strong>Final Ranking</strong> in the appropriate field.",
     "VSR_GUIDE_LOAD_SUGGESTED_STEP2_ACTION2": "Click the \"Add\" button next to the race.",
     "VSR_GUIDE_LOAD_SUGGESTED_STEP3": "The race will be added to your VSR history with points calculated based on the entered ranking. The \"Add\" button for that race in the suggested list will become \"Already Added\" and will be disabled.",
-    "VSR_GUIDE_LOAD_SUGGESTED_STEP4": "You can click \"Hide Race List\" again (the button text changes) to close the list view.",
+    "VSR_GUIDE_LOAD_SUGGESTED_STEP4": "To close the list window, click the '×' at the top right or anywhere outside the window itself.",
     "VSR_GUIDE_INPUT_METHODS_INTRO": "To enter your race results, you have two main methods available:",
     "VSR_GUIDE_READ_TABLES_TITLE": "<strong>How to Read the Race Tables:</strong>",
     "VSR_GUIDE_READ_TABLES_INTRO": "The table shows your races. Use the filter buttons:",

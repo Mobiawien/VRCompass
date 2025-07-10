@@ -132,7 +132,7 @@
     "VSR_GUIDE_LOAD_SUGGESTED_STEP2_ACTION1": "Entrez votre <strong>Classement Final</strong> dans le champ approprié.",
     "VSR_GUIDE_LOAD_SUGGESTED_STEP2_ACTION2": "Cliquez sur le bouton \"Ajouter\" à côté de la course.",
     "VSR_GUIDE_LOAD_SUGGESTED_STEP3": "La course sera ajoutée à votre historique VSR avec les points calculés en fonction du classement entré. Le bouton \"Ajouter\" pour cette course dans la liste suggérée deviendra \"Déjà Ajouté\" et sera désactivé.",
-    "VSR_GUIDE_LOAD_SUGGESTED_STEP4": "Vous pouvez cliquer à nouveau sur \"Masquer Liste des Courses\" (le texte du bouton change) pour fermer l'affichage de la liste.",
+    "VSR_GUIDE_LOAD_SUGGESTED_STEP4": "Pour fermer la fenêtre de la liste, cliquez sur le '×' en haut à droite ou n'importe où en dehors de la fenêtre.",
     "VSR_GUIDE_INPUT_METHODS_INTRO": "Pour saisir les résultats de vos régates, vous disposez de deux méthodes principales :",
     "VSR_GUIDE_READ_TABLES_TITLE": "<strong>Comment Lire les Tableaux des Courses :</strong>",
     "VSR_GUIDE_READ_TABLES_INTRO": "Le tableau montre vos courses. Utilisez les boutons de filtre :",

@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const LIMITI_GARE_PER_CATEGORIA = { "HC": 1, "LIV1": 3, "LIV2": 6, "LIV3": 10 };
     let potenzialePuntiPerGraficoTorta = {};
     let totalePotenzialePuntiPerGraficoTorta = 1;
-    const URL_ELENCO_REGATE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRufnoq1tMlyQJjCZEY9ifk7qykNYpxozBwuwHz2hjyv0qgIRWRGRNbkX7UFmfi_NVAp7Px62KgB_hO/pub?output=csv'; // URL del foglio Google Sheets pubblicato come CSV
+    const URL_ELENCO_REGATE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRV5pH66Z2p5uAeyBcMetfRkyXYTlNUjdeRcvDj8_snsm_vb4tR0SmyYWHwvdazMAIv1XnvkhXhR3hQ/pub?gid=0&single=true&output=csv'; // URL del foglio Google Sheets pubblicato come CSV
 
     let currentLanguage = 'it';
     let translations = {};

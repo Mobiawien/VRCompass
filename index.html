@@ -22,7 +22,7 @@
             <option value="fr">Français</option>
         </select>
         <!-- Spostato qui il badge versione -->
-        <span class="version-badge">VRCompass v1.4.0</span>
+        <span class="version-badge">VRCompass v1.5.0</span>
     </nav>
 
     <div id="dashboard-view" class="view-section">
@@ -109,8 +109,9 @@
                         <div class="info-gestione-sezione" id="informativa-dashboard">
                             <h3 data-i18n-key="DASHBOARD_INFO_DISCLAIMER_TITLE">Informativa e Disclaimer</h3>
                             <div id="informativa-disclaimer-section"> <!-- Manteniamo l'ID originale per la logica JS -->
-                                <p data-i18n-key="DASHBOARD_INFO_DISCLAIMER_DATA_MANAGEMENT_P1"><strong>Gestione dei Dati:</strong> Questa applicazione salva i dati inseriti (nome barca, punteggio VSR, dettagli delle regate) unicamente all'interno del <code>localStorage</code> del tuo browser. Nessun dato viene trasmesso o memorizzato su server esterni. L'utente ha pieno controllo sui propri dati e può cancellarli in qualsiasi momento tramite le impostazioni del proprio browser o utilizzando le funzionalità di esportazione/importazione fornite.</p>
-                                <p data-i18n-key="DASHBOARD_INFO_DISCLAIMER_ACCURACY_P1"><strong>Accuratezza e Scopo:</strong> VR Compass è uno strumento di ausilio fornito "così com'è", senza garanzie esplicite o implicite sulla sua accuratezza, completezza o funzionamento continuo. Il suo scopo principale è aiutarti a <strong>tenere traccia e organizzare la tua classifica VSR, fornendo un orientamento per le tue strategie di regata future</strong>, oltre a calcolare crediti e punti VSR. Questi calcoli sono basati su formule note ma potrebbero presentare lievi discrepanze rispetto ai valori ufficiali di Virtual Regatta Offshore a causa di arrotondamenti specifici o logiche interne del gioco non completamente documentate. <strong>Se noti discrepanze significative, potrebbe essere un segnale di un errore nell'inserimento dei dati di una o più regate.</strong></p>
+                                <p data-i18n-key="DASHBOARD_INFO_DISCLAIMER_DATA_MANAGEMENT_P1"></p>
+                                <p data-i18n-key="DASHBOARD_INFO_DISCLAIMER_ACCURACY_P1"></p>
+                                <p data-i18n-key="DASHBOARD_INFO_DISCLAIMER_ACCURACY_P2" style="background-color: #fff3cd; color: #664d03; padding: 10px; border-radius: 4px; border: 1px solid #ffecb5;"></p>
                             </div>
                             <!-- I paragrafi Responsabilità e Copyright sono stati spostati più in basso, fuori da questo div -->
                         </div>
@@ -256,8 +257,10 @@
 
                     <label for="punti-vsr-calcolati" data-i18n-key="VSR_FORM_LABEL_VSR_POINTS">Punti VSR:</label> <!-- Campo chiave per il calcolo -->
                     <input type="number" id="punti-vsr-calcolati" name="punti-vsr-calcolati" step="any" required readonly>
-
+                    
                     <button type="submit">Aggiungi Gara</button>
+                    <div class="form-spacer"></div> <!-- Questo elemento si espanderà per spingere il pulsante successivo a destra -->
+                    <button id="btn-apri-modal-elenco-regate" class="dashboard-action-button" data-i18n-key="VSR_BTN_LOAD_FROM_LIST">Carica da Elenco Regate</button>
                 </form>
 
                 <!-- Pulsanti per filtrare la visualizzazione dello storico -->
@@ -268,8 +271,6 @@
                     <button id="btn-storico-liv1" class="nav-button filtro-btn" data-i18n-key="VSR_FILTER_BTN_L1">Liv. 1</button>
                     <button id="btn-storico-liv2" class="nav-button filtro-btn" data-i18n-key="VSR_FILTER_BTN_L2">Liv. 2</button>
                     <button id="btn-storico-liv3" class="nav-button filtro-btn" data-i18n-key="VSR_FILTER_BTN_L3">Liv. 3</button>
-                    <!-- Pulsante spostato qui -->
-                    <button id="btn-apri-modal-elenco-regate" class="dashboard-action-button filtro-btn" style="background-color: #17a2b8; border-color: #17a2b8; margin-left: 10px;" data-i18n-key="VSR_BTN_LOAD_FROM_LIST">Carica da Elenco Regate</button>
                 </div>
                 <!-- Tabella per visualizzare le gare salvate -->
                 <table id="tabella-classifica-vsr">

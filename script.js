@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const LIMITI_GARE_PER_CATEGORIA = { "HC": 1, "LIV1": 3, "LIV2": 6, "LIV3": 10 };
     let potenzialePuntiPerGraficoTorta = {};
     let totalePotenzialePuntiPerGraficoTorta = 1;
-    const URL_ELENCO_REGATE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRufnoq1tMlyQJjCZEY9ifk7qykNYpxozBwuwHz2hjyv0qgIRWRGRNbkX7UFmfi_NVAp7Px62KgB_hO/pub?output=csv'; // URL del foglio Google Sheets pubblicato come CSV
+    const URL_ELENCO_REGATE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRV5pH66Z2p5uAeyBcMetfRkyXYTlNUjdeRcvDj8_snsm_vb4tR0SmyYWHwvdazMAIv1XnvkhXhR3hQ/pub?gid=0&single=true&output=csv'; // URL del foglio Google Sheets pubblicato come CSV
 
     let currentLanguage = 'it';
     let translations = {};
@@ -199,8 +199,8 @@ document.addEventListener('DOMContentLoaded', () => {
         HISTORY_L3: 'storico_liv3'
     };
     const EVENT_TYPES = {
-        HALVING: "Dimezzamento", // Usato internamente per logica, la traduzione avviene al display
-        EXPIRY: "Scadenza"      // Usato internamente per logica
+        HALVING: "EVENT_TYPE_HALVING", // Usato internamente per logica, la traduzione avviene al display
+        EXPIRY: "EVENT_TYPE_EXPIRY"      // Usato internamente per logica
     };
     let statoVSRPrecedente = {
         punteggio: 0,
@@ -871,8 +871,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
     
             const infoLivello = livelliVsrStoricoMap[gara.livello];
-            if (fattoreDecadimentoEffettivo > 0 && gara.puntiVSR > 0 && infoLivello) {
-                return { ...gara, puntiEffettivi: Math.round(gara.puntiVSR * fattoreDecadimentoEffettivo), fattoreDecadimento: fattoreDecadimentoEffettivo, mesiTrascorsi: mesiTrascorsiEffettivi, tipoGara: infoLivello.tipo };
+            // Ricalcoliamo i punti da zero per massima precisione, arrotondando solo alla fine.
+            if (fattoreDecadimentoEffettivo > 0 && gara.classificaFinale > 0 && infoLivello && infoLivello.valoreNumerico) {
+                const puntiNonArrotondati = infoLivello.valoreNumerico / Math.pow(gara.classificaFinale, 0.125);
+                const puntiEffettiviArrotondati = Math.round(puntiNonArrotondati * fattoreDecadimentoEffettivo);
+                return { ...gara, puntiEffettivi: puntiEffettiviArrotondati, fattoreDecadimento: fattoreDecadimentoEffettivo, mesiTrascorsi: mesiTrascorsiEffettivi, tipoGara: infoLivello.tipo };
             }
             return null;
         }).filter(g => g !== null);

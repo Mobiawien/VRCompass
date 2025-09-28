@@ -127,7 +127,7 @@
     "VSR_GUIDE_DATA_INSERTION_STEP5": "<strong>Points VSR :</strong> Calculés et affichés automatiquement par VRCompass en fonction du Niveau Course et du Classement Final (utilisant la formule <code>PointsMaxCatégorie / (Classement<sup>0.125</sup>)</code>, arrondis).",
     "VSR_GUIDE_DATA_INSERTION_STEP6": "Cliquez sur \"Ajouter Course\" pour sauvegarder le résultat dans votre historique.",
     "VSR_GUIDE_LOAD_SUGGESTED_TITLE": "<strong>Charger des Courses depuis la Liste Suggérée :</strong>",
-    "VSR_GUIDE_LOAD_SUGGESTED_STEP1": "Cliquez sur le bouton \"Charger depuis Liste des Courses\". Une liste de courses suggérées s'affichera, indiquant la date de la dernière mise à jour et mentionnant que la liste est gérée par <strong>ITA 86 FIV / Cristian</strong>.",
+    "VSR_GUIDE_LOAD_SUGGESTED_STEP1": "Cliquez sur le bouton \"Charger depuis Liste des Courses\". Une liste de courses suggérées s'affichera.",
     "VSR_GUIDE_LOAD_SUGGESTED_STEP2_INTRO": "Parcourez la liste. Pour chaque course à laquelle vous avez participé et que vous souhaitez ajouter à votre historique :",
     "VSR_GUIDE_LOAD_SUGGESTED_STEP2_ACTION1": "Entrez votre <strong>Classement Final</strong> dans le champ approprié.",
     "VSR_GUIDE_LOAD_SUGGESTED_STEP2_ACTION2": "Cliquez sur le bouton \"Ajouter\" à côté de la course.",
@@ -311,7 +311,7 @@
     "DASHBOARD_USER_DATA_HOW_TO_TITLE": "<strong>Comment utiliser :</strong>",
     "DASHBOARD_USER_DATA_HOW_TO_LI1": "- <strong>Exporter Données :</strong> Cliquez sur le bouton \"Exporter Données\" (dans la carte \"État Actuel\") pour télécharger un fichier (<code>VRCompass_backup.json</code>) contenant toutes vos données actuelles. Conservez ce fichier en lieu sûr.",
     "DASHBOARD_USER_DATA_HOW_TO_LI2": "- <strong>Importer Données :</strong> Cliquez sur le bouton \"Importer Données\" (dans la carte \"État Actuel\") pour sélectionner un fichier <code>.json</code> précédemment exporté. Les données du fichier écraseront celles actuellement présentes dans l'application.",
-    "DASHBOARD_USER_DATA_THANKS": "Un merci spécial à notre Capitaine <strong>ITA 86 FIV / Cristian</strong> pour sa précieuse collaboration dans la gestion et la mise à jour de la liste des courses, rendant VRCompass un outil encore plus puissant !",
+    "DASHBOARD_USER_DATA_THANKS": "Un merci spécial à <strong>SailSmurf - LSV / Franck</strong> pour sa précieuse collaboration dans la gestion et la mise à jour de la liste des courses, rendant VRCompass un outil encore plus puissant !",
     "DASHBOARD_USER_DATA_NOTE_P1": "<strong>Note :</strong> Après toute modification des données des courses ou des informations générales (comme le nom du bateau), il est conseillé d'<strong>exporter à nouveau les données</strong> pour vous assurer d'avoir une sauvegarde à jour.",
 
     "DASHBOARD_INFO_DISCLAIMER_TITLE": "Information et Clause de Non-responsabilité",

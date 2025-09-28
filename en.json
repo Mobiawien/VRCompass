@@ -127,7 +127,7 @@
     "VSR_GUIDE_DATA_INSERTION_STEP5": "<strong>VSR Points:</strong> Automatically calculated and displayed by VRCompass based on Race Level and Final Ranking (using the formula <code>MaxCategoryPoints / (Ranking<sup>0.125</sup>)</code>, rounded).",
     "VSR_GUIDE_DATA_INSERTION_STEP6": "Click \"Add Race\" to save the result to your history.",
     "VSR_GUIDE_LOAD_SUGGESTED_TITLE": "<strong>Load Races from Suggested List:</strong>",
-    "VSR_GUIDE_LOAD_SUGGESTED_STEP1": "Click the \"Load from Race List\" button. A list of suggested races will be displayed, indicating the last update date and mentioning that the list is curated by <strong>ITA 86 FIV / Cristian</strong>.",
+    "VSR_GUIDE_LOAD_SUGGESTED_STEP1": "Click the \"Load from Race List\" button. A list of suggested races will be displayed.",
     "VSR_GUIDE_LOAD_SUGGESTED_STEP2_INTRO": "Scroll through the list. For each race you participated in and wish to add to your history:",
     "VSR_GUIDE_LOAD_SUGGESTED_STEP2_ACTION1": "Enter your <strong>Final Ranking</strong> in the appropriate field.",
     "VSR_GUIDE_LOAD_SUGGESTED_STEP2_ACTION2": "Click the \"Add\" button next to the race.",
@@ -311,7 +311,7 @@
     "DASHBOARD_USER_DATA_HOW_TO_TITLE": "<strong>How to use:</strong>",
     "DASHBOARD_USER_DATA_HOW_TO_LI1": "- <strong>Export Data:</strong> Click the \"Export Data\" button (in the \"Current Status\" card) to download a file (<code>VRCompass_backup.json</code>) containing all your current data. Keep this file in a safe place.",
     "DASHBOARD_USER_DATA_HOW_TO_LI2": "- <strong>Import Data:</strong> Click the \"Import Data\" button (in the \"Current Status\" card) to select a previously exported <code>.json</code> file. The data in the file will overwrite the data currently in the application.",
-    "DASHBOARD_USER_DATA_THANKS": "A special thanks to our Captain <strong>ITA 86 FIV / Cristian</strong> for his valuable collaboration in managing and updating the race list, making VRCompass an even more powerful tool!",
+    "DASHBOARD_USER_DATA_THANKS": "A special thanks to <strong>SailSmurf - LSV / Franck</strong> for his valuable collaboration in managing and updating the race list, making VRCompass an even more powerful tool!",
     "DASHBOARD_USER_DATA_NOTE_P1": "<strong>Note:</strong> After any changes to race data or general information (like boat name), it is advisable to <strong>export the data again</strong> to ensure you have an updated backup.",
 
     "DASHBOARD_INFO_DISCLAIMER_TITLE": "Information and Disclaimer",

@@ -127,7 +127,7 @@
     "VSR_GUIDE_DATA_INSERTION_STEP5": "<strong>Punti VSR:</strong> Vengono calcolati e visualizzati automaticamente da VRCompass in base al Livello Gara e alla Classifica Finale (usando la formula <code>PuntiMaxCategoria / (Classifica<sup>0.125</sup>)</code>, arrotondati).",
     "VSR_GUIDE_DATA_INSERTION_STEP6": "Clicca su \"Aggiungi Gara\" per salvare il risultato nello storico.",
     "VSR_GUIDE_LOAD_SUGGESTED_TITLE": "<strong>Caricare Regate da Elenco Suggerito:</strong>",
-    "VSR_GUIDE_LOAD_SUGGESTED_STEP1": "Clicca sul pulsante \"Carica da Elenco Regate\". Verrà visualizzato un elenco di regate suggerite, con l'indicazione della data dell'ultimo aggiornamento e la menzione che l'elenco è curato da <strong>ITA 86 FIV / Cristian</strong>.",
+    "VSR_GUIDE_LOAD_SUGGESTED_STEP1": "Clicca sul pulsante \"Carica da Elenco Regate\". Verrà visualizzato un elenco di regate suggerite.",
     "VSR_GUIDE_LOAD_SUGGESTED_STEP2_INTRO": "Scorri l'elenco. Per ogni regata a cui hai partecipato e che desideri aggiungere al tuo storico:",
     "VSR_GUIDE_LOAD_SUGGESTED_STEP2_ACTION1": "Inserisci la tua <strong>Classifica Finale</strong> nell'apposito campo.",
     "VSR_GUIDE_LOAD_SUGGESTED_STEP2_ACTION2": "Clicca sul pulsante \"Aggiungi\" accanto alla regata.",
@@ -313,7 +313,7 @@
     "DASHBOARD_USER_DATA_HOW_TO_TITLE": "<strong>Come usare:</strong>",
     "DASHBOARD_USER_DATA_HOW_TO_LI1": "- <strong>Esporta Dati:</strong> Clicca sul pulsante \"Esporta Dati\" (nella card \"Stato Attuale\") per scaricare un file (<code>VRCompass_backup.json</code>) contenente tutti i tuoi dati attuali. Conserva questo file in un luogo sicuro.",
     "DASHBOARD_USER_DATA_HOW_TO_LI2": "- <strong>Importa Dati:</strong> Clicca sul pulsante \"Importa Dati\" (nella card \"Stato Attuale\") per selezionare un file <code>.json</code> precedentemente esportato. I dati nel file sovrascriveranno quelli attualmente presenti nell'applicazione.",
-    "DASHBOARD_USER_DATA_THANKS": "Un ringraziamento speciale al nostro Capitano <strong>ITA 86 FIV / Cristian</strong> per la sua preziosa collaborazione nella gestione e nell'aggiornamento dell'elenco regate, rendendo VRCompass uno strumento ancora più potente!",
+    "DASHBOARD_USER_DATA_THANKS": "Un ringraziamento speciale a <strong>SailSmurf - LSV / Franck</strong> per la sua preziosa collaborazione nella gestione e nell'aggiornamento dell'elenco regate, rendendo VRCompass uno strumento ancora più potente!",
     "DASHBOARD_USER_DATA_NOTE_P1": "<strong>Nota:</strong> Dopo ogni modifica ai dati delle gare o alle informazioni generali (come il nome della barca), è consigliabile <strong>esportare nuovamente i dati</strong> per assicurarsi di avere un backup aggiornato.",
 
     "DASHBOARD_INFO_DISCLAIMER_TITLE": "Informativa e Disclaimer",

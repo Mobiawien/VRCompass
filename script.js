@@ -167,8 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const LIMITI_GARE_PER_CATEGORIA = { "HC": 1, "LIV1": 3, "LIV2": 6, "LIV3": 10 };
     let potenzialePuntiPerGraficoTorta = {};
-    let totalePotenzialePuntiPerGraficoTorta = 1;
-    const URL_ELENCO_REGATE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRV5pH66Z2p5uAeyBcMetfRkyXYTlNUjdeRcvDj8_snsm_vb4tR0SmyYWHwvdazMAIv1XnvkhXhR3hQ/pub?gid=0&single=true&output=csv'; // URL del foglio Google Sheets pubblicato come CSV
+    let totalePotenzialePuntiPerGraficoTorta = 1;    
+    const URL_ELENCO_REGATE = 'https://cert.civis.net/LSV-Dash/api?context=api&context_type=allrace';
 
     let currentLanguage = 'it';
     let translations = {};
@@ -382,7 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadTranslations(lang) {
         try {
-            const response = await fetch(`${lang}.json`);
+            const response = await fetch(`${lang}.json?v=${Date.now()}`);
             if (!response.ok) throw new Error(`Errore nel caricamento del file di traduzione per ${lang}: ${response.statusText}`);
             translations[lang] = await response.json();
             console.log(`Traduzioni per ${lang} caricate.`);
@@ -1071,7 +1071,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
         if (nuovoFattoreDecadimentoSimulato === 0.5) { // Stiamo simulando un dimezzamento
             fattorePrecedente = 1.0;
-            mesiTrascorsiSimulatiPrima = 11; // Simula che la gara sia appena prima del dimezzamento (11 mesi e spicci)
+            mesiTrascorsiSimulatiPrima = 11.99; // Simula che la gara sia un istante prima del dimezzamento
         } else if (nuovoFattoreDecadimentoSimulato === 0) { // Stiamo simulando una scadenza
             fattorePrecedente = 0.5;
             mesiTrascorsiSimulatiPrima = 23; // Simula che la gara sia appena prima della scadenza (23 mesi e spicci)
@@ -1383,86 +1383,143 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function caricaDatiElencoRegate() {
         infoAggiornamentoElencoRegate.textContent = getTranslation('TEXT_LOADING_RACE_LIST');
-        tbodyElencoRegateSuggerite.innerHTML = `<tr><td colspan="6" style="text-align:center;">${getTranslation('TEXT_WAIT')}</td></tr>`;
-        try {
-            const response = await fetch(URL_ELENCO_REGATE);
-            if (!response.ok) throw new Error(`Errore HTTP ${response.status} nel caricare l'elenco delle regate.`);
-            const csvText = await response.text();
+        tbodyElencoRegateSuggerite.innerHTML =
+          `<tr><td colspan="6" style="text-align:center;">${getTranslation('TEXT_WAIT')}</td></tr>`;
 
-            // Logica di parsing avanzata per gestire data e tabella dallo stesso file CSV
-            const lines = csvText.trim().split(/\r\n?|\n/); // Split robusto per diverse terminazioni di riga
-            if (lines.length < 2) throw new Error("Il file CSV non ha abbastanza righe (data + intestazioni).");
+        // Ordre des catégories (par défaut si absent/inconnu → 99)
+        const categoryOrder = { HC: 1, LIV1: 2, LIV2: 3, LIV3: 4 };
 
-            // Rileva il separatore (virgola o tab) basandosi sulla riga delle intestazioni (la seconda riga)
-            const separator = lines[1].includes('\t') ? '\t' : ',';
-
-            // Estrai la data dalla prima riga
-            const dateLine = lines[0].split(separator);
-            let dataAggiornamentoDatabase = dateLine[0].trim();
-            // Validazione del formato data YYYY-MM-DD
-            if (!/^\d{4}-\d{2}-\d{2}$/.test(dataAggiornamentoDatabase)) {
-                console.warn(`Formato data non valido ('${dataAggiornamentoDatabase}') nella prima riga del CSV. Uso la data odierna.`);
-                dataAggiornamentoDatabase = new Date().toISOString().split('T')[0];
+        // Helpers
+        const mapVsrToLivello = (vsr) => {
+            switch (Number(vsr)) {
+                case -1: return "HC";
+                case 1:  return "LIV1";
+                case 2:  return "LIV2";
+                case 3:  return "LIV3";
+                case 0:
+                default: return ""; // rien pour 0 ou valeur inconnue
             }
+        };
+        // Map livello -> points par défaut
+        const basePointsFromLivello = (livello) => {
+          switch (String(livello).toUpperCase()) {
+            case "HC":   return 15000;
+            case "LIV1": return 10000;
+            case "LIV2": return 5000;
+            case "LIV3": return 3000;
+            default:     return 0;
+          }
+        };
+        const isValidISODate = (s) => typeof s === "string" && /^\d{4}-\d{2}-\d{2}/.test(s);
+        const toISODate = (v) => {
+          if (!v) return new Date().toISOString().split('T')[0];
+          if (isValidISODate(v)) return v.slice(0,10);
+          const d = new Date(v);
+          return isNaN(d.getTime()) ? new Date().toISOString().split('T')[0] : d.toISOString().split('T')[0];
+        };
+        const parsePoints = (x) => {
+          const n = parseInt(x, 10);
+          return Number.isFinite(n) ? n : 0;
+        };
 
-            // Passa il resto del CSV (dalla seconda riga in poi) alla funzione parseCsv
-            const tableCsvText = lines.slice(1).join('\n');
-            const parsedRegate = parseCsv(tableCsvText, separator);
+        // Normalisation d’un objet "regata" quel que soit le naming des champs
+        const normalizeRegata = (row) => {
+          //tentatives de mapping de clés possibles
+          const idDatabase = row.idDatabase ?? row.rid ?? "";
+          const data = row.data ?? row.date ?? row.end ?? "";
+          // const livello = row.livello ?? row.vsr ?? "";
+          const livello = (() => {
+              const lv = row.livello ?? row.category ?? row.cat ?? row.level;
+              if (lv != null && String(lv).trim() !== "") return String(lv).toUpperCase();
+              return mapVsrToLivello(row.vsr);
+          })();
+          const nome = row.nome ?? row.name ?? "";
+          // 1) si le JSON fournit déjà des points -> on les prend
+          // 2) sinon -> on applique la table (HC=15000, LIV1=10000, LIV2=5000, LIV3=3000)
+          const explicit = row.puntiVSRBase ?? row.vsrPoints;
+          const puntiVSRBase = (explicit == null || Number.isNaN(parseInt(explicit, 10)))
+            ? basePointsFromLivello(livello)
+            : parseInt(explicit, 10);
 
-            // Definisci l'ordine desiderato per le categorie
-            const categoryOrder = {
-                "HC": 1,
-                "LIV1": 2,
-                "LIV2": 3,
-                "LIV3": 4
-            };
+          return {
+            idDatabase: String(idDatabase),
+            data: toISODate(data),
+            livello: String(livello).toUpperCase(),
+            nome: String(nome),
+            puntiVSRBase: parsePoints(puntiVSRBase)
+          };
+        };
 
-            // Ordina le regate: prima per categoria, poi per data (dalla più recente alla meno recente)
-            parsedRegate.sort((a, b) => {
-                const categoryComparison = (categoryOrder[a.livello] || 99) - (categoryOrder[b.livello] || 99);
-                if (categoryComparison !== 0) return categoryComparison;
-                return new Date(b.data) - new Date(a.data);
-            });
+        try {
+          const response = await fetch(URL_ELENCO_REGATE, { cache: "no-store" });
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status} en chargeant la liste des régates.`);
+          }
 
-            // Ricostruisci la struttura dell'oggetto attesa
-            const datiElenco = {
-                dataAggiornamentoDatabase: dataAggiornamentoDatabase,
-                elencoRegateProposte: parsedRegate.map(row => ({
-                    idDatabase: row.idDatabase,
-                    data: row.data,
-                    livello: row.livello,
-                    nome: row.nome,
-                    puntiVSRBase: parseInt(row.puntiVSRBase) || 0 // Assicurati che i punti siano numeri interi
-                }))
-            };
+          // On tente JSON directement
+          let payload;
+          try {
+            payload = await response.json();
+          } catch (e) {
+            // Message plus clair si l’URL ne renvoie pas du JSON
+            const textPeek = await response.text();
+            throw new Error("La ressource n’est pas un JSON valide. Aperçu: " + textPeek.slice(0, 120));
+          }
 
-            infoAggiornamentoElencoRegate.innerHTML = `Elenco regate aggiornato il: <strong>${new Date(datiElenco.dataAggiornamentoDatabase).toLocaleDateString('it-IT')}</strong>. Aggiornamenti a cura di: <strong>ITA 86 FIV / Cristian</strong>.`;
-            popolaTabellaElencoRegateSuggerite(datiElenco.elencoRegateProposte);
+          // Plusieurs structures possibles :
+          // - { dataAggiornamentoDatabase, elencoRegateProposte:[...] }
+          // - { updatedAt, regate:[...] } / { updatedAt, races:[...] }
+          // - [ ...items ]
+          let elenco = [];
+          if (Array.isArray(payload)) {
+            elenco = payload;
+          } else if (payload && typeof payload === "object") {
+            elenco = payload.elencoRegateProposte
+                  ?? payload.regate
+                  ?? payload.races
+                  ?? payload.items
+                  ?? payload.data
+                  ?? [];
+          }
+
+          if (!Array.isArray(elenco)) {
+            throw new Error("Schéma JSON inattendu: la liste des régates n’est pas un tableau.");
+          }
+
+          // Date de MAJ
+          const dataAggiornamentoDatabase =
+            toISODate(
+              payload?.dataAggiornamentoDatabase
+              ?? payload?.updatedAt
+              ?? payload?.lastUpdate
+            );
+
+          // Normalisation + filtrage minimal
+          const parsedRegate = elenco
+            .map(normalizeRegata)
+            .filter(r => r.idDatabase && r.nome);
+
+          // Tri par catégorie puis date (récent → ancien)
+          parsedRegate.sort((a, b) => {
+            const cA = categoryOrder[a.livello] ?? 99;
+            const cB = categoryOrder[b.livello] ?? 99;
+            if (cA !== cB) return cA - cB;
+            return new Date(b.data) - new Date(a.data);
+          });
+
+          const datiElenco = {
+            dataAggiornamentoDatabase,
+            elencoRegateProposte: parsedRegate
+          };
+
+          // UI
+          popolaTabellaElencoRegateSuggerite(datiElenco.elencoRegateProposte);
         } catch (error) {
-            console.error("Errore durante il caricamento dell'elenco regate:", error);
-            infoAggiornamentoElencoRegate.textContent = getTranslation('TEXT_ERROR_LOADING_RACE_LIST');
-            tbodyElencoRegateSuggerite.innerHTML = `<tr><td colspan="6" style="text-align:center; color: red;">${error.message}</td></tr>`;
+          console.error("Erreur lors du chargement de l’elenco regate (JSON):", error);
+          infoAggiornamentoElencoRegate.textContent = getTranslation('TEXT_ERROR_LOADING_RACE_LIST');
+          tbodyElencoRegateSuggerite.innerHTML =
+            `<tr><td colspan="6" style="text-align:center; color: red;">${error.message}</td></tr>`;
         }
-    }
-
-    // Funzione helper per parsare il testo CSV in un array di oggetti
-    function parseCsv(csvString, separator = ',') {
-        const lines = csvString.trim().split(/\r\n?|\n/); // Split robusto
-        if (lines.length === 0) return [];
-
-        const headers = lines[0].split(separator).map(header => header.trim());
-        const result = [];
-
-        for (let i = 1; i < lines.length; i++) {
-            const values = lines[i].split(separator);
-            if (values.length === 1 && values[0].trim() === '') continue; // Salta righe vuote
-            const obj = {};
-            headers.forEach((header, index) => {
-                obj[header] = values[index] ? values[index].trim() : ''; // Gestisce valori mancanti
-            });
-            result.push(obj);
-        }
-        return result;
     }
 
     function popolaTabellaElencoRegateSuggerite(regateProposte) {

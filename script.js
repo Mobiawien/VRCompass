@@ -684,11 +684,11 @@ document.addEventListener('DOMContentLoaded', () => {
         classificaFinaleStoricoInput.addEventListener('input', calcolaEPopolaPuntiVSRStorico);
         classificaVsrtbody.addEventListener('click', (event) => {
             if (event.target.classList.contains('delete-btn')) {
-                const idGara = parseInt(event.target.dataset.id);
-                if (!isNaN(idGara)) eliminaGara(idGara);
+                const idGara = event.target.dataset.id;
+                if (idGara) eliminaGara(idGara);
             } else if (event.target.classList.contains('edit-btn')) {
-                const idGara = parseInt(event.target.dataset.id);
-                if (!isNaN(idGara)) popolaFormPerModifica(idGara);
+                const idGara = event.target.dataset.id;
+                if (idGara) popolaFormPerModifica(idGara);
             }
         });
         const formInputs = [dataGaraInput, livelloGaraVsrStoricoSelect, nomeRegataInput, classificaFinaleStoricoInput];
@@ -757,7 +757,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function popolaFormPerModifica(idGara) {
         const gareSalvate = JSON.parse(localStorage.getItem('gareSalvate')) || [];
-        const garaDaModificare = gareSalvate.find(g => g.id === idGara);
+        const garaDaModificare = gareSalvate.find(g => String(g.id) === String(idGara));
         if (garaDaModificare) {
             if (vistaStoricoAttuale === VIEW_MODES.VALID_FOR_RANKING) {
                 vistaStoricoAttuale = VIEW_MODES.ALL_HISTORY;
@@ -803,7 +803,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         let gareSalvate = JSON.parse(localStorage.getItem('gareSalvate')) || [];
         if (idGaraInModifica !== null) {
-            const index = gareSalvate.findIndex(g => g.id === idGaraInModifica);
+            const index = gareSalvate.findIndex(g => String(g.id) === String(idGaraInModifica));
             if (index !== -1) {
                 gareSalvate[index] = { ...gareSalvate[index], data: dataGara, livello: livelloGaraStoricoVal, nome: nomeRegata, classificaFinale: classificaFinaleStorico, puntiVSR: puntiVSR };
             }
@@ -1029,7 +1029,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function eliminaGara(idGara) {
         if (!confirm(getTranslation('CONFIRM_DELETE_RACE'))) return;
         let gareSalvate = JSON.parse(localStorage.getItem('gareSalvate')) || [];
-        gareSalvate = gareSalvate.filter(g => g.id !== idGara);
+        gareSalvate = gareSalvate.filter(g => String(g.id) !== String(idGara));
         localStorage.setItem('gareSalvate', JSON.stringify(gareSalvate));
         aggiornaTabellaGare();
         aggiornaPunteggioVsrTotale();
@@ -1390,6 +1390,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const categoryOrder = { HC: 1, LIV1: 2, LIV2: 3, LIV3: 4 };
 
         // Helpers
+        const normalizeLegId = (s) => String(s).replace(/^\d{4}_/, '');
+
         const mapVsrToLivello = (vsr) => {
             switch (Number(vsr)) {
                 case -1: return "HC";
@@ -1425,7 +1427,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Normalisation d’un objet "regata" quel que soit le naming des champs
         const normalizeRegata = (row) => {
           //tentatives de mapping de clés possibles
-          const idDatabase = row.idDatabase ?? row.rid ?? "";
+          const idDatabase = row.idDatabase ?? normalizeLegId(row.rid) ?? "";
           const data = row.data ?? row.date ?? row.end ?? "";
           // const livello = row.livello ?? row.vsr ?? "";
           const livello = (() => {

@@ -1,3 +1,5 @@
+import { initI18n, getTranslation } from "./modules/i18n.js";
+
 document.addEventListener("DOMContentLoaded", () => {
   // --- Elementi DOM ---
   // Navigazione
@@ -416,15 +418,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const URL_ELENCO_REGATE =
     "https://cert.civis.net/LSV-Dash/api?context=api&context_type=allrace";
 
-  let currentLanguage = "it";
-  let translations = {};
-  const DEFAULT_LANGUAGE = "it";
-  const languageSelector = document.getElementById("language-selector");
   const mappaTestoLabelGraficoATipoGara = {};
 
   Object.values(livelliVsrStoricoMap).forEach((level) => {
     if (level.chiaveTraduzione && level.tipo !== "N/D") {
-      // Questa mappa verrà popolata correttamente dopo il caricamento delle traduzioni
     }
   });
 
@@ -484,13 +481,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- Funzioni Helper ---
   function formatNumber(num, decimalPlaces = 0) {
     if (num === null || num === undefined || isNaN(num))
-      return getTranslation("TEXT_NA_DETAILED");
-    let numLocale = "en-US"; // Default
-    if (currentLanguage === "it") {
-      numLocale = "it-IT";
-    } else if (currentLanguage === "fr") {
-      numLocale = "fr-FR";
-    }
+      return getTranslation("TEXT_NA_DETAILED") || "N/A";
+    const numLocale = document.documentElement.lang || "en-US";
     if (decimalPlaces === 0) {
       return Math.round(num).toLocaleString(numLocale);
     } else {
@@ -573,7 +565,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function init() {
-    await initI18n();
+    await initI18n(() => {
+      // Questa funzione viene eseguita OGNI volta che la lingua cambia
+      aggiornaTestiPulsantiFormGara();
+      // Potremmo aggiungere qui altri aggiornamenti dinamici se necessario
+    });
 
     // --- LOGICA DI CONTROLLO VARIAZIONE VSR (REVISIONATA E CORRETTA) ---
 
@@ -670,94 +666,6 @@ document.addEventListener("DOMContentLoaded", () => {
       vsrNotificationCloseBtn.addEventListener(
         "click", // Corretto nome funzione chiamata
         dismissVSRChangeModal
-      );
-  }
-
-  // --- Funzioni di Internazionalizzazione (i18n) ---
-  function getTranslation(key, variables = {}) {
-    if (translations[currentLanguage] && translations[currentLanguage][key]) {
-      let translatedString = translations[currentLanguage][key];
-      for (const varName in variables) {
-        const regex = new RegExp(`{{${varName}}}`, "g");
-        translatedString = translatedString.replace(regex, variables[varName]);
-      }
-      return translatedString;
-    }
-    console.warn(
-      `Traduzione mancante per la chiave '${key}' in ${currentLanguage}. Restituisco la chiave.`
-    );
-    return key;
-  }
-
-  async function loadTranslations(lang) {
-    try {
-      const response = await fetch(`${lang}.json?v=${Date.now()}`);
-      if (!response.ok)
-        throw new Error(
-          `Errore nel caricamento del file di traduzione per ${lang}: ${response.statusText}`
-        );
-      translations[lang] = await response.json();
-      console.log(`Traduzioni per ${lang} caricate.`);
-      Object.values(livelliVsrStoricoMap).forEach((level) => {
-        if (level.chiaveTraduzione && level.tipo !== RACE_TYPES.ND) {
-          mappaTestoLabelGraficoATipoGara[
-            getTranslation(level.chiaveTraduzione)
-          ] = level.tipo;
-        }
-      });
-      applyTranslations();
-    } catch (error) {
-      console.error(`Impossibile caricare le traduzioni per ${lang}:`, error);
-      if (lang !== DEFAULT_LANGUAGE) {
-        console.warn(`Torno alla lingua di default (${DEFAULT_LANGUAGE})`);
-        await setLanguage(DEFAULT_LANGUAGE);
-      }
-    }
-  }
-
-  function applyTranslations() {
-    if (!translations[currentLanguage]) return;
-    document.querySelectorAll("[data-i18n-key]").forEach((element) => {
-      const key = element.getAttribute("data-i18n-key");
-      const translation = getTranslation(key);
-      if (element.tagName === "TITLE") document.title = translation;
-      else if (element.tagName === "INPUT" && element.placeholder)
-        element.placeholder = translation;
-      else element.innerHTML = translation;
-    });
-    aggiornaTestiPulsantiFormGara();
-  }
-
-  async function setLanguage(lang) {
-    let currentActiveButtonId = null;
-    const activeButtonBeforeChange = document.querySelector(
-      "nav > .nav-button.active"
-    );
-    if (activeButtonBeforeChange) {
-      currentActiveButtonId = activeButtonBeforeChange.id;
-    }
-
-    currentLanguage = lang;
-    localStorage.setItem("vrCompassLanguage", lang);
-    if (languageSelector) languageSelector.value = lang;
-    document.documentElement.lang = lang;
-    await loadTranslations(lang);
-
-    setTimeout(() => {
-      const buttonToReactivate = currentActiveButtonId
-        ? document.getElementById(currentActiveButtonId)
-        : document.getElementById("btn-show-dashboard");
-      if (buttonToReactivate)
-        handleNavClick({ currentTarget: buttonToReactivate });
-    }, 0);
-  }
-  async function initI18n() {
-    const savedLang =
-      localStorage.getItem("vrCompassLanguage") || DEFAULT_LANGUAGE;
-    await setLanguage(savedLang);
-    if (languageSelector)
-      languageSelector.addEventListener("change", (event) =>
-        setLanguage(event.target.value)
       );
   }
 
@@ -1603,6 +1511,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       row.classList.add(classeStato);
       let [year, month, day] = gara.data.split("-"); // Formato YYYY-MM-DD
+      const currentLanguage = document.documentElement.lang || "it";
       let dateLocale = "en-GB"; // Default
       if (currentLanguage === "it") dateLocale = "it-IT";
       else if (currentLanguage === "fr") dateLocale = "fr-FR";
@@ -1917,6 +1826,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       htmlContent += "<ul>";
       eventiRecenti.forEach((evento) => {
+        const currentLanguage = document.documentElement.lang || "it";
         let dateLocale = "en-GB";
         if (currentLanguage === "it") dateLocale = "it-IT";
         else if (currentLanguage === "fr") dateLocale = "fr-FR";
@@ -2616,6 +2526,7 @@ document.addEventListener("DOMContentLoaded", () => {
             p.classList.add("gara-dettaglio");
             const statoPercentuale =
               g.fattoreDecadimento === 1.0 ? "100%" : "50%";
+            const currentLanguage = document.documentElement.lang || "it";
             let dateLocale = "en-GB";
             if (currentLanguage === "it") dateLocale = "it-IT";
             else if (currentLanguage === "fr") dateLocale = "fr-FR";
@@ -2769,6 +2680,7 @@ document.addEventListener("DOMContentLoaded", () => {
             simulazione.laGaraSimulataContribuisceAncora;
           const garaEsceDalRanking = g.isContributing && !garaContribuisceDopo;
 
+          const currentLanguage = document.documentElement.lang || "it";
           let dateLocale = "en-GB";
           if (currentLanguage === "it") dateLocale = "it-IT";
           else if (currentLanguage === "fr") dateLocale = "fr-FR";
@@ -3005,6 +2917,7 @@ document.addEventListener("DOMContentLoaded", () => {
           fattoreDecadimentoSimulato
         );
 
+        const currentLanguage = document.documentElement.lang || "it";
         let dateLocale = "en-GB";
         if (currentLanguage === "it") dateLocale = "it-IT";
         else if (currentLanguage === "fr") dateLocale = "fr-FR";
@@ -3238,6 +3151,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   : getTranslation("STRATEGY_SUGGESTION_DAYS_PLURAL");
 
               let verboMancareItWarning = "";
+              const currentLanguage = document.documentElement.lang || "it";
               if (currentLanguage === "it") {
                 verboMancareItWarning =
                   Math.abs(warningParams.remainingDays) === 1

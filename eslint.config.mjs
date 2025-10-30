@@ -9,7 +9,7 @@ export default defineConfig({
       ...globals.browser,
       Chart: "readonly", // Aggiungiamo Chart come globale di sola lettura
     },
-    sourceType: "script",
+    sourceType: "module",
   },
   plugins: { js },
   rules: {

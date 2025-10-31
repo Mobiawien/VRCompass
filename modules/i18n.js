@@ -1,10 +1,3 @@
-let currentLanguage = "it";
-const DEFAULT_LANGUAGE = "it";
-let translations = {};
-
-// Questa mappa verrà popolata dopo il caricamento delle traduzioni
-export const mappaTestoLabelGraficoATipoGara = {};
-
 /**
  * Ottiene una stringa tradotta dalla chiave fornita.
  * @param {string} key La chiave di traduzione.
@@ -12,6 +5,7 @@ export const mappaTestoLabelGraficoATipoGara = {};
  * @returns {string} La stringa tradotta o la chiave stessa se non trovata.
  */
 export function getTranslation(key, variables = {}) {
+  // eslint-disable-next-line no-use-before-define
   if (translations[currentLanguage] && translations[currentLanguage][key]) {
     let translatedString = translations[currentLanguage][key];
     for (const varName in variables) {
@@ -26,17 +20,24 @@ export function getTranslation(key, variables = {}) {
   return key;
 }
 
+let currentLanguage = "it";
+const DEFAULT_LANGUAGE = "it";
+let translations = {};
+
+// Questa mappa verrà popolata dopo il caricamento delle traduzioni
+export const mappaTestoLabelGraficoATipoGara = {};
+
 /**
  * Applica le traduzioni caricate agli elementi DOM.
  */
-function applyTranslations() {
+function applyTranslations(onLanguageChangeCallback) {
   if (!translations[currentLanguage]) return;
 
   document.querySelectorAll("[data-i18n-key]").forEach((element) => {
     const key = element.getAttribute("data-i18n-key");
     const translation = getTranslation(key);
 
-    if (element.tagName === "TITLE") {
+    if (element.tagName === "TITLE" && document.title !== translation) {
       document.title = translation;
     } else if (element.tagName === "INPUT" && element.placeholder) {
       element.placeholder = translation;
@@ -45,15 +46,14 @@ function applyTranslations() {
     }
   });
 
-  // Aggiorna dinamicamente i testi che non sono gestiti da data-i18n-key, se necessario
-  // Esempio: aggiornaTestiPulsantiFormGara(); (Questa funzione dovrà essere importata o passata come callback)
+  if (onLanguageChangeCallback) onLanguageChangeCallback();
 }
 
 /**
  * Carica il file JSON per la lingua specificata.
  * @param {string} lang La lingua da caricare (es. 'it').
  */
-async function loadTranslations(lang) {
+async function loadTranslations(lang, onLanguageChangeCallback) {
   try {
     const response = await fetch(`${lang}.json?v=${Date.now()}`);
     if (!response.ok) {
@@ -63,12 +63,13 @@ async function loadTranslations(lang) {
     }
     translations[lang] = await response.json();
     console.log(`Traduzioni per ${lang} caricate.`);
-    applyTranslations();
+    applyTranslations(onLanguageChangeCallback);
   } catch (error) {
     console.error(`Impossibile caricare le traduzioni per ${lang}:`, error);
     if (lang !== DEFAULT_LANGUAGE) {
       console.warn(`Torno alla lingua di default (${DEFAULT_LANGUAGE})`);
-      await setLanguage(DEFAULT_LANGUAGE);
+      // eslint-disable-next-line no-use-before-define
+      await setLanguage(DEFAULT_LANGUAGE, onLanguageChangeCallback);
     }
   }
 }
@@ -77,12 +78,12 @@ async function loadTranslations(lang) {
  * Imposta la lingua corrente dell'applicazione.
  * @param {string} lang La nuova lingua.
  */
-async function setLanguage(lang) {
+async function setLanguage(lang, onLanguageChangeCallback) {
   currentLanguage = lang;
   localStorage.setItem("vrCompassLanguage", lang);
   document.getElementById("language-selector").value = lang;
   document.documentElement.lang = lang;
-  await loadTranslations(lang);
+  await loadTranslations(lang, onLanguageChangeCallback);
 }
 
 /**
@@ -91,11 +92,10 @@ async function setLanguage(lang) {
 export async function initI18n(onLanguageChangeCallback) {
   const savedLang =
     localStorage.getItem("vrCompassLanguage") || DEFAULT_LANGUAGE;
-  await setLanguage(savedLang);
+  await setLanguage(savedLang, onLanguageChangeCallback);
   document
     .getElementById("language-selector")
     .addEventListener("change", async (event) => {
-      await setLanguage(event.target.value);
-      if (onLanguageChangeCallback) onLanguageChangeCallback();
+      await setLanguage(event.target.value, onLanguageChangeCallback);
     });
 }

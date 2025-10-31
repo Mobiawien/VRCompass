@@ -1,4 +1,13 @@
 import { initI18n, getTranslation } from "./modules/i18n.js";
+import {
+  calcolaPosizioneRecupero,
+  ricalcolaRisultati,
+} from "./modules/calculator.js";
+import {
+  formatNumber,
+  calcolaMesiTrascorsi,
+  calcolaGiorniTraDate,
+} from "./modules/utils.js";
 
 // --- Elementi DOM ---
 // Navigazione
@@ -6,14 +15,12 @@ const mainNavButtons = document.querySelectorAll("nav > .nav-button"); // Selezi
 const viewSections = document.querySelectorAll(".view-section");
 
 // Dashboard
-const dashboardView = document.getElementById("dashboard-view");
 const nomeBarcaInput = document.getElementById("nome-barca");
 const classificaVsrAttualeInput = document.getElementById(
   "classifica-vsr-attuale"
 );
 
 // Gestione Crediti (ex Calcolatrice Gara)
-const gestioneCreditiView = document.getElementById("gestione-crediti-view"); // Rinominato da calcolatriceView
 const tabella1 = document.getElementById("tabella1");
 const tabella3Body = document.getElementById("tabella3").querySelector("tbody");
 // Elementi statici Tabella 2
@@ -24,7 +31,6 @@ const outputSpesaEffettiva = document.getElementById("output-spesa-effettiva");
 const outputPosRecupero = document.getElementById("output-pos-recupero");
 
 // Gestione Classifica VSR
-const classificaVsrView = document.getElementById("classifica-vsr-view");
 const formAggiungiGara = document.getElementById("form-aggiungi-gara");
 const dataGaraInput = document.getElementById("data-gara");
 const livelloGaraVsrStoricoSelect = document.getElementById(
@@ -92,7 +98,6 @@ const dataAggiornamentoFileRegateSpan = document.getElementById(
 let fileSelezionatoPerRegateSuggerite = null;
 
 // Analisi
-const analisiView = document.getElementById("analisi-view");
 const hcOccupati = document.getElementById("hc-occupati");
 const hcPuntiCategoria = document.getElementById("hc-punti-categoria");
 const hcPuntiAttuali = document.getElementById("hc-punti-attuali");
@@ -141,15 +146,11 @@ const liv3PointsBar100 = document.getElementById("liv3-points-bar-100");
 const liv3PointsBar50 = document.getElementById("liv3-points-bar-50");
 const liv3PointsBarEmpty = document.getElementById("liv3-points-bar-empty");
 
-const listaSuggerimentiSlot = document.getElementById(
-  "lista-suggerimenti-slot"
-);
 const listaGareDimezzamento = document.getElementById(
   "lista-gare-dimezzamento"
 );
 const listaGareScadenza = document.getElementById("lista-gare-scadenza");
 // Strategia
-const strategiaView = document.getElementById("strategia-view");
 const listaSuggerimentiStrategiciSlot = document.getElementById(
   "lista-suggerimenti-strategici-slot"
 );
@@ -168,17 +169,6 @@ const vsrChangeModalSecondaryButton = document.getElementById(
   "vsr-change-modal-secondary-btn"
 );
 
-// Elementi per la notifica "Cosa è Cambiato?"
-const vsrChangeNotification = document.getElementById(
-  "vsr-change-notification"
-);
-// Aggiungiamo i riferimenti specifici per messaggio e pulsante di chiusura
-const vsrNotificationMessage = document.getElementById(
-  "vsr-notification-message"
-);
-const vsrNotificationCloseBtn = document.getElementById(
-  "vsr-notification-close-btn"
-);
 const btnToggleRecentEvents = document.getElementById(
   "btn-toggle-recent-events"
 );
@@ -193,172 +183,6 @@ const canvasGraficoTorta = document.getElementById(
   "graficoTortaComposizioneVSR"
 );
 let graficoTortaIstanza = null;
-
-// --- Dati Premi ---
-const tabellaPremiData = {
-  cat1: {
-    1: 8600,
-    2: 6518,
-    3: 5542,
-    4: 4711,
-    5: 4146,
-    6: 3731,
-    7: 3411,
-    8: 3159,
-    9: 2952,
-    10: 2778,
-    11: 2629,
-    12: 2500,
-    13: 2387,
-    14: 2287,
-    15: 2197,
-    16: 2116,
-    17: 1975,
-    18: 1913,
-    19: 1856,
-    20: 1803,
-    21: 1754,
-    22: 1707,
-    23: 1664,
-    24: 1623,
-    25: 1584,
-  },
-  cat2: {
-    1: 7150,
-    2: 5419,
-    3: 4607,
-    4: 3916,
-    5: 3446,
-    6: 3099,
-    7: 2834,
-    8: 2624,
-    9: 2452,
-    10: 2308,
-    11: 2184,
-    12: 2077,
-    13: 1983,
-    14: 1900,
-    15: 1825,
-    16: 1758,
-    17: 1696,
-    18: 1641,
-    19: 1590,
-    20: 1542,
-    21: 1498,
-    22: 1457,
-    23: 1418,
-    24: 1382,
-    25: 1348,
-  },
-  cat3: {
-    1: 5700,
-    2: 4320,
-    3: 3673,
-    4: 3122,
-    5: 2747,
-    6: 2472,
-    7: 2260,
-    8: 2092,
-    9: 1955,
-    10: 1840,
-    11: 1741,
-    12: 1656,
-    13: 1581,
-    14: 1515,
-    15: 1455,
-    16: 1401,
-    17: 1352,
-    18: 1308,
-    19: 1267,
-    20: 1229,
-    21: 1194,
-    22: 1161,
-    23: 1130,
-    24: 1101,
-    25: 1074,
-  },
-  cat4: {
-    1: 4300,
-    2: 3259,
-    3: 2771,
-    4: 2355,
-    5: 2073,
-    6: 1865,
-    7: 1705,
-    8: 1579,
-    9: 1474,
-    10: 1387,
-    11: 1312,
-    12: 1249,
-    13: 1192,
-    14: 1143,
-    15: 1098,
-    16: 1057,
-    17: 1019,
-    18: 985,
-    19: 954,
-    20: 926,
-    21: 900,
-    22: 875,
-    23: 851,
-    24: 829,
-    25: 809,
-  },
-  cat5: {
-    1: 2850,
-    2: 2160,
-    3: 1837,
-    4: 1561,
-    5: 1373,
-    6: 1235,
-    7: 1130,
-    8: 1046,
-    9: 977,
-    10: 919,
-    11: 869,
-    12: 827,
-    13: 789,
-    14: 757,
-    15: 727,
-    16: 699,
-    17: 675,
-    18: 652,
-    19: 632,
-    20: 613,
-    21: 596,
-    22: 580,
-    23: 564,
-    24: 549,
-    25: 536,
-  },
-  cat6: {
-    1: 1425,
-    2: 1080,
-    3: 918,
-    4: 781,
-    5: 686,
-    6: 618,
-    7: 565,
-    8: 523,
-    9: 488,
-    10: 460,
-    11: 435,
-    12: 414,
-    13: 395,
-    14: 379,
-    15: 364,
-    16: 350,
-    17: 338,
-    18: 326,
-    19: 316,
-    20: 307,
-    21: 298,
-    22: 290,
-    23: 282,
-    24: 275,
-    25: 268,
-  },
-};
 
 // --- Stato Applicazione ---
 let categoriaSelezionata = null;
@@ -411,13 +235,6 @@ let totalePotenzialePuntiPerGraficoTorta = 1;
 const URL_ELENCO_REGATE =
   "https://cert.civis.net/LSV-Dash/api?context=api&context_type=allrace";
 
-const mappaTestoLabelGraficoATipoGara = {};
-
-Object.values(livelliVsrStoricoMap).forEach((level) => {
-  if (level.chiaveTraduzione && level.tipo !== "N/D") {
-  }
-});
-
 const SOGLIA_DEBOLEZZA = { 15000: 0.5, 10000: 0.4, 5000: 0.3, 3000: 0.25 };
 let inputClassificaTab3Ref = null;
 let cellaCreditiTab3Ref = null;
@@ -449,7 +266,6 @@ let statoVSRPrecedente = {
   eventiImminentiPrecedenti: [], // Array di oggetti {id, nome, tipoEvento, dataEvento, impattoNettoStimato, isContributingOriginale}
   timestampSalvataggio: null,
 };
-let initialStatoVSRPrecedente = null; // To preserve the state loaded at app start
 
 // --- Costanti per il Log Eventi ---
 const DURATA_RIEPILOGO_GIORNI = 30;
@@ -469,46 +285,6 @@ function calcolaClassificaPerPuntiTarget(
   const rapporto = livelloValoreNumerico / puntiVsrTarget;
   const classificaCalcolata = Math.pow(rapporto, 8);
   return Math.max(1, Math.floor(classificaCalcolata));
-}
-
-// --- Funzioni Helper ---
-function formatNumber(num, decimalPlaces = 0) {
-  if (num === null || num === undefined || isNaN(num))
-    return getTranslation("TEXT_NA_DETAILED") || "N/A";
-  const numLocale = document.documentElement.lang || "en-US";
-  if (decimalPlaces === 0) {
-    return Math.round(num).toLocaleString(numLocale);
-  } else {
-    return num.toLocaleString(numLocale, {
-      minimumFractionDigits: decimalPlaces,
-      maximumFractionDigits: decimalPlaces,
-    });
-  }
-}
-
-function calcolaMesiTrascorsi(dataGaraString) {
-  const dataGara = new Date(dataGaraString);
-  const oggi = new Date();
-  dataGara.setHours(0, 0, 0, 0);
-  oggi.setHours(0, 0, 0, 0);
-  let mesi = (oggi.getFullYear() - dataGara.getFullYear()) * 12;
-  mesi -= dataGara.getMonth();
-  mesi += oggi.getMonth();
-  if (oggi.getDate() < dataGara.getDate()) mesi--;
-  return mesi < 0 ? 0 : mesi;
-}
-
-function calcolaGiorniTraDate(data1, data2) {
-  const unGiorno = 24 * 60 * 60 * 1000;
-  const primaData = new Date(data1);
-  let secondaData = new Date(data2); // Può essere una stringa 'gg/mm/aaaa'
-  if (typeof data2 === "string" && data2.includes("/")) {
-    const parts = data2.split("/");
-    secondaData = new Date(parts[2], parseInt(parts[1]) - 1, parts[0]); // Mese è 0-indicizzato
-  }
-  primaData.setHours(0, 0, 0, 0);
-  secondaData.setHours(0, 0, 0, 0);
-  return Math.round((secondaData - primaData) / unGiorno);
 }
 
 // --- Funzioni di Navigazione e Inizializzazione ---
@@ -557,6 +333,78 @@ function handleNavClick(event) {
   }
 }
 
+function getGareConScadenzeImminenti(serializzabile = false) {
+  const gareSalvate = JSON.parse(localStorage.getItem("gareSalvate")) || [];
+  const scadenze = [];
+  const contributingIds = getContributingGareIds(); // Ottieni gli ID delle gare che contribuiscono PRIMA di ogni simulazione
+
+  gareSalvate.forEach((gara) => {
+    const oggi = new Date();
+    oggi.setHours(0, 0, 0, 0);
+    const dataGaraDate = new Date(gara.data);
+    dataGaraDate.setHours(0, 0, 0, 0);
+
+    const dataDimezzamento = new Date(dataGaraDate);
+    dataDimezzamento.setFullYear(dataDimezzamento.getFullYear() + 1);
+    const dataScadenza = new Date(dataGaraDate);
+    dataScadenza.setFullYear(dataScadenza.getFullYear() + 2);
+
+    let tipoEvento = null;
+    let dataEventoObj = null;
+    let isUrgente = false;
+    let impattoPuntiStimato = 0;
+    let fattoreDecadimentoSimulato = -1; // -1 indica nessuna simulazione
+
+    // Calculate warning periods (3 months before event)
+    const warningDimezzamento = new Date(dataDimezzamento);
+    warningDimezzamento.setMonth(warningDimezzamento.getMonth() - 3);
+    const warningScadenza = new Date(dataScadenza);
+    warningScadenza.setMonth(warningScadenza.getMonth() - 3);
+
+    if (oggi >= warningDimezzamento && oggi < dataDimezzamento) {
+      // Within 3 months before halving
+      tipoEvento = EVENT_TYPES.HALVING;
+      dataEventoObj = dataDimezzamento;
+      isUrgente = calcolaGiorniTraDate(oggi, dataDimezzamento) <= 30;
+      impattoPuntiStimato = Math.round(gara.puntiVSR * 0.5);
+      fattoreDecadimentoSimulato = 0.5;
+    } else if (oggi >= warningScadenza && oggi < dataScadenza) {
+      // Within 3 months before expiry
+      tipoEvento = EVENT_TYPES.EXPIRY;
+      dataEventoObj = dataScadenza;
+      isUrgente = calcolaGiorniTraDate(oggi, dataScadenza) <= 30;
+      impattoPuntiStimato = Math.round(gara.puntiVSR * 0.5);
+      fattoreDecadimentoSimulato = 0;
+    }
+
+    if (tipoEvento && dataEventoObj) {
+      const isContributingOriginale = contributingIds.has(gara.id);
+      const simulazioneRisultato = simulaImpattoNettoEVariazioneClassifica(
+        gara,
+        fattoreDecadimentoSimulato
+      );
+
+      const currentLanguage = document.documentElement.lang || "it";
+      let dateLocale = "en-GB";
+      if (currentLanguage === "it") dateLocale = "it-IT";
+      else if (currentLanguage === "fr") dateLocale = "fr-FR";
+
+      scadenze.push({
+        ...gara,
+        tipoEvento: tipoEvento,
+        dataEvento: serializzabile
+          ? dataEventoObj.toISOString()
+          : dataEventoObj.toLocaleDateString(dateLocale),
+        isUrgente,
+        impattoPunti: impattoPuntiStimato,
+        isContributingOriginale: isContributingOriginale,
+        impattoNettoStimato: simulazioneRisultato.impattoNettoEffettivo,
+      });
+    }
+  });
+  return scadenze;
+}
+
 async function init() {
   await initI18n(() => {
     // Questa funzione viene eseguita OGNI volta che la lingua cambia
@@ -568,7 +416,6 @@ async function init() {
 
   // 1. Carica lo stato della sessione PRECEDENTE.
   caricaStatoVSRPrecedente(); // This populates statoVSRPrecedente
-  initialStatoVSRPrecedente = JSON.parse(JSON.stringify(statoVSRPrecedente)); // Deep copy to preserve initial state
   const vsrPrecedente = statoVSRPrecedente?.punteggio;
 
   // 2. Calcola lo stato per la sessione CORRENTE.
@@ -651,11 +498,6 @@ async function init() {
     btnToggleRecentEvents.addEventListener(
       "click",
       popolaERendiVisibileRiepilogoEventi
-    );
-  if (vsrNotificationCloseBtn)
-    vsrNotificationCloseBtn.addEventListener(
-      "click", // Corretto nome funzione chiamata
-      dismissVSRChangeModal
     );
 }
 
@@ -768,7 +610,7 @@ function selezionaCategoria(cat) {
   const bonusCell = tabella1.querySelector(
     `.bonus-row td[data-categoria="${cat}"]`
   );
-  bonusBase = bonusCell ? parseInt(bonusCell.textContent) : 0;
+  bonusBase = bonusCell ? parseInt(bonusCell.textContent, 10) : 0;
   if (inputBonusTotale) {
     inputBonusTotale.value = bonusBase;
     inputBonusTotale.title = `Bonus base: ${bonusBase}`;
@@ -784,7 +626,7 @@ function toggleAttrezzatura(cell) {
     return;
   }
   const nomeAttrezzatura = cell.parentNode.cells[0].textContent;
-  const costo = parseInt(cell.textContent);
+  const costo = parseInt(cell.textContent, 10);
   const catCorrente = cell.dataset.categoria;
   classificaFinaleModificataManualmente = false;
   if (catCorrente !== categoriaSelezionata) return;
@@ -816,8 +658,15 @@ function ricalcolaSpesaAttrezzature() {
     attrezzatureSelezionate[categoriaSelezionata]?.items
   ) {
     for (const nome in attrezzatureSelezionate[categoriaSelezionata].items) {
-      spesaAttrezzature +=
-        attrezzatureSelezionate[categoriaSelezionata].items[nome];
+      if (
+        Object.prototype.hasOwnProperty.call(
+          attrezzatureSelezionate[categoriaSelezionata].items,
+          nome
+        )
+      ) {
+        spesaAttrezzature +=
+          attrezzatureSelezionate[categoriaSelezionata].items[nome];
+      }
     }
   }
   if (categoriaSelezionata) {
@@ -829,7 +678,7 @@ function ricalcolaSpesaAttrezzature() {
 }
 
 function handleBonusInputChange(e) {
-  const nuovoBonusTotale = parseInt(e.target.value) || 0;
+  const nuovoBonusTotale = parseInt(e.target.value, 10) || 0;
   bonusExtra = Math.max(0, nuovoBonusTotale - bonusBase);
   aggiornaTabella2();
   aggiornaTabella3();
@@ -849,7 +698,10 @@ function aggiornaTabella2() {
   }
   const bonusTotaleCorrente = bonusBase + bonusExtra;
   const spesaEffettiva = Math.max(0, spesaAttrezzature - bonusTotaleCorrente);
-  const posRecuperoNumerica = calcolaPosizioneRecupero(spesaEffettiva);
+  const posRecuperoNumerica = calcolaPosizioneRecupero(
+    spesaEffettiva,
+    categoriaSelezionata
+  );
   if (outputCatEcon) outputCatEcon.textContent = categoriaSelezionata;
   if (inputBonusTotale) inputBonusTotale.title = `Bonus base: ${bonusBase}`;
   if (outputSpesa) outputSpesa.textContent = formatNumber(spesaAttrezzature, 0);
@@ -880,46 +732,6 @@ function aggiornaTabella2() {
         : 0;
 }
 
-function ricalcolaRisultatiTabella3() {
-  if (
-    !categoriaSelezionata ||
-    !cellaCreditiTab3Ref ||
-    !cellaNettoTab3Ref ||
-    !cellaPuntiTab3Ref
-  ) {
-    if (cellaCreditiTab3Ref)
-      cellaCreditiTab3Ref.textContent = getTranslation("TEXT_NA_DETAILED");
-    if (cellaNettoTab3Ref)
-      cellaNettoTab3Ref.textContent = getTranslation("TEXT_NA_DETAILED");
-    if (cellaPuntiTab3Ref)
-      cellaPuntiTab3Ref.textContent = getTranslation("TEXT_NA_DETAILED");
-    return;
-  }
-  const spesaEffettiva = Math.max(
-    0,
-    spesaAttrezzature - (bonusBase + bonusExtra)
-  );
-  let creditiVintiCalc = null;
-  const premiCatData = tabellaPremiData[categoriaSelezionata];
-  if (
-    premiCatData &&
-    typeof premiCatData["1"] !== "undefined" &&
-    classificaFinale > 0
-  ) {
-    const premMax = premiCatData["1"];
-    creditiVintiCalc = premMax / Math.pow(classificaFinale, 0.4);
-  }
-  const nettoCreditiCalc =
-    creditiVintiCalc !== null ? creditiVintiCalc - spesaEffettiva : null;
-  let puntiVSRCalc = null;
-  if (livelloGara !== null && livelloGara > 0 && classificaFinale > 0) {
-    puntiVSRCalc = livelloGara / Math.pow(classificaFinale, 0.125);
-  }
-  cellaCreditiTab3Ref.textContent = formatNumber(creditiVintiCalc, 0);
-  cellaNettoTab3Ref.textContent = formatNumber(nettoCreditiCalc, 0);
-  cellaPuntiTab3Ref.textContent = formatNumber(puntiVSRCalc, 0);
-}
-
 function aggiornaTabella3() {
   tabella3Body.innerHTML = "";
   inputClassificaTab3Ref = null;
@@ -927,6 +739,7 @@ function aggiornaTabella3() {
   cellaNettoTab3Ref = null;
   cellaPuntiTab3Ref = null;
   if (!categoriaSelezionata) return;
+
   const row = tabella3Body.insertRow();
   const cellaLivello = row.insertCell(0);
   const selectLivello = document.createElement("select");
@@ -956,9 +769,10 @@ function aggiornaTabella3() {
       selectedKey && livelliVsrStoricoMap[selectedKey]
         ? livelliVsrStoricoMap[selectedKey].valoreNumerico
         : null;
-    ricalcolaRisultatiTabella3();
+    popolaRisultatiTabella3();
   });
   cellaLivello.appendChild(selectLivello);
+
   const cellaClassifica = row.insertCell(1);
   inputClassificaTab3Ref = document.createElement("input");
   inputClassificaTab3Ref.type = "number";
@@ -967,32 +781,46 @@ function aggiornaTabella3() {
   inputClassificaTab3Ref.placeholder = getTranslation("PLACEHOLDER_POSITION");
   inputClassificaTab3Ref.addEventListener("input", (e) => {
     classificaFinaleModificataManualmente = true;
-    classificaFinale = parseInt(e.target.value) || 0;
-    ricalcolaRisultatiTabella3();
+    classificaFinale = parseInt(e.target.value, 10) || 0;
+    popolaRisultatiTabella3();
   });
   cellaClassifica.appendChild(inputClassificaTab3Ref);
+
   cellaCreditiTab3Ref = row.insertCell(2);
   cellaCreditiTab3Ref.classList.add("calculated-result-cell");
   cellaNettoTab3Ref = row.insertCell(3);
   cellaNettoTab3Ref.classList.add("calculated-result-cell");
   cellaPuntiTab3Ref = row.insertCell(4);
   cellaPuntiTab3Ref.classList.add("calculated-result-cell");
-  ricalcolaRisultatiTabella3();
+
+  popolaRisultatiTabella3();
 }
 
-function calcolaPosizioneRecupero(spesaEffettiva) {
-  if (!categoriaSelezionata) return null;
-  const premiCat = tabellaPremiData[categoriaSelezionata];
-  if (!premiCat || typeof premiCat["1"] === "undefined") return null;
-  const premMax = premiCat["1"];
-  let posRec = 1000000;
-  while (posRec > 0) {
-    const creditiVintiStimati = premMax / Math.pow(posRec, 0.4);
-    const nettoCreditiStimato = creditiVintiStimati - spesaEffettiva;
-    if (Math.round(nettoCreditiStimato) >= 0) return posRec;
-    posRec--;
+function popolaRisultatiTabella3() {
+  if (
+    !categoriaSelezionata ||
+    !cellaCreditiTab3Ref ||
+    !cellaNettoTab3Ref ||
+    !cellaPuntiTab3Ref
+  ) {
+    return;
   }
-  return 0;
+
+  const spesaEffettiva = Math.max(
+    0,
+    spesaAttrezzature - (bonusBase + bonusExtra)
+  );
+
+  const risultati = ricalcolaRisultati({
+    categoria: categoriaSelezionata,
+    spesaEffettiva: spesaEffettiva,
+    classifica: classificaFinale,
+    livelloGaraValore: livelloGara,
+  });
+
+  cellaCreditiTab3Ref.textContent = formatNumber(risultati.creditiVinti, 0);
+  cellaNettoTab3Ref.textContent = formatNumber(risultati.nettoCrediti, 0);
+  cellaPuntiTab3Ref.textContent = formatNumber(risultati.puntiVSR, 0);
 }
 
 // --- Funzioni Gestione Classifica VSR ---
@@ -1107,7 +935,7 @@ function setupFiltriStoricoListeners() {
 
 function calcolaEPopolaPuntiVSRStorico() {
   const livelloSelezionatoValue = livelloGaraVsrStoricoSelect.value;
-  const classifica = parseInt(classificaFinaleStoricoInput.value);
+  const classifica = parseInt(classificaFinaleStoricoInput.value, 10);
   if (
     livelloSelezionatoValue &&
     livelloSelezionatoValue !== "0" &&
@@ -1181,7 +1009,10 @@ function handleSubmitGara(event) {
   const dataGara = dataGaraInput.value;
   const livelloGaraStoricoVal = livelloGaraVsrStoricoSelect.value;
   const nomeRegata = nomeRegataInput.value.trim();
-  const classificaFinaleStorico = parseInt(classificaFinaleStoricoInput.value);
+  const classificaFinaleStorico = parseInt(
+    classificaFinaleStoricoInput.value,
+    10
+  );
   const puntiVSR = parseFloat(puntiVsrCalcolatiInput.value);
   if (
     !dataGara ||
@@ -1237,7 +1068,7 @@ function handleSubmitGara(event) {
 function calcolaVsrTotaleDaContributive(gareContributive) {
   let punteggioFinaleTotale = 0;
   for (const tipoGara in gareContributive) {
-    if (gareContributive.hasOwnProperty(tipoGara)) {
+    if (Object.prototype.hasOwnProperty.call(gareContributive, tipoGara)) {
       gareContributive[tipoGara].forEach((gara) => {
         if (gara && typeof gara.puntiEffettivi === "number") {
           punteggioFinaleTotale += gara.puntiEffettivi;
@@ -1332,11 +1163,18 @@ function selezionaGareContributivePerClassifica(
       gareMenoRecentiRaggruppate[l.tipo] = [];
     });
   gareRecenti.forEach((gara) => {
-    if (gareRecentiRaggruppate.hasOwnProperty(gara.tipoGara))
+    if (
+      Object.prototype.hasOwnProperty.call(gareRecentiRaggruppate, gara.tipoGara)
+    )
       gareRecentiRaggruppate[gara.tipoGara].push(gara);
   });
   gareMenoRecenti.forEach((gara) => {
-    if (gareMenoRecentiRaggruppate.hasOwnProperty(gara.tipoGara))
+    if (
+      Object.prototype.hasOwnProperty.call(
+        gareMenoRecentiRaggruppate,
+        gara.tipoGara
+      )
+    )
       gareMenoRecentiRaggruppate[gara.tipoGara].push(gara);
   });
   const gareContributiveFinali = {};
@@ -1344,7 +1182,7 @@ function selezionaGareContributivePerClassifica(
     .filter((l) => l.tipo !== RACE_TYPES.ND)
     .forEach((l) => (gareContributiveFinali[l.tipo] = []));
   for (const tipo in LIMITI_GARE_PER_CATEGORIA) {
-    if (LIMITI_GARE_PER_CATEGORIA.hasOwnProperty(tipo)) {
+    if (Object.prototype.hasOwnProperty.call(LIMITI_GARE_PER_CATEGORIA, tipo)) {
       const limite = LIMITI_GARE_PER_CATEGORIA[tipo];
       const miglioriRecenti = (gareRecentiRaggruppate[tipo] || [])
         .sort((a, b) =>
@@ -1365,7 +1203,7 @@ function selezionaGareContributivePerClassifica(
     }
   }
   for (const tipo in gareContributiveFinali) {
-    if (gareContributiveFinali.hasOwnProperty(tipo))
+    if (Object.prototype.hasOwnProperty.call(gareContributiveFinali, tipo))
       gareContributiveFinali[tipo].sort(
         (a, b) => b.puntiEffettivi - a.puntiEffettivi
       );
@@ -1379,7 +1217,7 @@ function getContributingGareIds() {
   const gareContributive = selezionaGareContributivePerClassifica(gareSalvate);
   const contributingIds = new Set();
   for (const tipoGara in LIMITI_GARE_PER_CATEGORIA) {
-    if (gareContributive.hasOwnProperty(tipoGara))
+    if (Object.prototype.hasOwnProperty.call(gareContributive, tipoGara))
       gareContributive[tipoGara].forEach((gara) =>
         contributingIds.add(gara.id)
       );
@@ -1414,7 +1252,12 @@ function aggiornaTabellaGare() {
       RACE_TYPES.L3,
     ];
     ordineVisualizzazioneTipi.forEach((tipoGara) => {
-      if (gareContributivePerClassifica.hasOwnProperty(tipoGara))
+      if (
+        Object.prototype.hasOwnProperty.call(
+          gareContributivePerClassifica,
+          tipoGara
+        )
+      )
         gareFiltrateEOrdinate = gareFiltrateEOrdinate.concat(
           gareContributivePerClassifica[tipoGara]
         );
@@ -1487,11 +1330,7 @@ function aggiornaTabellaGare() {
       inPreavvisoTesto = "";
     }
     row.classList.add(classeStato);
-    let [year, month, day] = gara.data.split("-"); // Formato YYYY-MM-DD
-    const currentLanguage = document.documentElement.lang || "it";
-    let dateLocale = "en-GB"; // Default
-    if (currentLanguage === "it") dateLocale = "it-IT";
-    else if (currentLanguage === "fr") dateLocale = "fr-FR";
+    const [year, month, day] = gara.data.split("-"); // Formato YYYY-MM-DD
 
     // Per la visualizzazione, usiamo toLocaleDateString, ma per lo split usiamo il formato YYYY-MM-DD
     // La data viene mostrata come gg/mm/aaaa indipendentemente dal locale per coerenza con l'input
@@ -1735,7 +1574,6 @@ function mostraNotificaCambiamento(oldScore, newScore) {
 
 // Nuova funzione per gestire il click sul pulsante primario della modale
 function handleVSRChangeModalPrimaryClick() {
-  // Corretto nome funzione
   dismissVSRChangeModal(); // Chiude la modale
   const strategyButton = document.getElementById("btn-show-strategia");
   if (strategyButton) handleNavClick({ currentTarget: strategyButton }); // Naviga alla sezione Strategia
@@ -1951,7 +1789,7 @@ function importaDati(event) {
       console.error("Errore durante l'importazione dei dati:", error);
       alert(getTranslation("ALERT_ERROR_READING_FILE"));
     } finally {
-      fileImportaDatiInput.value = "";
+      if (fileImportaDatiInput) fileImportaDatiInput.value = "";
     }
   };
   reader.readAsText(file);
@@ -1961,14 +1799,18 @@ function importaDati(event) {
 function setupModaleAvvisoRegateListeners() {
   if (btnChiudiModaleAvvisoRegate)
     btnChiudiModaleAvvisoRegate.addEventListener("click", () => {
-      modaleAvvisoCaricamentoRegate.style.display = "none";
-      fileImportaRegateSuggeriteInput.value = "";
+      if (modaleAvvisoCaricamentoRegate)
+        modaleAvvisoCaricamentoRegate.style.display = "none";
+      if (fileImportaRegateSuggeriteInput)
+        fileImportaRegateSuggeriteInput.value = "";
       fileSelezionatoPerRegateSuggerite = null;
     });
   if (btnAnnullaCaricamentoRegate)
     btnAnnullaCaricamentoRegate.addEventListener("click", () => {
-      modaleAvvisoCaricamentoRegate.style.display = "none";
-      fileImportaRegateSuggeriteInput.value = "";
+      if (modaleAvvisoCaricamentoRegate)
+        modaleAvvisoCaricamentoRegate.style.display = "none";
+      if (fileImportaRegateSuggeriteInput)
+        fileImportaRegateSuggeriteInput.value = "";
       fileSelezionatoPerRegateSuggerite = null;
     });
   if (btnConfermaCaricamentoRegate)
@@ -1996,7 +1838,8 @@ function preparaImportazioneRegateSuggerite(event) {
         error
       );
       alert(getTranslation("ALERT_ERROR_READING_SUGGESTED_RACES_FILE"));
-      fileImportaRegateSuggeriteInput.value = "";
+      if (fileImportaRegateSuggeriteInput)
+        fileImportaRegateSuggeriteInput.value = "";
       fileSelezionatoPerRegateSuggerite = null;
     }
   };
@@ -2034,7 +1877,8 @@ function importaRegateSuggeriteConfermate() {
     } finally {
       if (modaleAvvisoCaricamentoRegate)
         modaleAvvisoCaricamentoRegate.style.display = "none";
-      fileImportaRegateSuggeriteInput.value = "";
+      if (fileImportaRegateSuggeriteInput)
+        fileImportaRegateSuggeriteInput.value = "";
       fileSelezionatoPerRegateSuggerite = null;
     }
   };
@@ -2156,7 +2000,7 @@ async function caricaDatiElencoRegate() {
       );
     }
 
-    // On tente JSON directement
+    // On tente JSON direttamente
     let payload;
     try {
       payload = await response.json();
@@ -2286,7 +2130,7 @@ function aggiungiRegataDaElencoAlloStorico(
   regataMaster,
   classificaFinaleUtenteString
 ) {
-  const classificaFinale = parseInt(classificaFinaleUtenteString);
+  const classificaFinale = parseInt(classificaFinaleUtenteString, 10);
   if (isNaN(classificaFinale) || classificaFinale <= 0) {
     alert(getTranslation("ALERT_INVALID_FINAL_RANKING"));
     return;
@@ -2343,15 +2187,12 @@ function aggiornaSezioneAnalisi() {
   aggiornaPanoramicaSlotVSR();
 }
 function getGareContributiveConDettagli() {
-  return selezionaGareContributivePerClassifica(
-    JSON.parse(localStorage.getItem("gareSalvate")) || [],
-    null
-  );
+  const gareSalvate = JSON.parse(localStorage.getItem("gareSalvate")) || [];
+  return selezionaGareContributivePerClassifica(gareSalvate, null);
 }
 
 function aggiornaPanoramicaSlotVSR() {
   const gareContributive = getGareContributiveConDettagli();
-  const suggerimenti = [];
   const gareConScadenze = getGareConScadenzeImminenti();
   const idsGareConScadenze = new Set(gareConScadenze.map((g) => g.id));
 
@@ -2380,7 +2221,7 @@ function aggiornaPanoramicaSlotVSR() {
       return;
     }
 
-    let idContainerBase = tipoGara.toLowerCase();
+    const idContainerBase = tipoGara.toLowerCase();
     const slotCategoriaContainer = document.getElementById(
       `slot-${idContainerBase}-container`
     );
@@ -2392,9 +2233,9 @@ function aggiornaPanoramicaSlotVSR() {
       );
     }
 
-    let chiaveMappaPerValoreNumerico = Object.keys(livelliVsrStoricoMap).find(
-      (key) => livelliVsrStoricoMap[key].tipo === tipoGara
-    );
+    const chiaveMappaPerValoreNumerico = Object.keys(
+      livelliVsrStoricoMap
+    ).find((key) => livelliVsrStoricoMap[key].tipo === tipoGara);
     const infoLivelloDaMappa = chiaveMappaPerValoreNumerico
       ? livelliVsrStoricoMap[chiaveMappaPerValoreNumerico]
       : null;
@@ -2826,78 +2667,6 @@ function aggiornaSezioneStrategia() {
   aggiornaValutazioneStrategicaSlot();
 }
 
-function getGareConScadenzeImminenti(serializzabile = false) {
-  const gareSalvate = JSON.parse(localStorage.getItem("gareSalvate")) || [];
-  const scadenze = [];
-  const contributingIds = getContributingGareIds(); // Ottieni gli ID delle gare che contribuiscono PRIMA di ogni simulazione
-
-  gareSalvate.forEach((gara) => {
-    const oggi = new Date();
-    oggi.setHours(0, 0, 0, 0);
-    const dataGaraDate = new Date(gara.data);
-    dataGaraDate.setHours(0, 0, 0, 0);
-
-    const dataDimezzamento = new Date(dataGaraDate);
-    dataDimezzamento.setFullYear(dataDimezzamento.getFullYear() + 1);
-    const dataScadenza = new Date(dataGaraDate);
-    dataScadenza.setFullYear(dataScadenza.getFullYear() + 2);
-
-    let tipoEvento = null;
-    let dataEventoObj = null;
-    let isUrgente = false;
-    let impattoPuntiStimato = 0;
-    let fattoreDecadimentoSimulato = -1; // -1 indica nessuna simulazione
-
-    // Calculate warning periods (3 months before event)
-    const warningDimezzamento = new Date(dataDimezzamento);
-    warningDimezzamento.setMonth(warningDimezzamento.getMonth() - 3);
-    const warningScadenza = new Date(dataScadenza);
-    warningScadenza.setMonth(warningScadenza.getMonth() - 3);
-
-    if (oggi >= warningDimezzamento && oggi < dataDimezzamento) {
-      // Within 3 months before halving
-      tipoEvento = EVENT_TYPES.HALVING;
-      dataEventoObj = dataDimezzamento;
-      isUrgente = calcolaGiorniTraDate(oggi, dataDimezzamento) <= 30;
-      impattoPuntiStimato = Math.round(gara.puntiVSR * 0.5);
-      fattoreDecadimentoSimulato = 0.5;
-    } else if (oggi >= warningScadenza && oggi < dataScadenza) {
-      // Within 3 months before expiry
-      tipoEvento = EVENT_TYPES.EXPIRY;
-      dataEventoObj = dataScadenza;
-      isUrgente = calcolaGiorniTraDate(oggi, dataScadenza) <= 30;
-      impattoPuntiStimato = Math.round(gara.puntiVSR * 0.5);
-      fattoreDecadimentoSimulato = 0;
-    }
-
-    if (tipoEvento && dataEventoObj) {
-      const isContributingOriginale = contributingIds.has(gara.id);
-      const simulazioneRisultato = simulaImpattoNettoEVariazioneClassifica(
-        gara,
-        fattoreDecadimentoSimulato
-      );
-
-      const currentLanguage = document.documentElement.lang || "it";
-      let dateLocale = "en-GB";
-      if (currentLanguage === "it") dateLocale = "it-IT";
-      else if (currentLanguage === "fr") dateLocale = "fr-FR";
-
-      scadenze.push({
-        ...gara,
-        tipoEvento: tipoEvento,
-        dataEvento: serializzabile
-          ? dataEventoObj.toISOString()
-          : dataEventoObj.toLocaleDateString(dateLocale),
-        isUrgente,
-        impattoPunti: impattoPuntiStimato,
-        isContributingOriginale: isContributingOriginale,
-        impattoNettoStimato: simulazioneRisultato.impattoNettoEffettivo,
-      });
-    }
-  });
-  return scadenze;
-}
-
 function aggiornaValutazioneStrategicaSlot() {
   if (!listaSuggerimentiStrategiciSlot) return;
   try {
@@ -2914,9 +2683,9 @@ function aggiornaValutazioneStrategicaSlot() {
 
     ordineTipiPerStrategia.forEach((tipoGara) => {
       const gareCat = gareContributive[tipoGara] || [];
-      let chiaveMappaPerValoreNumerico = Object.keys(livelliVsrStoricoMap).find(
-        (key) => livelliVsrStoricoMap[key].tipo === tipoGara
-      );
+      const chiaveMappaPerValoreNumerico = Object.keys(
+        livelliVsrStoricoMap
+      ).find((key) => livelliVsrStoricoMap[key].tipo === tipoGara);
       const infoLivelloDaMappa = chiaveMappaPerValoreNumerico
         ? livelliVsrStoricoMap[chiaveMappaPerValoreNumerico]
         : null;
@@ -2929,7 +2698,7 @@ function aggiornaValutazioneStrategicaSlot() {
 
       if (!livelloValoreNumerico) return;
 
-      let icona = getTranslation(`STRATEGY_SUGGESTION_${tipoGara}_ICON`);
+      const icona = getTranslation(`STRATEGY_SUGGESTION_${tipoGara}_ICON`);
       let suggerimentoTestoCompleto = "";
       const limitePerFascia = LIMITI_GARE_PER_CATEGORIA[tipoGara];
 
@@ -2998,7 +2767,10 @@ function aggiornaValutazioneStrategicaSlot() {
           params
         )}`;
       } else if (numSlotVuoti100ConsideratiPerSuggerimento > 0) {
-        let puntiEsempio = calcolaPuntiPerClassifica(livelloValoreNumerico, 50);
+        const puntiEsempio = calcolaPuntiPerClassifica(
+          livelloValoreNumerico,
+          50
+        );
         params.numRacesToAdd = numSlotVuoti100ConsideratiPerSuggerimento;
         params.raceWord =
           numSlotVuoti100ConsideratiPerSuggerimento > 1
@@ -3086,9 +2858,9 @@ function aggiornaValutazioneStrategicaSlot() {
               garaInScadenza;
             const [day, month, year] = dataEvento.split("/");
             const dataEventoDate = new Date(
-              parseInt(year),
-              parseInt(month) - 1,
-              parseInt(day)
+              parseInt(year, 10),
+              parseInt(month, 10) - 1,
+              parseInt(day, 10)
             );
             const giorniRimanentiEffettivi = calcolaGiorniTraDate(
               new Date(),
@@ -3164,9 +2936,9 @@ function aggiornaValutazioneStrategicaSlot() {
         const scadenzaPiuImminente = gareHCoL1InScadenza[0];
         const [day, month, year] = scadenzaPiuImminente.dataEvento.split("/");
         const dataEventoDate = new Date(
-          parseInt(year),
-          parseInt(month) - 1,
-          parseInt(day)
+          parseInt(year, 10),
+          parseInt(month, 10) - 1,
+          parseInt(day, 10)
         );
         const giorniRimanenti = calcolaGiorniTraDate(
           new Date(),
@@ -3222,9 +2994,21 @@ function aggiornaValutazioneStrategicaSlot() {
 }
 
 // --- Funzioni Grafico Torta Strategia ---
+const mappaTestoLabelGraficoATipoGara = {};
+
 function aggiornaGraficoTortaStatoStrategia() {
   if (!canvasGraficoTorta) return;
   try {
+    // Popola la mappa se è vuota (dopo che i18n è inizializzato)
+    if (Object.keys(mappaTestoLabelGraficoATipoGara).length === 0) {
+      Object.values(livelliVsrStoricoMap).forEach((level) => {
+        if (level.chiaveTraduzione && level.tipo !== "N/D") {
+          const translatedLabel = getTranslation(level.chiaveTraduzione);
+          mappaTestoLabelGraficoATipoGara[translatedLabel] = level.tipo;
+        }
+      });
+    }
+
     const saluteCategoriePerTooltip = {};
     const gareContributive = getGareContributiveConDettagli();
     const puntiAttualiPerCategoriaGrafico = {};
@@ -3304,7 +3088,7 @@ function aggiornaGraficoTortaStatoStrategia() {
       const percentualeRiempimento = gareCat.length / totaleSlotCategoria;
       let qualitaMediaPunti = 0;
       if (gareCat.length > 0 && livelloValoreNumerico > 0) {
-        let sommaQualitaPercentuale = gareCat.reduce((sum, g) => {
+        const sommaQualitaPercentuale = gareCat.reduce((sum, g) => {
           const potenzialeMaxSlotSpecifico =
             livelloValoreNumerico * g.fattoreDecadimento;
           return (
@@ -3431,7 +3215,7 @@ function aggiornaGraficoTortaStatoStrategia() {
                     potenzialePuntiPerGraficoTorta[tipoGaraPerTooltip] || 0;
                   const puntiAttualiDellaCategoria =
                     puntiAttualiPerCategoriaGrafico[tipoGaraPerTooltip] || 0;
-                  let percentualePuntiVSRPerCategoria =
+                  const percentualePuntiVSRPerCategoria =
                     potenzialeMaxCategoria > 0
                       ? (puntiAttualiDellaCategoria / potenzialeMaxCategoria) *
                         100
@@ -3554,52 +3338,6 @@ function aggiornaGraficoTortaStatoStrategia() {
 }
 
 // --- Funzioni Grafico Radar Dashboard ---
-function calcolaPunteggioSaluteCategoria(
-  gareCat,
-  maxSlotPerFascia,
-  valoreMaxPuntiGara
-) {
-  const totaleSlotCategoria = maxSlotPerFascia * 2;
-  if (totaleSlotCategoria === 0) return 0;
-  const percentualeRiempimento = gareCat.length / totaleSlotCategoria;
-  let qualitaMediaPunti = 0;
-  if (gareCat.length > 0 && valoreMaxPuntiGara > 0) {
-    let sommaQualitaPercentuale = gareCat.reduce((sum, g) => {
-      const potenzialeMaxSlotSpecifico =
-        valoreMaxPuntiGara * g.fattoreDecadimento;
-      return (
-        sum +
-        (potenzialeMaxSlotSpecifico > 0
-          ? g.puntiEffettivi / potenzialeMaxSlotSpecifico
-          : 0)
-      );
-    }, 0);
-    qualitaMediaPunti = sommaQualitaPercentuale / gareCat.length;
-  }
-  let pesoRiempimento = 0.5,
-    pesoQualita = 0.5;
-  if (maxSlotPerFascia === 1) {
-    pesoRiempimento = 0.4;
-    pesoQualita = 0.6;
-  } else if (maxSlotPerFascia === 3) {
-    pesoRiempimento = 0.45;
-    pesoQualita = 0.55;
-  } else if (maxSlotPerFascia === 10) {
-    pesoRiempimento = 0.6;
-    pesoQualita = 0.4;
-  }
-  return (
-    Math.min(
-      1,
-      Math.max(
-        0,
-        percentualeRiempimento * pesoRiempimento +
-          qualitaMediaPunti * pesoQualita
-      )
-    ) * 100
-  );
-}
-
 function aggiornaGraficoRadarSaluteSlot() {
   if (!canvasGraficoRadar) return;
   const gareContributive = getGareContributiveConDettagli();
@@ -3630,10 +3368,10 @@ function aggiornaGraficoRadarSaluteSlot() {
       datiPercentualePotenziale.push(0);
       return;
     }
-    let puntiAttuali = gareCat.reduce((sum, g) => sum + g.puntiEffettivi, 0);
+    const puntiAttuali = gareCat.reduce((sum, g) => sum + g.puntiEffettivi, 0);
     const potenzialeMaxCategoria =
       livelloValoreNumerico * maxSlotPerFascia * 1.5;
-    let percentualeRaggiunta =
+    const percentualeRaggiunta =
       potenzialeMaxCategoria > 0
         ? (puntiAttuali / potenzialeMaxCategoria) * 100
         : 0;

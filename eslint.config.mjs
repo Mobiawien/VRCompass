@@ -13,7 +13,7 @@ export default defineConfig({
   },
   plugins: { js },
   rules: {
-    "no-unused-vars": "warn", // Cambia da 'error' (rosso) a 'warn' (giallo)
+    "no-unused-vars": "off", // Disattiva completamente il controllo sulle variabili non usate
     "no-undef": "error", // Mantiene come errore se una variabile non è definita
   },
 });

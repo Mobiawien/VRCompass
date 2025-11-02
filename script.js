@@ -16,6 +16,10 @@ import {
 } from "./modules/vsr-calculator.js";
 import { initCreditsCalculator } from "./modules/credits-ui.js";
 import { initVsrRankingUI, aggiornaTabellaGare } from "./modules/vsr-ui.js";
+import {
+  initAnalysisUI,
+  aggiornaSezioneAnalisi,
+} from "./modules/analysis-ui.js";
 
 // --- Elementi DOM ---
 // Navigazione
@@ -404,6 +408,8 @@ async function init() {
     // Aggiorna tutti i componenti UI che dipendono dalla lingua
     aggiornaInfoClassificaView();
     aggiornaTabellaGare();
+    aggiornaSezioneAnalisi();
+    aggiornaSezioneStrategia();
   });
 
   // --- LOGICA DI CONTROLLO VARIAZIONE VSR (REVISIONATA E CORRETTA) ---
@@ -486,6 +492,53 @@ async function init() {
     }
   );
 
+  // Inizializza il modulo della UI per l'analisi
+  initAnalysisUI(
+    {
+      hcOccupati,
+      hcPuntiCategoria,
+      hcPuntiAttuali,
+      hcGareSlot,
+      hcProgressBar,
+      hcStackedPointsBarContainer,
+      hcPointsBar100,
+      hcPointsBar50,
+      hcPointsBarEmpty,
+      liv1Occupati,
+      liv1PuntiCategoria,
+      liv1MinPunti,
+      liv1GareSlot,
+      liv1ProgressBar,
+      liv1StackedPointsBarContainer,
+      liv1PointsBar100,
+      liv1PointsBar50,
+      liv1PointsBarEmpty,
+      liv2Occupati,
+      liv2PuntiCategoria,
+      liv2MinPunti,
+      liv2GareSlot,
+      liv2ProgressBar,
+      liv2StackedPointsBarContainer,
+      liv2PointsBar100,
+      liv2PointsBar50,
+      liv2PointsBarEmpty,
+      liv3Occupati,
+      liv3PuntiCategoria,
+      liv3MinPunti,
+      liv3GareSlot,
+      liv3ProgressBar,
+      liv3StackedPointsBarContainer,
+      liv3PointsBar100,
+      liv3PointsBar50,
+      liv3PointsBarEmpty,
+      livelliVsrStoricoMap,
+      LIMITI_GARE_PER_CATEGORIA,
+    },
+    {
+      getGareContributiveConDettagli,
+    }
+  );
+
   setupDashboardListeners();
   if (btnEsportaDati) btnEsportaDati.addEventListener("click", esportaDati);
   if (fileImportaDatiInput)
@@ -563,8 +616,6 @@ function aggiornaInfoClassificaView() {
 }
 
 // --- Funzioni Gestione Classifica VSR ---
-// TUTTE LE FUNZIONI DELLA UI VSR SONO STATE SPOSTATE IN `modules/vsr-ui.js`
-
 function getContributingGareIds(gareSalvate, dataRiferimento) {
   if (gareSalvate.length === 0) return new Set();
   const gareContributive = selezionaGareContributive(
@@ -1305,244 +1356,16 @@ function aggiungiRegataDaElencoAlloStorico(
 }
 
 // --- Funzioni Sezione Analisi ---
-function aggiornaSezioneAnalisi() {
-  aggiornaPanoramicaSlotVSR();
-}
+// TUTTE LE FUNZIONI DELLA UI ANALISI SONO STATE SPOSTATE IN `modules/analysis-ui.js`
 function getGareContributiveConDettagli() {
   const gareSalvate = JSON.parse(localStorage.getItem("gareSalvate")) || [];
   return selezionaGareContributive(gareSalvate, new Date());
 }
 
-function aggiornaPanoramicaSlotVSR() {
-  const gareContributive = getGareContributiveConDettagli();
-  const gareConScadenze = getGareConScadenzeImminenti();
-  const idsGareConScadenze = new Set(gareConScadenze.map((g) => g.id));
-
-  function popolaCategoriaSlot(
-    tipoGara,
-    gareCat,
-    maxSlotPerFascia,
-    elOccupati,
-    elMinPunti,
-    elGareSlot,
-    elProgressBar,
-    nomeCatBreve,
-    elPuntiCategoria,
-    elStackedPointsBarContainer,
-    elPointsBar100,
-    elPointsBar50,
-    elPointsBarEmpty
-  ) {
-    const totaleSlotCategoria = maxSlotPerFascia * 2;
-    elOccupati.textContent = gareCat.length;
-    if (elGareSlot) elGareSlot.innerHTML = "";
-    else {
-      console.warn(
-        `Elemento DOM elGareSlot non trovato per '${nomeCatBreve}'.`
-      );
-      return;
-    }
-
-    const idContainerBase = tipoGara.toLowerCase();
-    const slotCategoriaContainer = document.getElementById(
-      `slot-${idContainerBase}-container`
-    );
-    if (slotCategoriaContainer) {
-      slotCategoriaContainer.classList.remove(
-        "slot-debole",
-        "slot-con-opportunita",
-        "slot-con-preavviso"
-      );
-    }
-
-    const chiaveMappaPerValoreNumerico = Object.keys(livelliVsrStoricoMap).find(
-      (key) => livelliVsrStoricoMap[key].tipo === tipoGara
-    );
-    const infoLivelloDaMappa = chiaveMappaPerValoreNumerico
-      ? livelliVsrStoricoMap[chiaveMappaPerValoreNumerico]
-      : null;
-    const livelloValoreNumerico = infoLivelloDaMappa
-      ? infoLivelloDaMappa.valoreNumerico
-      : null;
-
-    let totalePuntiCategoria = 0;
-    gareCat.forEach((g) => (totalePuntiCategoria += g.puntiEffettivi));
-    if (elPuntiCategoria)
-      elPuntiCategoria.textContent = formatNumber(totalePuntiCategoria, 0);
-
-    if (
-      elStackedPointsBarContainer &&
-      elPointsBar100 &&
-      elPointsBar50 &&
-      elPointsBarEmpty &&
-      livelloValoreNumerico
-    ) {
-      let punti100 = 0,
-        punti50 = 0;
-      gareCat.forEach((g) => {
-        if (g.fattoreDecadimento === 1.0) punti100 += g.puntiEffettivi;
-        else if (g.fattoreDecadimento === 0.5) punti50 += g.puntiEffettivi;
-      });
-      const potenzialeMaxPuntiCategoria =
-        livelloValoreNumerico * maxSlotPerFascia * 1.5;
-      let perc100 = 0,
-        perc50 = 0,
-        percEmpty = 100;
-      if (potenzialeMaxPuntiCategoria > 0) {
-        const numPunti100 = Number(punti100) || 0;
-        const numPunti50 = Number(punti50) || 0;
-        perc100 = (numPunti100 / potenzialeMaxPuntiCategoria) * 100;
-        perc50 = (numPunti50 / potenzialeMaxPuntiCategoria) * 100;
-        percEmpty = Math.max(0, 100 - perc100 - perc50);
-      }
-      elPointsBar100.style.width = `${perc100}%`;
-      elPointsBar50.style.width = `${perc50}%`;
-      elPointsBarEmpty.style.width = `${percEmpty}%`;
-      elStackedPointsBarContainer.setAttribute(
-        "title",
-        `Punti 100%: ${formatNumber(punti100, 0)}\nPunti 50%: ${formatNumber(
-          punti50,
-          0
-        )}\nPotenziale Max: ${formatNumber(potenzialeMaxPuntiCategoria, 0)}`
-      );
-    }
-
-    if (elProgressBar) {
-      elProgressBar.style.width = `${
-        (gareCat.length / totaleSlotCategoria) * 100
-      }%`;
-      elProgressBar.classList.remove(
-        "progress-bar-good",
-        "progress-bar-medium",
-        "progress-bar-low",
-        "progress-bar-empty"
-      );
-      let tooltipText = `Slot ${nomeCatBreve}: ${gareCat.length}/${totaleSlotCategoria} gare. `;
-      if (
-        gareCat.length > 0 &&
-        livelloValoreNumerico &&
-        livelloValoreNumerico > 0
-      ) {
-        let sommaQualitaPercentuale = 0;
-        gareCat.forEach(
-          (g) =>
-            (sommaQualitaPercentuale +=
-              (g.puntiEffettivi /
-                (livelloValoreNumerico * g.fattoreDecadimento)) *
-              100)
-        );
-        const qualitaMediaPercentuale =
-          sommaQualitaPercentuale / gareCat.length;
-        if (qualitaMediaPercentuale >= 75)
-          elProgressBar.classList.add("progress-bar-good");
-        else if (qualitaMediaPercentuale >= 40)
-          elProgressBar.classList.add("progress-bar-medium");
-        else elProgressBar.classList.add("progress-bar-low");
-      } else elProgressBar.classList.add("progress-bar-empty");
-      elProgressBar.setAttribute("title", tooltipText.trim());
-    }
-
-    if (gareCat.length > 0) {
-      if (elMinPunti)
-        elMinPunti.textContent = formatNumber(
-          gareCat[gareCat.length - 1].puntiEffettivi,
-          0
-        );
-      else if (tipoGara === RACE_TYPES.HC && hcPuntiAttuali)
-        hcPuntiAttuali.textContent =
-          gareCat.length > 0
-            ? formatNumber(gareCat[0].puntiEffettivi, 0)
-            : getTranslation("TEXT_NA_DETAILED");
-      gareCat.forEach((g) => {
-        if (elGareSlot) {
-          const p = document.createElement("p");
-          p.classList.add("gara-dettaglio");
-          const statoPercentuale =
-            g.fattoreDecadimento === 1.0 ? "100%" : "50%";
-          const currentLanguage = document.documentElement.lang || "it";
-          let dateLocale = "en-GB";
-          if (currentLanguage === "it") dateLocale = "it-IT";
-          else if (currentLanguage === "fr") dateLocale = "fr-FR";
-          p.textContent = `${g.nome}: ${formatNumber(
-            g.puntiEffettivi,
-            0
-          )} pts (${statoPercentuale}, Data: ${new Date(
-            g.data
-          ).toLocaleDateString(dateLocale)})`;
-          elGareSlot.appendChild(p);
-        }
-      });
-    } else {
-      if (elMinPunti)
-        elMinPunti.textContent = getTranslation("TEXT_NA_DETAILED");
-      else if (tipoGara === RACE_TYPES.HC && hcPuntiAttuali)
-        hcPuntiAttuali.textContent = getTranslation("TEXT_NA_DETAILED");
-      if (elGareSlot)
-        elGareSlot.innerHTML = `<p class="no-data">${getTranslation(
-          "TEXT_NO_VALID_RACES_IN_SLOT"
-        )}</p>`;
-    }
-  }
-  popolaCategoriaSlot(
-    RACE_TYPES.HC,
-    gareContributive[RACE_TYPES.HC] || [],
-    LIMITI_GARE_PER_CATEGORIA[RACE_TYPES.HC],
-    hcOccupati,
-    null,
-    hcGareSlot,
-    hcProgressBar,
-    getTranslation(livelliVsrStoricoMap[RACE_TYPES.HC].chiaveTraduzione),
-    hcPuntiCategoria,
-    hcStackedPointsBarContainer,
-    hcPointsBar100,
-    hcPointsBar50,
-    hcPointsBarEmpty
-  );
-  popolaCategoriaSlot(
-    RACE_TYPES.L1,
-    gareContributive[RACE_TYPES.L1] || [],
-    LIMITI_GARE_PER_CATEGORIA[RACE_TYPES.L1],
-    liv1Occupati,
-    liv1MinPunti,
-    liv1GareSlot,
-    liv1ProgressBar,
-    getTranslation(livelliVsrStoricoMap[RACE_TYPES.L1].chiaveTraduzione),
-    liv1PuntiCategoria,
-    liv1StackedPointsBarContainer,
-    liv1PointsBar100,
-    liv1PointsBar50,
-    liv1PointsBarEmpty
-  );
-  popolaCategoriaSlot(
-    RACE_TYPES.L2,
-    gareContributive[RACE_TYPES.L2] || [],
-    LIMITI_GARE_PER_CATEGORIA[RACE_TYPES.L2],
-    liv2Occupati,
-    liv2MinPunti,
-    liv2GareSlot,
-    liv2ProgressBar,
-    getTranslation(livelliVsrStoricoMap[RACE_TYPES.L2].chiaveTraduzione),
-    liv2PuntiCategoria,
-    liv2StackedPointsBarContainer,
-    liv2PointsBar100,
-    liv2PointsBar50,
-    liv2PointsBarEmpty
-  );
-  popolaCategoriaSlot(
-    RACE_TYPES.L3,
-    gareContributive[RACE_TYPES.L3] || [],
-    LIMITI_GARE_PER_CATEGORIA[RACE_TYPES.L3],
-    liv3Occupati,
-    liv3MinPunti,
-    liv3GareSlot,
-    liv3ProgressBar,
-    getTranslation(livelliVsrStoricoMap[RACE_TYPES.L3].chiaveTraduzione),
-    liv3PuntiCategoria,
-    liv3StackedPointsBarContainer,
-    liv3PointsBar100,
-    liv3PointsBar50,
-    liv3PointsBarEmpty
-  );
+// --- Funzioni Sezione Strategia ---
+function aggiornaSezioneStrategia() {
+  aggiornaMonitoraggioScadenze();
+  aggiornaValutazioneStrategicaSlot();
 }
 
 function aggiornaMonitoraggioScadenze() {
@@ -1782,12 +1605,6 @@ function aggiornaMonitoraggioScadenze() {
     EVENT_TYPES.HALVING
   );
   popolaListaScadenze(listaGareScadenza, gareInScadenza, EVENT_TYPES.EXPIRY);
-}
-
-// --- Funzioni Sezione Strategia ---
-function aggiornaSezioneStrategia() {
-  aggiornaMonitoraggioScadenze();
-  aggiornaValutazioneStrategicaSlot();
 }
 
 function aggiornaValutazioneStrategicaSlot() {

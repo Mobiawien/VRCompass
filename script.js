@@ -14,6 +14,7 @@ import {
   calcolaVsrTotaleDaContributive,
   calcolaPuntiPerClassifica,
 } from "./modules/vsr-calculator.js";
+import { initCreditsCalculator } from "./modules/credits-ui.js";
 
 // --- Elementi DOM ---
 // Navigazione
@@ -191,14 +192,7 @@ const canvasGraficoTorta = document.getElementById(
 let graficoTortaIstanza = null;
 
 // --- Stato Applicazione ---
-let categoriaSelezionata = null;
-let attrezzatureSelezionate = {};
-let bonusBase = 0;
-let spesaAttrezzature = 0;
-let bonusExtra = 0;
-let livelloGara = null;
-let classificaFinale = 0;
-let classificaFinaleModificataManualmente = false;
+// Le variabili di stato per la calcolatrice sono state spostate in `modules/credits-ui.js`
 let vistaStoricoAttuale = "valide";
 let idGaraInModifica = null;
 
@@ -242,10 +236,7 @@ const URL_ELENCO_REGATE =
   "https://cert.civis.net/LSV-Dash/api?context=api&context_type=allrace";
 
 const SOGLIA_DEBOLEZZA = { 15000: 0.5, 10000: 0.4, 5000: 0.3, 3000: 0.25 };
-let inputClassificaTab3Ref = null;
-let cellaCreditiTab3Ref = null;
-let cellaNettoTab3Ref = null;
-let cellaPuntiTab3Ref = null;
+// Le variabili di riferimento per le celle della tabella 3 sono ora gestite in `modules/credits-ui.js`
 
 // --- Costanti Applicazione ---
 const RACE_TYPES = {
@@ -309,8 +300,9 @@ function handleNavClick(event) {
           aggiornaGraficoRadarSaluteSlot();
           break;
         case "gestione-crediti-view":
-          aggiornaTabella2();
-          aggiornaTabella3();
+          // La logica di aggiornamento della calcolatrice è ora gestita dal suo modulo
+          // ma potrebbe essere necessario chiamare una funzione di refresh se lo stato cambia altrove.
+          // Per ora, l'init si occupa di tutto.
           break;
         case "classifica-vsr-view":
           aggiornaInfoClassificaView();
@@ -453,7 +445,21 @@ async function init() {
 
   // 6. Continua con il resto dell'inizializzazione.
   caricaDatiDashboard(); // Mostra i dati iniziali (incluso il VSR appena calcolato)
-  setupCalcolatriceListeners();
+
+  // Inizializza il modulo della calcolatrice crediti
+  initCreditsCalculator(
+    {
+      tabella1,
+      tabella3Body,
+      outputCatEcon,
+      inputBonusTotale,
+      outputSpesa,
+      outputSpesaEffettiva,
+      outputPosRecupero,
+    },
+    livelliVsrStoricoMap
+  );
+
   if (
     btnMostraTutteGare &&
     btnMostraGareValide &&
@@ -554,279 +560,7 @@ function aggiornaInfoClassificaView() {
 }
 
 // --- Funzioni Calcolatrice Gara ---
-function setupCalcolatriceListeners() {
-  tabella1
-    .querySelectorAll("th.categoria-cell")
-    .forEach((th) =>
-      th.addEventListener("click", () =>
-        selezionaCategoria(th.dataset.categoria)
-      )
-    );
-  tabella1
-    .querySelectorAll("td.attrezzatura-cell")
-    .forEach((td) =>
-      td.addEventListener("click", () => toggleAttrezzatura(td))
-    );
-  if (inputBonusTotale)
-    inputBonusTotale.addEventListener("input", handleBonusInputChange);
-  if (fileImportaRegateSuggeriteInput)
-    fileImportaRegateSuggeriteInput.addEventListener(
-      "change",
-      preparaImportazioneRegateSuggerite
-    );
-  setupModaleAvvisoRegateListeners();
-  if (btnApriModalElencoRegate)
-    btnApriModalElencoRegate.addEventListener(
-      "click",
-      apriEPopolaModalElencoRegate
-    );
-  if (btnChiudiModalElencoRegate)
-    btnChiudiModalElencoRegate.addEventListener(
-      "click",
-      chiudiModalElencoRegate
-    );
-  if (modalElencoRegate)
-    modalElencoRegate.addEventListener("click", (event) => {
-      if (event.target === modalElencoRegate) chiudiModalElencoRegate();
-    });
-}
-
-function selezionaCategoria(cat) {
-  categoriaSelezionata = cat;
-  attrezzatureSelezionate = {};
-  spesaAttrezzature = 0;
-  classificaFinaleModificataManualmente = false;
-  classificaFinale = 0;
-  livelloGara = null;
-  tabella1
-    .querySelectorAll("td.attrezzatura-cell.selected")
-    .forEach((td) => td.classList.remove("selected"));
-  tabella1
-    .querySelectorAll("td.selected-name")
-    .forEach((td) => td.classList.remove("selected-name"));
-  bonusExtra = 0;
-  tabella1
-    .querySelectorAll("th.categoria-cell")
-    .forEach((th) => th.classList.remove("selected-category"));
-  const headerCliccato = tabella1.querySelector(
-    `th.categoria-cell[data-categoria="${cat}"]`
-  );
-  if (headerCliccato) headerCliccato.classList.add("selected-category");
-  const bonusCell = tabella1.querySelector(
-    `.bonus-row td[data-categoria="${cat}"]`
-  );
-  bonusBase = bonusCell ? parseInt(bonusCell.textContent, 10) : 0;
-  if (inputBonusTotale) {
-    inputBonusTotale.value = bonusBase;
-    inputBonusTotale.title = `Bonus base: ${bonusBase}`;
-  }
-  ricalcolaSpesaAttrezzature();
-  aggiornaTabella2();
-  aggiornaTabella3();
-}
-
-function toggleAttrezzatura(cell) {
-  if (!categoriaSelezionata) {
-    alert(getTranslation("ALERT_SELECT_CATEGORY_FIRST"));
-    return;
-  }
-  const nomeAttrezzatura = cell.parentNode.cells[0].textContent;
-  const costo = parseInt(cell.textContent, 10);
-  const catCorrente = cell.dataset.categoria;
-  classificaFinaleModificataManualmente = false;
-  if (catCorrente !== categoriaSelezionata) return;
-  attrezzatureSelezionate[categoriaSelezionata] =
-    attrezzatureSelezionate[categoriaSelezionata] || {};
-  attrezzatureSelezionate[categoriaSelezionata].items =
-    attrezzatureSelezionate[categoriaSelezionata].items || {};
-  if (attrezzatureSelezionate[categoriaSelezionata].items[nomeAttrezzatura]) {
-    delete attrezzatureSelezionate[categoriaSelezionata].items[
-      nomeAttrezzatura
-    ];
-    cell.classList.remove("selected");
-    cell.parentNode.cells[0].classList.remove("selected-name");
-  } else {
-    attrezzatureSelezionate[categoriaSelezionata].items[nomeAttrezzatura] =
-      costo;
-    cell.classList.add("selected");
-    cell.parentNode.cells[0].classList.add("selected-name");
-  }
-  ricalcolaSpesaAttrezzature();
-  aggiornaTabella2();
-  aggiornaTabella3();
-}
-
-function ricalcolaSpesaAttrezzature() {
-  spesaAttrezzature = 0;
-  if (
-    categoriaSelezionata &&
-    attrezzatureSelezionate[categoriaSelezionata]?.items
-  ) {
-    for (const nome in attrezzatureSelezionate[categoriaSelezionata].items) {
-      if (
-        Object.prototype.hasOwnProperty.call(
-          attrezzatureSelezionate[categoriaSelezionata].items,
-          nome
-        )
-      ) {
-        spesaAttrezzature +=
-          attrezzatureSelezionate[categoriaSelezionata].items[nome];
-      }
-    }
-  }
-  if (categoriaSelezionata) {
-    attrezzatureSelezionate[categoriaSelezionata] =
-      attrezzatureSelezionate[categoriaSelezionata] || {};
-    attrezzatureSelezionate[categoriaSelezionata].costoTotale =
-      spesaAttrezzature;
-  }
-}
-
-function handleBonusInputChange(e) {
-  const nuovoBonusTotale = parseInt(e.target.value, 10) || 0;
-  bonusExtra = Math.max(0, nuovoBonusTotale - bonusBase);
-  aggiornaTabella2();
-  aggiornaTabella3();
-}
-
-function aggiornaTabella2() {
-  if (!categoriaSelezionata) {
-    if (outputCatEcon) outputCatEcon.textContent = getTranslation("TEXT_NA");
-    if (inputBonusTotale) inputBonusTotale.value = 0;
-    if (outputSpesa) outputSpesa.textContent = getTranslation("TEXT_NA");
-    if (outputSpesaEffettiva)
-      outputSpesaEffettiva.textContent = getTranslation("TEXT_NA");
-    if (outputPosRecupero)
-      outputPosRecupero.textContent = getTranslation("TEXT_NA");
-    bonusExtra = 0;
-    return;
-  }
-  const bonusTotaleCorrente = bonusBase + bonusExtra;
-  const spesaEffettiva = Math.max(0, spesaAttrezzature - bonusTotaleCorrente);
-  const posRecuperoNumerica = calcolaPosizioneRecupero(
-    spesaEffettiva,
-    categoriaSelezionata
-  );
-  if (outputCatEcon) outputCatEcon.textContent = categoriaSelezionata;
-  if (inputBonusTotale) inputBonusTotale.title = `Bonus base: ${bonusBase}`;
-  if (outputSpesa) outputSpesa.textContent = formatNumber(spesaAttrezzature, 0);
-  if (outputSpesaEffettiva)
-    outputSpesaEffettiva.textContent = formatNumber(spesaEffettiva, 0);
-  if (outputPosRecupero) {
-    if (spesaEffettiva <= 0 && posRecuperoNumerica !== null) {
-      outputPosRecupero.textContent = formatNumber(posRecuperoNumerica, 0);
-      outputPosRecupero.classList.remove("important-result");
-      outputPosRecupero.classList.add("profit-result");
-    } else {
-      outputPosRecupero.textContent =
-        posRecuperoNumerica !== null && posRecuperoNumerica > 0
-          ? formatNumber(posRecuperoNumerica, 0)
-          : posRecuperoNumerica === 0
-          ? "0"
-          : getTranslation("TEXT_NA");
-      outputPosRecupero.classList.remove("profit-result");
-      if (posRecuperoNumerica !== null && posRecuperoNumerica > 0)
-        outputPosRecupero.classList.add("important-result");
-      else outputPosRecupero.classList.remove("important-result");
-    }
-  }
-  if (!classificaFinaleModificataManualmente)
-    classificaFinale =
-      posRecuperoNumerica !== null && posRecuperoNumerica > 0
-        ? posRecuperoNumerica
-        : 0;
-}
-
-function aggiornaTabella3() {
-  tabella3Body.innerHTML = "";
-  inputClassificaTab3Ref = null;
-  cellaCreditiTab3Ref = null;
-  cellaNettoTab3Ref = null;
-  cellaPuntiTab3Ref = null;
-  if (!categoriaSelezionata) return;
-
-  const row = tabella3Body.insertRow();
-  const cellaLivello = row.insertCell(0);
-  const selectLivello = document.createElement("select");
-  const opzioniLivelloGara = [
-    { chiaveTesto: "CREDITS_TABLE3_SELECT_LEVEL_OPTION_DEFAULT", valore: "" },
-    { chiaveTesto: "CREDITS_TABLE3_SELECT_LEVEL_OPTION_HC", valore: "HC" },
-    { chiaveTesto: "CREDITS_TABLE3_SELECT_LEVEL_OPTION_L1", valore: "LIV1" },
-    { chiaveTesto: "CREDITS_TABLE3_SELECT_LEVEL_OPTION_L2", valore: "LIV2" },
-    { chiaveTesto: "CREDITS_TABLE3_SELECT_LEVEL_OPTION_L3", valore: "LIV3" },
-  ];
-  opzioniLivelloGara.forEach((opzione) => {
-    const option = document.createElement("option");
-    option.value = opzione.valore;
-    option.textContent = getTranslation(opzione.chiaveTesto);
-    if (opzione.valore === "") {
-      option.disabled = true;
-      option.selected = livelloGara === null;
-    } else if (livelliVsrStoricoMap[opzione.valore]) {
-      option.selected =
-        livelloGara === livelliVsrStoricoMap[opzione.valore].valoreNumerico;
-    }
-    selectLivello.appendChild(option);
-  });
-  selectLivello.addEventListener("change", (e) => {
-    const selectedKey = e.target.value;
-    livelloGara =
-      selectedKey && livelliVsrStoricoMap[selectedKey]
-        ? livelliVsrStoricoMap[selectedKey].valoreNumerico
-        : null;
-    popolaRisultatiTabella3();
-  });
-  cellaLivello.appendChild(selectLivello);
-
-  const cellaClassifica = row.insertCell(1);
-  inputClassificaTab3Ref = document.createElement("input");
-  inputClassificaTab3Ref.type = "number";
-  inputClassificaTab3Ref.value = classificaFinale > 0 ? classificaFinale : "";
-  inputClassificaTab3Ref.min = "1";
-  inputClassificaTab3Ref.placeholder = getTranslation("PLACEHOLDER_POSITION");
-  inputClassificaTab3Ref.addEventListener("input", (e) => {
-    classificaFinaleModificataManualmente = true;
-    classificaFinale = parseInt(e.target.value, 10) || 0;
-    popolaRisultatiTabella3();
-  });
-  cellaClassifica.appendChild(inputClassificaTab3Ref);
-
-  cellaCreditiTab3Ref = row.insertCell(2);
-  cellaCreditiTab3Ref.classList.add("calculated-result-cell");
-  cellaNettoTab3Ref = row.insertCell(3);
-  cellaNettoTab3Ref.classList.add("calculated-result-cell");
-  cellaPuntiTab3Ref = row.insertCell(4);
-  cellaPuntiTab3Ref.classList.add("calculated-result-cell");
-
-  popolaRisultatiTabella3();
-}
-
-function popolaRisultatiTabella3() {
-  if (
-    !categoriaSelezionata ||
-    !cellaCreditiTab3Ref ||
-    !cellaNettoTab3Ref ||
-    !cellaPuntiTab3Ref
-  ) {
-    return;
-  }
-
-  const spesaEffettiva = Math.max(
-    0,
-    spesaAttrezzature - (bonusBase + bonusExtra)
-  );
-
-  const risultati = ricalcolaRisultati({
-    categoria: categoriaSelezionata,
-    spesaEffettiva: spesaEffettiva,
-    classifica: classificaFinale,
-    livelloGaraValore: livelloGara,
-  });
-
-  cellaCreditiTab3Ref.textContent = formatNumber(risultati.creditiVinti, 0);
-  cellaNettoTab3Ref.textContent = formatNumber(risultati.nettoCrediti, 0);
-  cellaPuntiTab3Ref.textContent = formatNumber(risultati.puntiVSR, 0);
-}
+// TUTTE LE FUNZIONI DELLA CALCOLATRICE SONO STATE SPOSTATE IN `modules/credits-ui.js`
 
 // --- Funzioni Gestione Classifica VSR ---
 function setupClassificaListeners() {
@@ -1581,7 +1315,8 @@ function importaDati(event) {
         aggiornaSezioneAnalisi();
         aggiornaGraficoTortaStatoStrategia();
         aggiornaGraficoRadarSaluteSlot();
-        if (categoriaSelezionata) selezionaCategoria(categoriaSelezionata);
+        // Non è necessario chiamare selezionaCategoria qui,
+        // lo stato della calcolatrice non è parte del backup.
         alert(getTranslation("ALERT_DATA_IMPORTED_SUCCESSFULLY"));
       } else alert(getTranslation("ALERT_INVALID_BACKUP_FILE"));
     } catch (error) {

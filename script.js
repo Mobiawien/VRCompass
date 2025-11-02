@@ -15,6 +15,7 @@ import {
   calcolaPuntiPerClassifica,
 } from "./modules/vsr-calculator.js";
 import { initCreditsCalculator } from "./modules/credits-ui.js";
+import { initVsrRankingUI, aggiornaTabellaGare } from "./modules/vsr-ui.js";
 
 // --- Elementi DOM ---
 // Navigazione
@@ -193,8 +194,7 @@ let graficoTortaIstanza = null;
 
 // --- Stato Applicazione ---
 // Le variabili di stato per la calcolatrice sono state spostate in `modules/credits-ui.js`
-let vistaStoricoAttuale = "valide";
-let idGaraInModifica = null;
+// Le variabili di stato per la UI VSR sono state spostate in `modules/vsr-ui.js`
 
 const livelliVsrStoricoMap = {
   0: {
@@ -306,8 +306,7 @@ function handleNavClick(event) {
           break;
         case "classifica-vsr-view":
           aggiornaInfoClassificaView();
-          aggiornaTestiPulsantiFormGara();
-          aggiornaTabellaGare();
+          aggiornaTabellaGare(); // Assicura che la tabella sia aggiornata quando si naviga alla vista
           break;
         case "analisi-view":
           aggiornaSezioneAnalisi();
@@ -402,8 +401,9 @@ function getGareConScadenzeImminenti(serializzabile = false) {
 async function init() {
   await initI18n(() => {
     // Questa funzione viene eseguita OGNI volta che la lingua cambia
-    aggiornaTestiPulsantiFormGara();
-    // Potremmo aggiungere qui altri aggiornamenti dinamici se necessario
+    // Aggiorna tutti i componenti UI che dipendono dalla lingua
+    aggiornaInfoClassificaView();
+    aggiornaTabellaGare();
   });
 
   // --- LOGICA DI CONTROLLO VARIAZIONE VSR (REVISIONATA E CORRETTA) ---
@@ -460,17 +460,32 @@ async function init() {
     livelliVsrStoricoMap
   );
 
-  if (
-    btnMostraTutteGare &&
-    btnMostraGareValide &&
-    btnStoricoHC &&
-    btnStoricoLiv1 &&
-    btnStoricoLiv2 &&
-    btnStoricoLiv3
-  ) {
-    setupFiltriStoricoListeners();
-  }
-  setupClassificaListeners();
+  // Inizializza il modulo della UI per la classifica VSR
+  initVsrRankingUI(
+    {
+      formAggiungiGara,
+      dataGaraInput,
+      livelloGaraVsrStoricoSelect,
+      nomeRegataInput,
+      classificaFinaleStoricoInput,
+      puntiVsrCalcolatiInput,
+      classificaVsrtbody,
+      tabellaClassificaVsr,
+      titoloFormGara,
+      btnMostraTutteGare,
+      btnMostraGareValide,
+      btnStoricoHC,
+      btnStoricoLiv1,
+      btnStoricoLiv2,
+      btnStoricoLiv3,
+      livelliVsrStoricoMap,
+    },
+    {
+      onDataChange: handleDataChange,
+      getContributingGareIds: getContributingGareIds,
+    }
+  );
+
   setupDashboardListeners();
   if (btnEsportaDati) btnEsportaDati.addEventListener("click", esportaDati);
   if (fileImportaDatiInput)
@@ -512,18 +527,6 @@ async function init() {
     );
 }
 
-function aggiornaTestiPulsantiFormGara() {
-  const submitButton = formAggiungiGara.querySelector('button[type="submit"]');
-  if (submitButton)
-    submitButton.textContent = idGaraInModifica
-      ? getTranslation("BTN_SAVE_CHANGES")
-      : getTranslation("BTN_ADD_RACE");
-  if (titoloFormGara)
-    titoloFormGara.textContent = idGaraInModifica
-      ? getTranslation("FORM_TITLE_EDIT_RACE")
-      : getTranslation("FORM_TITLE_ADD_RACE");
-}
-
 // --- Funzioni Dashboard ---
 function setupDashboardListeners() {
   if (nomeBarcaInput)
@@ -559,251 +562,8 @@ function aggiornaInfoClassificaView() {
     classificaVsrAttualeInput.textContent = formatNumber(classificaVsrNum, 0);
 }
 
-// --- Funzioni Calcolatrice Gara ---
-// TUTTE LE FUNZIONI DELLA CALCOLATRICE SONO STATE SPOSTATE IN `modules/credits-ui.js`
-
 // --- Funzioni Gestione Classifica VSR ---
-function setupClassificaListeners() {
-  formAggiungiGara.addEventListener("submit", handleSubmitGara);
-  if (puntiVsrCalcolatiInput) puntiVsrCalcolatiInput.readOnly = true;
-  livelloGaraVsrStoricoSelect.addEventListener(
-    "change",
-    calcolaEPopolaPuntiVSRStorico
-  );
-  classificaFinaleStoricoInput.addEventListener(
-    "input",
-    calcolaEPopolaPuntiVSRStorico
-  );
-  classificaVsrtbody.addEventListener("click", (event) => {
-    if (event.target.classList.contains("delete-btn")) {
-      const idGara = event.target.dataset.id;
-      if (idGara) eliminaGara(idGara);
-    } else if (event.target.classList.contains("edit-btn")) {
-      const idGara = event.target.dataset.id;
-      if (idGara) popolaFormPerModifica(idGara);
-    }
-  });
-  const formInputs = [
-    dataGaraInput,
-    livelloGaraVsrStoricoSelect,
-    nomeRegataInput,
-    classificaFinaleStoricoInput,
-  ];
-  formInputs.forEach((input) => {
-    input.addEventListener("focus", () => {
-      if (
-        vistaStoricoAttuale === VIEW_MODES.VALID_FOR_RANKING &&
-        btnMostraTutteGare
-      ) {
-        if (formAggiungiGara) formAggiungiGara.style.display = "block";
-        btnMostraTutteGare.click();
-      }
-    });
-  });
-}
-
-function rimuoviEvidenziazioneTutteLeRighe() {
-  const righeEvidenziate = classificaVsrtbody.querySelectorAll(
-    "tr.riga-in-modifica"
-  );
-  righeEvidenziate.forEach((riga) => riga.classList.remove("riga-in-modifica"));
-}
-
-function setupFiltriStoricoListeners() {
-  const tuttiIBottoniFiltro = [
-    btnMostraGareValide,
-    btnMostraTutteGare,
-    btnStoricoHC,
-    btnStoricoLiv1,
-    btnStoricoLiv2,
-    btnStoricoLiv3,
-  ];
-  function impostaFiltro(nuovaVista, bottoneAttivo) {
-    vistaStoricoAttuale = nuovaVista;
-    tuttiIBottoniFiltro.forEach((btn) => btn.classList.remove("active"));
-    if (bottoneAttivo) bottoneAttivo.classList.add("active");
-    rimuoviEvidenziazioneTutteLeRighe();
-    if (formAggiungiGara) formAggiungiGara.reset();
-    if (puntiVsrCalcolatiInput) puntiVsrCalcolatiInput.value = "";
-    idGaraInModifica = null;
-    aggiornaTestiPulsantiFormGara();
-    if (nuovaVista === VIEW_MODES.VALID_FOR_RANKING) {
-      if (formAggiungiGara) formAggiungiGara.style.display = "none";
-      if (titoloFormGara) titoloFormGara.style.display = "none";
-      const headerAzioni = document.getElementById("header-colonna-azioni");
-      if (headerAzioni) headerAzioni.style.display = "none";
-      if (tabellaClassificaVsr)
-        tabellaClassificaVsr.classList.remove("vista-tutte-attiva");
-    } else {
-      if (formAggiungiGara) formAggiungiGara.style.display = "block";
-      if (titoloFormGara) {
-        titoloFormGara.style.display = "block";
-      }
-      const headerAzioni = document.getElementById("header-colonna-azioni");
-      if (headerAzioni) headerAzioni.style.display = "";
-      if (tabellaClassificaVsr)
-        tabellaClassificaVsr.classList.add("vista-tutte-attiva");
-    }
-    aggiornaTabellaGare();
-  }
-  if (btnMostraGareValide)
-    btnMostraGareValide.addEventListener("click", () =>
-      impostaFiltro(VIEW_MODES.VALID_FOR_RANKING, btnMostraGareValide)
-    );
-  if (btnMostraTutteGare)
-    btnMostraTutteGare.addEventListener("click", () =>
-      impostaFiltro(VIEW_MODES.ALL_HISTORY, btnMostraTutteGare)
-    );
-  if (btnStoricoHC)
-    btnStoricoHC.addEventListener("click", () =>
-      impostaFiltro(VIEW_MODES.HISTORY_HC, btnStoricoHC)
-    );
-  if (btnStoricoLiv1)
-    btnStoricoLiv1.addEventListener("click", () =>
-      impostaFiltro(VIEW_MODES.HISTORY_L1, btnStoricoLiv1)
-    );
-  if (btnStoricoLiv2)
-    btnStoricoLiv2.addEventListener("click", () =>
-      impostaFiltro(VIEW_MODES.HISTORY_L2, btnStoricoLiv2)
-    );
-  if (btnStoricoLiv3)
-    btnStoricoLiv3.addEventListener("click", () =>
-      impostaFiltro(VIEW_MODES.HISTORY_L3, btnStoricoLiv3)
-    );
-}
-
-function calcolaEPopolaPuntiVSRStorico() {
-  const livelloSelezionatoValue = livelloGaraVsrStoricoSelect.value;
-  const classifica = parseInt(classificaFinaleStoricoInput.value, 10);
-  if (
-    livelloSelezionatoValue &&
-    livelloSelezionatoValue !== "0" &&
-    !isNaN(classifica) &&
-    classifica > 0
-  ) {
-    const categoriaInfo = livelliVsrStoricoMap[livelloSelezionatoValue];
-    if (categoriaInfo && categoriaInfo.valoreNumerico !== null) {
-      puntiVsrCalcolatiInput.value = calcolaPuntiPerClassifica(
-        categoriaInfo.valoreNumerico,
-        classifica
-      );
-    } else puntiVsrCalcolatiInput.value = "";
-  } else puntiVsrCalcolatiInput.value = "";
-}
-
-function popolaFormPerModifica(idGara) {
-  const gareSalvate = JSON.parse(localStorage.getItem("gareSalvate")) || [];
-  const garaDaModificare = gareSalvate.find(
-    (g) => String(g.id) === String(idGara)
-  );
-  if (garaDaModificare) {
-    if (vistaStoricoAttuale === VIEW_MODES.VALID_FOR_RANKING) {
-      vistaStoricoAttuale = VIEW_MODES.ALL_HISTORY;
-      const tuttiIBottoniFiltro = [
-        btnMostraGareValide,
-        btnMostraTutteGare,
-        btnStoricoHC,
-        btnStoricoLiv1,
-        btnStoricoLiv2,
-        btnStoricoLiv3,
-      ];
-      tuttiIBottoniFiltro.forEach((btn) => btn.classList.remove("active"));
-      if (btnMostraTutteGare) btnMostraTutteGare.classList.add("active");
-    }
-    if (vistaStoricoAttuale !== VIEW_MODES.VALID_FOR_RANKING) {
-      if (formAggiungiGara) formAggiungiGara.style.display = "block";
-      if (titoloFormGara) titoloFormGara.style.display = "block";
-      const headerAzioni = document.getElementById("header-colonna-azioni");
-      if (headerAzioni) headerAzioni.style.display = "";
-      if (tabellaClassificaVsr)
-        tabellaClassificaVsr.classList.add("vista-tutte-attiva");
-      aggiornaTabellaGare();
-    }
-    idGaraInModifica = idGara;
-    rimuoviEvidenziazioneTutteLeRighe();
-    const rigaDaEvidenziare = classificaVsrtbody
-      .querySelector(`button.edit-btn[data-id="${idGara}"]`)
-      ?.closest("tr");
-    if (rigaDaEvidenziare) rigaDaEvidenziare.classList.add("riga-in-modifica");
-    dataGaraInput.value = garaDaModificare.data;
-    livelloGaraVsrStoricoSelect.value = garaDaModificare.livello;
-    nomeRegataInput.value = garaDaModificare.nome;
-    classificaFinaleStoricoInput.value = garaDaModificare.classificaFinale;
-    calcolaEPopolaPuntiVSRStorico();
-    aggiornaTestiPulsantiFormGara();
-    setTimeout(() => {
-      if (formAggiungiGara)
-        formAggiungiGara.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-    }, 150);
-  } else {
-    console.error("Gara non trovata per la modifica:", idGara);
-    alert(getTranslation("ALERT_RACE_NOT_FOUND_FOR_EDIT"));
-  }
-}
-
-function handleSubmitGara(event) {
-  event.preventDefault();
-  const dataGara = dataGaraInput.value;
-  const livelloGaraStoricoVal = livelloGaraVsrStoricoSelect.value;
-  const nomeRegata = nomeRegataInput.value.trim();
-  const classificaFinaleStorico = parseInt(
-    classificaFinaleStoricoInput.value,
-    10
-  );
-  const puntiVSR = parseFloat(puntiVsrCalcolatiInput.value);
-  if (
-    !dataGara ||
-    livelloGaraStoricoVal === "0" ||
-    !nomeRegata ||
-    isNaN(classificaFinaleStorico) ||
-    classificaFinaleStorico <= 0 ||
-    isNaN(puntiVSR)
-  ) {
-    alert(getTranslation("ALERT_FILL_ALL_FIELDS_CORRECTLY"));
-    return;
-  }
-  let gareSalvate = JSON.parse(localStorage.getItem("gareSalvate")) || [];
-  if (idGaraInModifica !== null) {
-    const index = gareSalvate.findIndex(
-      (g) => String(g.id) === String(idGaraInModifica)
-    );
-    if (index !== -1) {
-      gareSalvate[index] = {
-        ...gareSalvate[index],
-        data: dataGara,
-        livello: livelloGaraStoricoVal,
-        nome: nomeRegata,
-        classificaFinale: classificaFinaleStorico,
-        puntiVSR: puntiVSR,
-      };
-    }
-    idGaraInModifica = null;
-  } else {
-    const nuovaGara = {
-      id: Date.now(),
-      data: dataGara,
-      livello: livelloGaraStoricoVal,
-      nome: nomeRegata,
-      classificaFinale: classificaFinaleStorico,
-      puntiVSR: puntiVSR,
-    };
-    gareSalvate.push(nuovaGara);
-  }
-  localStorage.setItem("gareSalvate", JSON.stringify(gareSalvate));
-  aggiornaTabellaGare();
-  rimuoviEvidenziazioneTutteLeRighe();
-  aggiornaSezioneAnalisi();
-  aggiornaSezioneStrategia();
-  aggiornaGraficoTortaStatoStrategia();
-  aggiornaGraficoRadarSaluteSlot();
-  aggiornaPunteggioVsrTotale();
-  formAggiungiGara.reset();
-  puntiVsrCalcolatiInput.value = "";
-  aggiornaTestiPulsantiFormGara();
-}
+// TUTTE LE FUNZIONI DELLA UI VSR SONO STATE SPOSTATE IN `modules/vsr-ui.js`
 
 function getContributingGareIds(gareSalvate, dataRiferimento) {
   if (gareSalvate.length === 0) return new Set();
@@ -821,185 +581,6 @@ function getContributingGareIds(gareSalvate, dataRiferimento) {
   return contributingIds;
 }
 
-function aggiornaTabellaGare() {
-  let gareDaMostrare = JSON.parse(localStorage.getItem("gareSalvate")) || [];
-  classificaVsrtbody.innerHTML = "";
-  const headerAzioni = document.getElementById("header-colonna-azioni");
-  if (tabellaClassificaVsr) {
-    if (vistaStoricoAttuale === VIEW_MODES.VALID_FOR_RANKING) {
-      tabellaClassificaVsr.classList.remove("vista-tutte-attiva");
-      if (headerAzioni) headerAzioni.style.display = "none";
-    } else {
-      tabellaClassificaVsr.classList.add("vista-tutte-attiva");
-      if (headerAzioni) headerAzioni.style.display = "";
-    }
-  }
-  let contributingGareIds = new Set();
-  let livelloPrecedentePerSeparatore = null;
-  const oggi = new Date();
-
-  if (vistaStoricoAttuale === VIEW_MODES.VALID_FOR_RANKING) {
-    const gareContributivePerClassifica = selezionaGareContributive(
-      gareDaMostrare,
-      oggi
-    );
-    let gareFiltrateEOrdinate = [];
-    const ordineVisualizzazioneTipi = [
-      RACE_TYPES.HC,
-      RACE_TYPES.L1,
-      RACE_TYPES.L2,
-      RACE_TYPES.L3,
-    ];
-    ordineVisualizzazioneTipi.forEach((tipoGara) => {
-      if (
-        Object.prototype.hasOwnProperty.call(
-          gareContributivePerClassifica,
-          tipoGara
-        )
-      )
-        gareFiltrateEOrdinate = gareFiltrateEOrdinate.concat(
-          gareContributivePerClassifica[tipoGara]
-        );
-    });
-    gareDaMostrare = gareFiltrateEOrdinate;
-    contributingGareIds = getContributingGareIds(gareDaMostrare, oggi);
-  } else if (vistaStoricoAttuale === VIEW_MODES.ALL_HISTORY) {
-    gareDaMostrare.sort((a, b) => new Date(b.data) - new Date(a.data));
-    contributingGareIds = getContributingGareIds(gareDaMostrare, oggi);
-  } else if (vistaStoricoAttuale.startsWith("storico_")) {
-    const tipoFiltro = vistaStoricoAttuale.split("_")[1].toUpperCase();
-    gareDaMostrare = gareDaMostrare.filter((gara) => {
-      const infoLivello = livelliVsrStoricoMap[gara.livello];
-      return infoLivello && infoLivello.tipo === tipoFiltro;
-    });
-    gareDaMostrare.sort((a, b) => new Date(b.data) - new Date(a.data));
-    contributingGareIds = getContributingGareIds(gareDaMostrare, oggi);
-  } else {
-    gareDaMostrare.sort((a, b) => new Date(b.data) - new Date(a.data));
-    contributingGareIds = getContributingGareIds(gareDaMostrare, oggi);
-  }
-  gareDaMostrare.forEach((gara) => {
-    const row = classificaVsrtbody.insertRow();
-    const infoLivelloGara = livelliVsrStoricoMap[gara.livello];
-    const tipoGaraCorrente = infoLivelloGara
-      ? infoLivelloGara.tipo
-      : RACE_TYPES.ND;
-    if (
-      vistaStoricoAttuale === VIEW_MODES.VALID_FOR_RANKING &&
-      tipoGaraCorrente !== livelloPrecedentePerSeparatore
-    ) {
-      if (livelloPrecedentePerSeparatore !== null)
-        row.classList.add("nuovo-gruppo-livello");
-      livelloPrecedentePerSeparatore = tipoGaraCorrente;
-    }
-    const mesiTrascorsi = calcolaMesiTrascorsi(gara.data);
-    let statoPunti = "";
-    let classeStato = "";
-    let inPreavvisoTesto = "";
-    if (mesiTrascorsi < 12) {
-      statoPunti = "100%";
-      classeStato = "stato-100";
-      if (mesiTrascorsi >= 9) {
-        row.classList.add("in-preavviso");
-        inPreavvisoTesto = ` ${getTranslation(
-          "VSR_TABLE_STATUS_WARNING_SUFFIX"
-        )}`;
-      }
-    } else if (mesiTrascorsi < 24) {
-      statoPunti = "50%";
-      classeStato = "stato-50";
-      if (mesiTrascorsi >= 21) {
-        row.classList.add("in-preavviso");
-        inPreavvisoTesto = ` ${getTranslation(
-          "VSR_TABLE_STATUS_WARNING_SUFFIX"
-        )}`;
-      }
-    } else {
-      statoPunti = "Scaduta";
-      classeStato = "stato-scaduta";
-    }
-    if (
-      vistaStoricoAttuale !== VIEW_MODES.VALID_FOR_RANKING &&
-      classeStato !== "stato-scaduta" &&
-      contributingGareIds &&
-      !contributingGareIds.has(gara.id)
-    ) {
-      classeStato = "stato-scaduta";
-      row.classList.remove("in-preavviso");
-      inPreavvisoTesto = "";
-    }
-    row.classList.add(classeStato);
-    const [year, month, day] = gara.data.split("-"); // Formato YYYY-MM-DD
-
-    // Per la visualizzazione, usiamo toLocaleDateString, ma per lo split usiamo il formato YYYY-MM-DD
-    // La data viene mostrata come gg/mm/aaaa indipendentemente dal locale per coerenza con l'input
-    row.insertCell(0).textContent = `${day}/${month}/${year}`;
-    row.insertCell(1).textContent = gara.nome;
-    row.insertCell(2).textContent = infoLivelloGara
-      ? getTranslation(infoLivelloGara.chiaveTraduzione)
-      : gara.livello;
-    row.insertCell(3).textContent = gara.classificaFinale;
-    let puntiDaMostrare;
-    let colorePunti = "";
-    if (vistaStoricoAttuale === VIEW_MODES.VALID_FOR_RANKING) {
-      puntiDaMostrare = gara.puntiEffettivi;
-      if (gara.fattoreDecadimento === 0.5 || puntiDaMostrare < 0)
-        colorePunti = "red";
-      else if (puntiDaMostrare >= 0) colorePunti = "green";
-    } else {
-      puntiDaMostrare = gara.puntiVSR;
-      if (classeStato !== "stato-scaduta" && contributingGareIds.has(gara.id))
-        colorePunti = "green";
-      else if (classeStato === "stato-scaduta") colorePunti = "";
-    }
-    const puntiFormatted =
-      puntiDaMostrare >= 0
-        ? `+${formatNumber(Math.round(puntiDaMostrare), 0)}`
-        : formatNumber(Math.round(puntiDaMostrare), 0);
-    const cellPunti = row.insertCell(4);
-    cellPunti.textContent = puntiFormatted;
-    if (colorePunti) cellPunti.style.color = colorePunti;
-    const cellaStatoPunti = row.insertCell(5);
-    let testoStato =
-      (vistaStoricoAttuale === VIEW_MODES.VALID_FOR_RANKING ? statoPunti : "") +
-      inPreavvisoTesto.trim();
-    if (
-      vistaStoricoAttuale !== VIEW_MODES.VALID_FOR_RANKING &&
-      classeStato === "stato-scaduta" &&
-      !contributingGareIds.has(gara.id)
-    ) {
-      testoStato = getTranslation("VSR_TABLE_STATUS_NOT_CONTRIBUTING");
-    }
-    cellaStatoPunti.textContent = testoStato;
-    if (vistaStoricoAttuale !== VIEW_MODES.VALID_FOR_RANKING) {
-      const cellaAzioni = row.insertCell(6);
-      const deleteButton = document.createElement("button");
-      deleteButton.textContent = getTranslation("BTN_DELETE");
-      deleteButton.classList.add("delete-btn");
-      deleteButton.dataset.id = gara.id;
-      cellaAzioni.appendChild(deleteButton);
-      const editButton = document.createElement("button");
-      editButton.textContent = getTranslation("BTN_EDIT");
-      editButton.classList.add("edit-btn");
-      editButton.dataset.id = gara.id;
-      cellaAzioni.appendChild(editButton);
-    }
-  });
-}
-
-function eliminaGara(idGara) {
-  if (!confirm(getTranslation("CONFIRM_DELETE_RACE"))) return;
-  let gareSalvate = JSON.parse(localStorage.getItem("gareSalvate")) || [];
-  gareSalvate = gareSalvate.filter((g) => String(g.id) !== String(idGara));
-  localStorage.setItem("gareSalvate", JSON.stringify(gareSalvate));
-  aggiornaTabellaGare();
-  aggiornaPunteggioVsrTotale();
-  aggiornaGraficoTortaStatoStrategia();
-  aggiornaGraficoRadarSaluteSlot();
-  aggiornaSezioneAnalisi();
-  aggiornaSezioneStrategia();
-}
-
 // Funzione che si occupa di ricalcolare, salvare e aggiornare l'interfaccia.
 // Questa viene chiamata DOPO un'azione dell'utente (aggiungi, elimina, importa).
 function recalcolaEAggiornaVsrUI() {
@@ -1010,8 +591,14 @@ function recalcolaEAggiornaVsrUI() {
   aggiornaInfoClassificaView(); // Aggiorna i display con il nuovo punteggio
 }
 
-// Sostituiamo le chiamate alla vecchia funzione con la nuova
-const aggiornaPunteggioVsrTotale = recalcolaEAggiornaVsrUI;
+// Callback per aggiornare tutto quando i dati cambiano
+function handleDataChange() {
+  aggiornaSezioneAnalisi();
+  aggiornaSezioneStrategia();
+  aggiornaGraficoTortaStatoStrategia();
+  aggiornaGraficoRadarSaluteSlot();
+  recalcolaEAggiornaVsrUI();
+}
 
 // TODO: La funzione `simulaImpattoNettoEVariazioneClassifica` è complessa e usa una logica di simulazione
 // che ora è disallineata con `selezionaGareContributive`. Andrà rifattorizzata in un secondo momento
@@ -1310,7 +897,7 @@ function importaDati(event) {
         caricaDatiDashboard();
         aggiornaInfoClassificaView();
         aggiornaTabellaGare();
-        aggiornaPunteggioVsrTotale();
+        recalcolaEAggiornaVsrUI();
         aggiornaSezioneStrategia();
         aggiornaSezioneAnalisi();
         aggiornaGraficoTortaStatoStrategia();
@@ -1395,7 +982,7 @@ function importaRegateSuggeriteConfermate() {
           JSON.stringify(datiImportati.gareSalvate)
         );
         aggiornaTabellaGare();
-        aggiornaPunteggioVsrTotale();
+        recalcolaEAggiornaVsrUI();
         aggiornaSezioneAnalisi();
         aggiornaSezioneStrategia();
         aggiornaGraficoTortaStatoStrategia();
@@ -1693,7 +1280,7 @@ function aggiungiRegataDaElencoAlloStorico(
   gareSalvate.push(nuovaGara);
   localStorage.setItem("gareSalvate", JSON.stringify(gareSalvate));
   aggiornaTabellaGare();
-  aggiornaPunteggioVsrTotale();
+  recalcolaEAggiornaVsrUI();
   aggiornaSezioneAnalisi();
   aggiornaSezioneStrategia();
   aggiornaGraficoTortaStatoStrategia();

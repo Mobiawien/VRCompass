@@ -5,7 +5,6 @@
  * @returns {string} La stringa tradotta o la chiave stessa se non trovata.
  */
 export function getTranslation(key, variables = {}) {
-  // eslint-disable-next-line no-use-before-define
   if (translations[currentLanguage] && translations[currentLanguage][key]) {
     let translatedString = translations[currentLanguage][key];
     for (const varName in variables) {
@@ -76,7 +75,6 @@ async function loadTranslations(lang) {
     console.error(`Impossibile caricare le traduzioni per ${lang}:`, error);
     if (lang !== DEFAULT_LANGUAGE) {
       console.warn(`Torno alla lingua di default (${DEFAULT_LANGUAGE})`);
-      // eslint-disable-next-line no-use-before-define
       await setLanguage(DEFAULT_LANGUAGE);
     }
   }

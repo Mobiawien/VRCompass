@@ -28,7 +28,7 @@ import {
 
 // --- Elementi DOM ---
 // Navigazione
-const mainNavButtons = document.querySelectorAll("nav > .nav-button"); // Seleziona solo i .nav-button diretti figli di nav
+const mainNavButtons = document.querySelectorAll("nav > button.nav-button"); // Seleziona solo i .nav-button diretti figli di nav
 const viewSections = document.querySelectorAll(".view-section");
 
 // Dashboard
@@ -315,17 +315,26 @@ function handleNavClick(event) {
   }
 }
 
-async function init() {
-  await initI18n(() => {
-    aggiornaInfoClassificaView();
-    aggiornaTabellaGare();
-    aggiornaSezioneAnalisi();
-    aggiornaSezioneStrategia();
-    aggiornaGraficoTortaStatoStrategia();
-    aggiornaGraficoRadarSaluteSlot();
-  });
+/**
+ * Funzione di callback per aggiornare tutti i componenti UI quando cambia la lingua.
+ */
+function updateAllUIComponents() {
+  aggiornaInfoClassificaView();
+  aggiornaTabellaGare();
+  aggiornaSezioneAnalisi();
+  aggiornaSezioneStrategia();
+  aggiornaGraficoTortaStatoStrategia();
+  aggiornaGraficoRadarSaluteSlot();
+}
 
-  // --- LOGICA DI CONTROLLO VARIAZIONE VSR ---
+/**
+ * Inizializza l'applicazione.
+ */
+async function init() {
+  // 1. Inizializza i18n e passa il callback per aggiornare l'UI al cambio lingua
+  await initI18n(updateAllUIComponents);
+
+  // 2. Controlla le variazioni di VSR dovute al tempo trascorso
   caricaStatoVSRPrecedente();
   const vsrPrecedente = statoVSRPrecedente?.punteggio;
   const gareSalvateCorrenti =
@@ -337,6 +346,7 @@ async function init() {
     mostraNotificaCambiamento(vsrPrecedente, vsrCorrenteCalcolato);
   }
 
+  // Aggiorna lo stato VSR corrente nel localStorage per i prossimi avvii
   const statoCorrenteDaSalvare = {
     punteggio: vsrCorrenteCalcolato,
     timestampSalvataggio: new Date().toISOString(),
@@ -347,6 +357,23 @@ async function init() {
   );
   localStorage.setItem("classificaVsrAttuale", vsrCorrenteCalcolato.toString());
 
+  // 3. Inizializza i componenti UI con i dati corretti
+  initializeUI();
+
+  // 4. Imposta gli event listeners
+  setupEventListeners();
+
+  // 5. Aggiorna tutte le viste con i dati caricati e processati
+  updateAllUIComponents();
+
+  // Imposta la vista di default sulla Dashboard
+  document.getElementById("btn-show-dashboard").click();
+}
+
+/**
+ * Raggruppa l'inizializzazione di tutti i moduli UI.
+ */
+function initializeUI() {
   caricaDatiDashboard();
 
   initCreditsCalculator(
@@ -453,7 +480,15 @@ async function init() {
       getTranslation,
     }
   );
+}
 
+/**
+ * Raggruppa l'impostazione di tutti gli event listeners.
+ */
+function setupEventListeners() {
+  mainNavButtons.forEach((button) =>
+    button.addEventListener("click", handleNavClick)
+  );
   setupDashboardListeners();
   if (btnEsportaDati) btnEsportaDati.addEventListener("click", esportaDati);
   if (fileImportaDatiInput)
@@ -1250,7 +1285,12 @@ function getGareContributiveConDettagli(sourceGare) {
 
 // --- Funzioni Grafico Radar Dashboard ---
 function aggiornaGraficoRadarSaluteSlot() {
+  console.log(
+    "aggiornaGraficoRadarSaluteSlot called. canvasGraficoRadar:",
+    canvasGraficoRadar
+  );
   if (!canvasGraficoRadar) return;
+
   const gareContributive = getGareContributiveConDettagli();
   const datiPercentualePotenziale = [];
   const categorieRadar = [
@@ -1308,33 +1348,26 @@ function aggiornaGraficoRadarSaluteSlot() {
     ],
   };
   if (graficoRadarIstanza) {
-    graficoRadarIstanza.data = data;
-    graficoRadarIstanza.update();
-  } else {
-    graficoRadarIstanza = new Chart(canvasGraficoRadar, {
-      type: "radar",
-      data: data,
-      options: {
-        scales: {
-          r: {
-            angleLines: { display: true },
-            suggestedMin: 0,
-            suggestedMax: 100,
-            pointLabels: { font: { size: 13 } },
-            ticks: { callback: (value) => value + "%" },
-          },
-        },
-        elements: { line: { borderWidth: 2 } },
-        plugins: { legend: { display: false } },
-      },
-    });
+    graficoRadarIstanza.destroy();
   }
+  graficoRadarIstanza = new Chart(canvasGraficoRadar, {
+    type: "radar",
+    data: data,
+    options: {
+      scales: {
+        r: {
+          angleLines: { display: true },
+          suggestedMin: 0,
+          suggestedMax: 100,
+          pointLabels: { font: { size: 13 } },
+          ticks: { callback: (value) => value + "%" },
+        },
+      },
+      elements: { line: { borderWidth: 2 } },
+      plugins: { legend: { display: false } },
+    },
+  });
 }
-
-// --- Event Listener Generali ---
-mainNavButtons.forEach((button) =>
-  button.addEventListener("click", handleNavClick)
-);
 
 // --- Inizializzazione ---
 init();

@@ -23,6 +23,7 @@ export function getTranslation(key, variables = {}) {
 let currentLanguage = "it";
 const DEFAULT_LANGUAGE = "it";
 let translations = {};
+let onLanguageChangeCallback = null;
 
 // Questa mappa verrà popolata dopo il caricamento delle traduzioni
 export const mappaTestoLabelGraficoATipoGara = {};
@@ -30,7 +31,7 @@ export const mappaTestoLabelGraficoATipoGara = {};
 /**
  * Applica le traduzioni caricate agli elementi DOM.
  */
-function applyTranslations(onLanguageChangeCallback) {
+function applyTranslations() {
   if (!translations[currentLanguage]) return;
 
   document.querySelectorAll("[data-i18n-key]").forEach((element) => {
@@ -42,7 +43,14 @@ function applyTranslations(onLanguageChangeCallback) {
     } else if (element.tagName === "INPUT" && element.placeholder) {
       element.placeholder = translation;
     } else {
-      element.innerHTML = translation;
+      // Aggiunta di un controllo per i DIV
+      if (element.tagName === 'DIV' && element.children.length > 0) {
+        // Se è un DIV con elementi figli, non fare nulla per evitare di rompere il layout.
+        // Potremmo voler tradurre solo i nodi di testo, ma per ora questo è più sicuro.
+        console.warn(`Traduzione saltata per l'elemento DIV con figli (chiave: ${key})`);
+      } else {
+        element.innerHTML = translation;
+      }
     }
   });
 
@@ -53,7 +61,7 @@ function applyTranslations(onLanguageChangeCallback) {
  * Carica il file JSON per la lingua specificata.
  * @param {string} lang La lingua da caricare (es. 'it').
  */
-async function loadTranslations(lang, onLanguageChangeCallback) {
+async function loadTranslations(lang) {
   try {
     const response = await fetch(`${lang}.json?v=${Date.now()}`);
     if (!response.ok) {
@@ -63,13 +71,13 @@ async function loadTranslations(lang, onLanguageChangeCallback) {
     }
     translations[lang] = await response.json();
     console.log(`Traduzioni per ${lang} caricate.`);
-    applyTranslations(onLanguageChangeCallback);
+    applyTranslations();
   } catch (error) {
     console.error(`Impossibile caricare le traduzioni per ${lang}:`, error);
     if (lang !== DEFAULT_LANGUAGE) {
       console.warn(`Torno alla lingua di default (${DEFAULT_LANGUAGE})`);
       // eslint-disable-next-line no-use-before-define
-      await setLanguage(DEFAULT_LANGUAGE, onLanguageChangeCallback);
+      await setLanguage(DEFAULT_LANGUAGE);
     }
   }
 }
@@ -78,24 +86,25 @@ async function loadTranslations(lang, onLanguageChangeCallback) {
  * Imposta la lingua corrente dell'applicazione.
  * @param {string} lang La nuova lingua.
  */
-async function setLanguage(lang, onLanguageChangeCallback) {
+async function setLanguage(lang) {
   currentLanguage = lang;
   localStorage.setItem("vrCompassLanguage", lang);
   document.getElementById("language-selector").value = lang;
   document.documentElement.lang = lang;
-  await loadTranslations(lang, onLanguageChangeCallback);
+  await loadTranslations(lang);
 }
 
 /**
  * Inizializza il sistema di internazionalizzazione.
  */
-export async function initI18n(onLanguageChangeCallback) {
+export async function initI18n(callback) {
+  onLanguageChangeCallback = callback;
   const savedLang =
     localStorage.getItem("vrCompassLanguage") || DEFAULT_LANGUAGE;
-  await setLanguage(savedLang, onLanguageChangeCallback);
+  await setLanguage(savedLang);
   document
     .getElementById("language-selector")
     .addEventListener("change", async (event) => {
-      await setLanguage(event.target.value, onLanguageChangeCallback);
+      await setLanguage(event.target.value);
     });
 }

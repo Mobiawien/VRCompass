@@ -552,14 +552,17 @@ function aggiornaValutazioneStrategicaSlot() {
 export function aggiornaGraficoTortaStatoStrategia() {
   if (!dom.canvasGraficoTorta) return;
   try {
-    if (Object.keys(mappaTestoLabelGraficoATipoGara).length === 0) {
-      Object.values(dom.livelliVsrStoricoMap).forEach((level) => {
-        if (level.chiaveTraduzione && level.tipo !== "N/D") {
-          const translatedLabel = getTranslation(level.chiaveTraduzione);
-          mappaTestoLabelGraficoATipoGara[translatedLabel] = level.tipo;
-        }
-      });
+    // La mappa deve essere ricostruita ad ogni aggiornamento per riflettere i cambi di lingua,
+    // altrimenti i tooltip non funzioneranno dopo il cambio.
+    for (const key in mappaTestoLabelGraficoATipoGara) {
+      delete mappaTestoLabelGraficoATipoGara[key];
     }
+    Object.values(dom.livelliVsrStoricoMap).forEach((level) => {
+      if (level.chiaveTraduzione && level.tipo !== "N/D") {
+        const translatedLabel = getTranslation(level.chiaveTraduzione);
+        mappaTestoLabelGraficoATipoGara[translatedLabel] = level.tipo;
+      }
+    });
 
     const saluteCategoriePerTooltip = {};
     const gareContributive = callbacks.getGareContributiveConDettagli();
@@ -718,9 +721,11 @@ export function aggiornaGraficoTortaStatoStrategia() {
     };
 
     if (graficoTortaIstanza) {
-      graficoTortaIstanza.data = data;
-      graficoTortaIstanza.update();
-    } else {
+      graficoTortaIstanza.destroy();
+      graficoTortaIstanza = null; // Ensure it's null so a new instance is created
+    }
+
+    try {
       graficoTortaIstanza = new Chart(dom.canvasGraficoTorta, {
         type: "pie",
         data: data,
@@ -781,11 +786,11 @@ export function aggiornaGraficoTortaStatoStrategia() {
                     )} / ${formatNumber(potenzialeMaxCategoria, 0)}`
                   );
                   tooltipLines.push(
-                    `(${percentualePuntiVSRPerCategoria.toFixed(
+                    `${percentualePuntiVSRPerCategoria.toFixed(
                       1
                     )}% ${getTranslation(
                       "STRATEGY_PIE_CHART_TOOLTIP_PERCENT_CATEGORY_POTENTIAL"
-                    )})`
+                    )}`
                   );
                   if (tipoGaraPerTooltip !== "Generale") {
                     let punti100 = 0,
@@ -871,9 +876,32 @@ export function aggiornaGraficoTortaStatoStrategia() {
           },
         },
       });
-    }
+    } catch (error) {
+      console.error("Errore in aggiornaGraficoTortaStatoStrategia:", error);
+      if (graficoTortaIstanza) {
+        graficoTortaIstanza.destroy();
+        graficoTortaIstanza = null;
+      }
+      const ctx = dom.canvasGraficoTorta.getContext("2d");
+      ctx.clearRect(
+        0,
+        0,
+        dom.canvasGraficoTorta.width,
+        dom.canvasGraficoTorta.height
+      );
+      ctx.textAlign = "center";
+      ctx.fillText(
+        getTranslation("TEXT_ERROR_LOADING_CHART"),
+        dom.canvasGraficoTorta.width / 2,
+        dom.canvasGraficoTorta.height / 2
+      );
+    } // This is the catch for the inner try.
   } catch (error) {
-    console.error("Errore in aggiornaGraficoTortaStatoStrategia:", error);
+    // This is the new catch for the outer try at line 554
+    console.error(
+      "Errore generale in aggiornaGraficoTortaStatoStrategia:",
+      error
+    );
     if (graficoTortaIstanza) {
       graficoTortaIstanza.destroy();
       graficoTortaIstanza = null;

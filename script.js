@@ -130,6 +130,8 @@ const hcPointsBarEmpty = document.getElementById("hc-points-bar-empty");
 const liv1Occupati = document.getElementById("liv1-occupati");
 const liv1PuntiCategoria = document.getElementById("liv1-punti-categoria");
 const liv1MinPunti = document.getElementById("liv1-min-punti");
+const liv1MaxPunti = document.getElementById("liv1-max-punti");
+const liv1MinPunti100 = document.getElementById("liv1-min-punti-100");
 const liv1GareSlot = document.getElementById("liv1-gare-slot");
 const liv1ProgressBar = document.getElementById("liv1-progress-bar");
 const liv1StackedPointsBarContainer = document.getElementById(
@@ -142,6 +144,8 @@ const liv1PointsBarEmpty = document.getElementById("liv1-points-bar-empty");
 const liv2Occupati = document.getElementById("liv2-occupati");
 const liv2PuntiCategoria = document.getElementById("liv2-punti-categoria");
 const liv2MinPunti = document.getElementById("liv2-min-punti");
+const liv2MaxPunti = document.getElementById("liv2-max-punti");
+const liv2MinPunti100 = document.getElementById("liv2-min-punti-100");
 const liv2GareSlot = document.getElementById("liv2-gare-slot");
 const liv2ProgressBar = document.getElementById("liv2-progress-bar");
 const liv2StackedPointsBarContainer = document.getElementById(
@@ -154,6 +158,8 @@ const liv2PointsBarEmpty = document.getElementById("liv2-points-bar-empty");
 const liv3Occupati = document.getElementById("liv3-occupati");
 const liv3PuntiCategoria = document.getElementById("liv3-punti-categoria");
 const liv3MinPunti = document.getElementById("liv3-min-punti");
+const liv3MaxPunti = document.getElementById("liv3-max-punti");
+const liv3MinPunti100 = document.getElementById("liv3-min-punti-100");
 const liv3GareSlot = document.getElementById("liv3-gare-slot");
 const liv3ProgressBar = document.getElementById("liv3-progress-bar");
 const liv3StackedPointsBarContainer = document.getElementById(
@@ -428,6 +434,8 @@ function initializeUI() {
       liv1Occupati,
       liv1PuntiCategoria,
       liv1MinPunti,
+      liv1MaxPunti,
+      liv1MinPunti100,
       liv1GareSlot,
       liv1ProgressBar,
       liv1StackedPointsBarContainer,
@@ -437,6 +445,8 @@ function initializeUI() {
       liv2Occupati,
       liv2PuntiCategoria,
       liv2MinPunti,
+      liv2MaxPunti,
+      liv2MinPunti100,
       liv2GareSlot,
       liv2ProgressBar,
       liv2StackedPointsBarContainer,
@@ -446,6 +456,8 @@ function initializeUI() {
       liv3Occupati,
       liv3PuntiCategoria,
       liv3MinPunti,
+      liv3MaxPunti,
+      liv3MinPunti100,
       liv3GareSlot,
       liv3ProgressBar,
       liv3StackedPointsBarContainer,

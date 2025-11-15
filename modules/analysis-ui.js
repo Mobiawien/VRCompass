@@ -8,6 +8,8 @@ let callbacks = {};
 function popolaCategoriaSlot(
   tipoGara,
   gareCat,
+  elMaxPunti,
+  elMinPunti100,
   maxSlotPerFascia,
   elOccupati,
   elMinPunti,
@@ -152,6 +154,28 @@ function popolaCategoriaSlot(
         "TEXT_NO_VALID_RACES_IN_SLOT"
       )}</p>`;
   }
+
+  // Calcolo e visualizzazione del punteggio massimo contributivo
+  if (elMaxPunti) {
+    if (gareCat.length > 0) {
+      elMaxPunti.textContent = formatNumber(gareCat[0].puntiEffettivi, 0);
+    } else {
+      elMaxPunti.textContent = getTranslation("TEXT_NA_DETAILED");
+    }
+  }
+
+  // Calcolo e visualizzazione del punteggio minimo da battere (solo gare 100%)
+  if (elMinPunti100) {
+    const gare100 = gareCat.filter((g) => g.fattoreDecadimento === 1.0);
+    if (gare100.length > 0) {
+      elMinPunti100.textContent = formatNumber(
+        gare100[gare100.length - 1].puntiEffettivi,
+        0
+      );
+    } else {
+      elMinPunti100.textContent = getTranslation("TEXT_NA_DETAILED");
+    }
+  }
 }
 
 function aggiornaPanoramicaSlotVSR() {
@@ -160,6 +184,8 @@ function aggiornaPanoramicaSlotVSR() {
   popolaCategoriaSlot(
     "HC",
     gareContributive["HC"] || [],
+    null, // elMaxPunti non applicabile per HC
+    null, // elMinPunti100 non applicabile per HC
     dom.LIMITI_GARE_PER_CATEGORIA["HC"],
     dom.hcOccupati,
     null,
@@ -175,6 +201,8 @@ function aggiornaPanoramicaSlotVSR() {
   popolaCategoriaSlot(
     "LIV1",
     gareContributive["LIV1"] || [],
+    dom.liv1MaxPunti,
+    dom.liv1MinPunti100,
     dom.LIMITI_GARE_PER_CATEGORIA["LIV1"],
     dom.liv1Occupati,
     dom.liv1MinPunti,
@@ -190,6 +218,8 @@ function aggiornaPanoramicaSlotVSR() {
   popolaCategoriaSlot(
     "LIV2",
     gareContributive["LIV2"] || [],
+    dom.liv2MaxPunti,
+    dom.liv2MinPunti100,
     dom.LIMITI_GARE_PER_CATEGORIA["LIV2"],
     dom.liv2Occupati,
     dom.liv2MinPunti,
@@ -205,6 +235,8 @@ function aggiornaPanoramicaSlotVSR() {
   popolaCategoriaSlot(
     "LIV3",
     gareContributive["LIV3"] || [],
+    dom.liv3MaxPunti,
+    dom.liv3MinPunti100,
     dom.LIMITI_GARE_PER_CATEGORIA["LIV3"],
     dom.liv3Occupati,
     dom.liv3MinPunti,

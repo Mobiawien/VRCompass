@@ -258,6 +258,7 @@ const RACE_TYPES = {
 const EVENT_TYPES = {
   HALVING: "EVENT_TYPE_HALVING",
   EXPIRY: "EVENT_TYPE_EXPIRY",
+  ADDED: "EVENT_TYPE_ADDED",
 };
 let statoVSRPrecedente = {
   punteggio: 0,
@@ -733,8 +734,15 @@ function mostraNotificaCambiamento(oldScore, newScore) {
   )
     return;
 
+  let bodyKey = "VSR_CHANGE_MODAL_BODY"; // Messaggio di default
+  if (newScore > oldScore) {
+    bodyKey = "VSR_CHANGE_MODAL_BODY_INCREASED";
+  } else if (newScore < oldScore) {
+    bodyKey = "VSR_CHANGE_MODAL_BODY_DECREASED";
+  }
+
   vsrChangeModalTitle.textContent = getTranslation("VSR_CHANGE_MODAL_TITLE");
-  vsrChangeModalBody.innerHTML = getTranslation("VSR_CHANGE_MODAL_BODY", {
+  vsrChangeModalBody.innerHTML = getTranslation(bodyKey, {
     oldScore: formatNumber(oldScore, 0),
     newScore: formatNumber(newScore, 0),
   });
@@ -756,7 +764,15 @@ function popolaERendiVisibileRiepilogoEventi() {
   if (!recentEventsSummary) return;
 
   if (recentEventsSummary.style.display === "block") {
+    // Se è aperto, lo chiudiamo e ripristiniamo il pulsante
     recentEventsSummary.style.display = "none";
+    btnToggleRecentEvents.setAttribute(
+      "data-i18n-key",
+      "STRATEGY_CHANGES_BUTTON_TEXT"
+    );
+    btnToggleRecentEvents.textContent = getTranslation(
+      "STRATEGY_CHANGES_BUTTON_TEXT"
+    );
     return;
   }
 
@@ -766,16 +782,32 @@ function popolaERendiVisibileRiepilogoEventi() {
   const dataLimite = new Date();
   dataLimite.setDate(oggi.getDate() - DURATA_RIEPILOGO_GIORNI);
 
-  const scadenze = getGareConScadenzeImminenti();
-
-  scadenze.forEach((evento) => {
+  // 1. Trova eventi di scadenza/dimezzamento
+  const eventiScadenza = getGareConScadenzeImminenti();
+  eventiScadenza.forEach((evento) => {
     const dataEvento = new Date(evento.dataEvento);
     dataEvento.setHours(0, 0, 0, 0);
 
     if (dataEvento >= dataLimite && dataEvento <= oggi) {
       eventiRecenti.push({
         ...evento,
+        dataEventoEffettiva: dataEvento,
         impattoNettoStimato: evento.simulazioneRisultato.impattoNettoEffettivo,
+      });
+    }
+  });
+
+  // 2. Trova gare aggiunte di recente
+  const gareSalvate = JSON.parse(localStorage.getItem("gareSalvate")) || [];
+  gareSalvate.forEach((gara) => {
+    const dataAggiunta = new Date(gara.id);
+    dataAggiunta.setHours(0, 0, 0, 0);
+
+    if (dataAggiunta >= dataLimite && dataAggiunta <= oggi) {
+      eventiRecenti.push({
+        ...gara,
+        tipoEvento: EVENT_TYPES.ADDED,
+        dataEventoEffettiva: dataAggiunta,
       });
     }
   });
@@ -793,9 +825,9 @@ function popolaERendiVisibileRiepilogoEventi() {
       let dateLocale = "en-GB";
       if (currentLanguage === "it") dateLocale = "it-IT";
       else if (currentLanguage === "fr") dateLocale = "fr-FR";
-      const displayDate = new Date(evento.dataEvento).toLocaleDateString(
-        dateLocale
-      );
+      const displayDate = new Date(
+        evento.dataEventoEffettiva
+      ).toLocaleDateString(dateLocale);
 
       const params = {
         raceName: evento.nome,
@@ -807,15 +839,30 @@ function popolaERendiVisibileRiepilogoEventi() {
         chiaveTraduzione = "SUMMARY_EVENT_ITEM_HALVED";
       } else if (evento.tipoEvento === EVENT_TYPES.EXPIRY) {
         chiaveTraduzione = "SUMMARY_EVENT_ITEM_EXPIRED";
+      } else if (evento.tipoEvento === EVENT_TYPES.ADDED) {
+        chiaveTraduzione = "SUMMARY_EVENT_ITEM_ADDED";
       }
 
       if (chiaveTraduzione) {
-        htmlContent += `<li>${getTranslation(
-          chiaveTraduzione,
-          params
-        )} <small>(${getTranslation("SUMMARY_EVENT_IMPACT_TEXT", {
-          netImpact: params.netImpact,
-        })})</small></li>`;
+        let testoRiga = getTranslation(chiaveTraduzione, params);
+
+        // Aggiungi l'impatto solo per eventi di scadenza/dimezzamento
+        if (
+          evento.tipoEvento === EVENT_TYPES.HALVING ||
+          evento.tipoEvento === EVENT_TYPES.EXPIRY
+        ) {
+          let impactKey = "SUMMARY_EVENT_IMPACT_TEXT";
+          const netImpactValue = evento.impattoNettoStimato;
+          if (netImpactValue > 0) {
+            impactKey = "SUMMARY_EVENT_IMPACT_TEXT_INCREASE";
+          } else if (netImpactValue < 0) {
+            impactKey = "SUMMARY_EVENT_IMPACT_TEXT_DECREASE";
+          }
+          testoRiga += ` <small>(${getTranslation(impactKey, {
+            netImpact: formatNumber(Math.abs(netImpactValue), 0),
+          })})</small>`;
+        }
+        htmlContent += `<li>${testoRiga}</li>`;
       }
     });
     htmlContent += "</ul>";
@@ -827,6 +874,15 @@ function popolaERendiVisibileRiepilogoEventi() {
 
   recentEventsSummary.innerHTML = htmlContent;
   recentEventsSummary.style.display = "block";
+
+  // Se lo apriamo, cambiamo il testo del pulsante
+  btnToggleRecentEvents.setAttribute(
+    "data-i18n-key",
+    "STRATEGY_HIDE_CHANGES_BUTTON_TEXT"
+  );
+  btnToggleRecentEvents.textContent = getTranslation(
+    "STRATEGY_HIDE_CHANGES_BUTTON_TEXT"
+  );
 }
 
 function dismissVSRChangeModal() {

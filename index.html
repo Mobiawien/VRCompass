@@ -272,15 +272,17 @@
                     <button id="btn-storico-liv2" class="nav-button filtro-btn" data-i18n-key="VSR_FILTER_BTN_L2">Liv. 2</button>
                     <button id="btn-storico-liv3" class="nav-button filtro-btn" data-i18n-key="VSR_FILTER_BTN_L3">Liv. 3</button>
                 </div>
+                <!-- Suggerimento per l'ordinamento, visibile solo nelle viste "storico" -->
+                <p id="vsr-sort-hint" class="sort-hint" data-i18n-key="VSR_SORT_HINT" style="display: none;"></p>
                 <!-- Tabella per visualizzare le gare salvate -->
                 <table id="tabella-classifica-vsr">
                     <thead>
                         <tr>
-                            <th data-i18n-key="VSR_TABLE_HEADER_DATE">Data</th>
-                            <th style="width: 35%;" data-i18n-key="VSR_TABLE_HEADER_RACE_NAME">Nome Regata</th>
-                            <th data-i18n-key="VSR_TABLE_HEADER_LEVEL">Livello</th>
-                            <th style="width: 15%;" data-i18n-key="VSR_TABLE_HEADER_FINAL_RANKING">Classifica Finale</th>
-                            <th style="width: 15%;" data-i18n-key="VSR_TABLE_HEADER_VSR_POINTS">Punti VSR</th>
+                            <th data-i18n-key="VSR_TABLE_HEADER_DATE" class="sortable-header" data-sort="data">Data</th>
+                            <th style="width: 35%;" data-i18n-key="VSR_TABLE_HEADER_RACE_NAME" class="sortable-header" data-sort="nome">Nome Regata</th>
+                            <th data-i18n-key="VSR_TABLE_HEADER_LEVEL" class="sortable-header" data-sort="livello">Livello</th>
+                            <th style="width: 15%;" data-i18n-key="VSR_TABLE_HEADER_FINAL_RANKING" class="sortable-header" data-sort="classificaFinale">Classifica Finale</th>
+                            <th style="width: 15%;" data-i18n-key="VSR_TABLE_HEADER_VSR_POINTS" class="sortable-header" data-sort="puntiVSR">Punti VSR</th>
                             <th data-i18n-key="VSR_TABLE_HEADER_POINTS_STATUS">Stato Punti</th> <!-- Nuova intestazione colonna -->
                             <th id="header-colonna-azioni" data-i18n-key="VSR_TABLE_HEADER_ACTIONS">Azioni</th>
                         </tr>

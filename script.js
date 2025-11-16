@@ -72,6 +72,7 @@ const btnStoricoHC = document.getElementById("btn-storico-hc");
 const btnStoricoLiv1 = document.getElementById("btn-storico-liv1");
 const btnStoricoLiv2 = document.getElementById("btn-storico-liv2");
 const btnStoricoLiv3 = document.getElementById("btn-storico-liv3");
+const vsrSortHint = document.getElementById("vsr-sort-hint");
 
 // Nuovi elementi per Caricamento Elenco Regate
 const btnApriModalElencoRegate = document.getElementById(
@@ -412,6 +413,7 @@ function initializeUI() {
       btnStoricoLiv1,
       btnStoricoLiv2,
       btnStoricoLiv3,
+      vsrSortHint,
       livelliVsrStoricoMap,
     },
     {

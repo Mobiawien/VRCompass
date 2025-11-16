@@ -9,6 +9,8 @@ import {
 let stato = {
   vistaStoricoAttuale: "valide",
   idGaraInModifica: null,
+  currentSortKey: "data",
+  currentSortDirection: "desc",
 };
 
 // Riferimenti agli elementi DOM e alle funzioni di callback globali
@@ -55,6 +57,44 @@ function rimuoviEvidenziazioneTutteLeRighe() {
   righeEvidenziate.forEach((riga) => riga.classList.remove("riga-in-modifica"));
 }
 
+function updateSortIndicators() {
+  const headers = dom.tabellaClassificaVsr.querySelectorAll("th[data-sort]");
+  headers.forEach((header) => {
+    const sortKey = header.dataset.sort;
+    header.classList.remove("sort-asc", "sort-desc");
+    if (sortKey === stato.currentSortKey) {
+      header.classList.add(
+        stato.currentSortDirection === "asc" ? "sort-asc" : "sort-desc"
+      );
+    }
+  });
+}
+
+function handleSort(event) {
+  const newSortKey = event.currentTarget.dataset.sort;
+  if (!newSortKey) return;
+
+  // L'ordinamento non si applica alla vista 'valide'
+  if (stato.vistaStoricoAttuale === "valide") return;
+
+  if (stato.currentSortKey === newSortKey) {
+    stato.currentSortDirection =
+      stato.currentSortDirection === "asc" ? "desc" : "asc";
+  } else {
+    stato.currentSortKey = newSortKey;
+    // Imposta una direzione di default per le nuove colonne
+    stato.currentSortDirection =
+      newSortKey === "data" ||
+      newSortKey === "puntiVSR" ||
+      newSortKey === "classificaFinale"
+        ? "desc"
+        : "asc";
+  }
+
+  aggiornaTabellaGare();
+  updateSortIndicators();
+}
+
 export function aggiornaTabellaGare() {
   let gareDaMostrare = JSON.parse(localStorage.getItem("gareSalvate")) || [];
   dom.classificaVsrtbody.innerHTML = "";
@@ -92,30 +132,50 @@ export function aggiornaTabellaGare() {
     });
     gareDaMostrare = gareFiltrateEOrdinate;
     contributingGareIds = callbacks.getContributingGareIds(
-      gareDaMostrare,
-      oggi
-    );
-  } else if (stato.vistaStoricoAttuale === "tutte") {
-    gareDaMostrare.sort((a, b) => new Date(b.data) - new Date(a.data));
-    contributingGareIds = callbacks.getContributingGareIds(
-      gareDaMostrare,
-      oggi
-    );
-  } else if (stato.vistaStoricoAttuale.startsWith("storico_")) {
-    const tipoFiltro = stato.vistaStoricoAttuale.split("_")[1].toUpperCase();
-    gareDaMostrare = gareDaMostrare.filter((gara) => {
-      const infoLivello = dom.livelliVsrStoricoMap[gara.livello];
-      return infoLivello && infoLivello.tipo === tipoFiltro;
-    });
-    gareDaMostrare.sort((a, b) => new Date(b.data) - new Date(a.data));
-    contributingGareIds = callbacks.getContributingGareIds(
-      gareDaMostrare,
+      JSON.parse(localStorage.getItem("gareSalvate")) || [], // Usa l'array completo per l'ID
       oggi
     );
   } else {
-    gareDaMostrare.sort((a, b) => new Date(b.data) - new Date(a.data));
+    // Filtra prima di ordinare per le viste 'storico_*'
+    if (stato.vistaStoricoAttuale.startsWith("storico_")) {
+      const tipoFiltro = stato.vistaStoricoAttuale.split("_")[1].toUpperCase();
+      gareDaMostrare = gareDaMostrare.filter((gara) => {
+        const infoLivello = dom.livelliVsrStoricoMap[gara.livello];
+        return infoLivello && infoLivello.tipo === tipoFiltro;
+      });
+    }
+
+    // Applica l'ordinamento dinamico
+    gareDaMostrare.sort((a, b) => {
+      let valA = a[stato.currentSortKey];
+      let valB = b[stato.currentSortKey];
+
+      switch (stato.currentSortKey) {
+        case "data":
+          valA = new Date(valA);
+          valB = new Date(valB);
+          break;
+        case "nome":
+          valA = valA.toLowerCase();
+          valB = valB.toLowerCase();
+          break;
+        case "livello":
+          const order = { HC: 0, LIV1: 1, LIV2: 2, LIV3: 3 };
+          valA = order[valA] ?? 99;
+          valB = order[valB] ?? 99;
+          break;
+        default:
+          // Per 'classificaFinale' e 'puntiVSR' la conversione a numero è implicita
+          break;
+      }
+
+      if (valA < valB) return stato.currentSortDirection === "asc" ? -1 : 1;
+      if (valA > valB) return stato.currentSortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+
     contributingGareIds = callbacks.getContributingGareIds(
-      gareDaMostrare,
+      JSON.parse(localStorage.getItem("gareSalvate")) || [], // Usa l'array completo per l'ID
       oggi
     );
   }
@@ -367,6 +427,7 @@ function setupFiltriStoricoListeners() {
       if (dom.titoloFormGara) dom.titoloFormGara.style.display = "none";
       const headerAzioni = document.getElementById("header-colonna-azioni");
       if (headerAzioni) headerAzioni.style.display = "none";
+      if (dom.vsrSortHint) dom.vsrSortHint.style.display = "none"; // Nascondi suggerimento
       if (dom.tabellaClassificaVsr)
         dom.tabellaClassificaVsr.classList.remove("vista-tutte-attiva");
     } else {
@@ -374,6 +435,7 @@ function setupFiltriStoricoListeners() {
       if (dom.titoloFormGara) {
         dom.titoloFormGara.style.display = "block";
       }
+      if (dom.vsrSortHint) dom.vsrSortHint.style.display = "block"; // Mostra suggerimento
       const headerAzioni = document.getElementById("header-colonna-azioni");
       if (headerAzioni) headerAzioni.style.display = "";
       if (dom.tabellaClassificaVsr)
@@ -443,6 +505,13 @@ export function initVsrRankingUI(domElements, globalCallbacks) {
         dom.btnMostraTutteGare.click();
       }
     });
+  });
+
+  // Aggiungi event listener per l'ordinamento
+  const sortableHeaders =
+    dom.tabellaClassificaVsr.querySelectorAll("th[data-sort]");
+  sortableHeaders.forEach((header) => {
+    header.addEventListener("click", handleSort);
   });
 
   setupFiltriStoricoListeners();

@@ -105,6 +105,7 @@
   "VSR_FILTER_BTN_L1": "Liv. 1",
   "VSR_FILTER_BTN_L2": "Liv. 2",
   "VSR_FILTER_BTN_L3": "Liv. 3",
+  "VSR_SORT_HINT": "Suggerimento: Clicca sulle intestazioni delle colonne per ordinare la tabella.",
   "VSR_BTN_LOAD_FROM_LIST": "Carica da Elenco Regate",
   "VSR_TABLE_HEADER_DATE": "Data",
   "VSR_TABLE_HEADER_RACE_NAME": "Nome Regata",

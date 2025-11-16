@@ -105,6 +105,7 @@
   "VSR_FILTER_BTN_L1": "Niv. 1",
   "VSR_FILTER_BTN_L2": "Niv. 2",
   "VSR_FILTER_BTN_L3": "Niv. 3",
+  "VSR_SORT_HINT": "Astuce : Cliquez sur les en-têtes de colonnes pour trier le tableau.",
   "VSR_BTN_LOAD_FROM_LIST": "Charger depuis Liste des Courses",
   "VSR_TABLE_HEADER_DATE": "Date",
   "VSR_TABLE_HEADER_RACE_NAME": "Nom de la Course",

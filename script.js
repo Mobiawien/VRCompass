@@ -350,7 +350,6 @@ async function init() {
 
   if (vsrPrecedente !== null && vsrCorrenteCalcolato !== vsrPrecedente) {
     mostraNotificaCambiamento(vsrPrecedente, vsrCorrenteCalcolato);
-    registraPuntoStoricoVSR(vsrCorrenteCalcolato); // Registra il nuovo punto
   }
 
   // Aggiorna lo stato VSR corrente nel localStorage per i prossimi avvii
@@ -983,41 +982,75 @@ function aggiornaGraficoAndamentoVSR() {
     dateEventi.add(dataScadenza.toISOString().split("T")[0]);
   });
 
-  // Trova la data della gara valida più vecchia per rendere il grafico più leggibile
-  const gareContributive = selezionaGareContributive(gareSalvate, oggi);
-  let primaDataGaraValida = null;
-  for (const tipo in gareContributive) {
-    gareContributive[tipo].forEach((gara) => {
-      const dataCorrente = new Date(gara.data);
-      if (!primaDataGaraValida || dataCorrente < primaDataGaraValida) {
-        primaDataGaraValida = dataCorrente;
-      }
-    });
-  }
-  // Se non ci sono gare valide, usa la data di oggi come fallback per evitare errori
-  const dataInizioGrafico = primaDataGaraValida || oggi;
+  // Imposta la data di inizio del grafico a un anno fa per migliorare la leggibilità.
+  const dataInizioGrafico = new Date();
+  dataInizioGrafico.setFullYear(dataInizioGrafico.getFullYear() - 1);
 
-  // 2. Filtra le date future, ordinale e assicurati che siano uniche
-  const dateStoricoUniche = Array.from(dateEventi)
+  // 2. Filtra le date per l'ultimo anno, ordinale e assicurati che siano uniche
+  const dateEventiUltimoAnno = Array.from(dateEventi)
     .map((d) => new Date(d))
-    .filter((d) => d <= oggi && d >= dataInizioGrafico) // Parte dalla prima gara valida
+    .filter((d) => d <= oggi && d >= dataInizioGrafico) // Parte da un anno fa
     .sort((a, b) => a - b)
     .filter(
       (date, index, self) =>
         index === 0 || date.getTime() !== self[index - 1].getTime()
     );
 
-  // 3. Per ogni data chiave, ricalcola il punteggio VSR
-  const puntiStorico = dateStoricoUniche.map((dataOriginale) => {
+  // 3. Raggruppa gli eventi troppo ravvicinati per pulire il grafico
+  const dateStoricoRaggruppate = [];
+  const GIORNI_RAGGRUPPAMENTO = 4; // Raggruppa eventi che avvengono entro 4 giorni
+  if (dateEventiUltimoAnno.length > 0) {
+    dateStoricoRaggruppate.push(dateEventiUltimoAnno[0]);
+    for (let i = 1; i < dateEventiUltimoAnno.length; i++) {
+      const ultimaDataAggiunta =
+        dateStoricoRaggruppate[dateStoricoRaggruppate.length - 1];
+      const dataCorrente = dateEventiUltimoAnno[i];
+      const giorniTrascorsi =
+        (dataCorrente - ultimaDataAggiunta) / (1000 * 60 * 60 * 24);
+      if (giorniTrascorsi >= GIORNI_RAGGRUPPAMENTO) {
+        dateStoricoRaggruppate.push(dataCorrente);
+      } else {
+        // Se la data è troppo vicina, sostituisci l'ultima con quella corrente (più recente)
+        dateStoricoRaggruppate[dateStoricoRaggruppate.length - 1] =
+          dataCorrente;
+      }
+    }
+  }
+
+  // 4. Per ogni data raggruppata, ricalcola il punteggio VSR
+  const puntiStorico = dateStoricoRaggruppate.map((dataOriginale) => {
     // Crea una copia della data per non modificare l'originale nell'array
     const dataCalcolo = new Date(dataOriginale);
     dataCalcolo.setHours(23, 59, 59, 999); // Usa la fine del giorno per i calcoli
-    const punteggio = getVsrScoreCalcolato(gareSalvate, dataCalcolo);
+
+    // Filtra le gare per includere solo quelle concluse entro la data di calcolo
+    const gareDisponibiliInData = gareSalvate.filter(
+      (g) => new Date(g.data) <= dataCalcolo
+    );
+    const punteggio = getVsrScoreCalcolato(gareDisponibiliInData, dataCalcolo);
+
     return {
       data: dataCalcolo.toISOString().split("T")[0],
       punteggio: punteggio,
     };
   });
+
+  // Assicura che l'ultimo punto del grafico corrisponda esattamente al VSR attuale.
+  // Questo risolve il caso in cui una gara viene aggiunta "oggi" e non viene inclusa nel calcolo storico.
+  const vsrAttuale =
+    parseFloat(localStorage.getItem("classificaVsrAttuale")) || 0;
+  const oggiString = oggi.toISOString().split("T")[0];
+
+  // Se l'ultimo punto calcolato non è di oggi, o se è di oggi ma ha un punteggio diverso, aggiungi/aggiorna il punto finale.
+  const ultimoPunto = puntiStorico[puntiStorico.length - 1];
+  if (!ultimoPunto || ultimoPunto.data !== oggiString) {
+    puntiStorico.push({ data: oggiString, punteggio: vsrAttuale });
+  } else if (
+    ultimoPunto.data === oggiString &&
+    ultimoPunto.punteggio !== vsrAttuale
+  ) {
+    ultimoPunto.punteggio = vsrAttuale; // Aggiorna il punteggio dell'ultimo punto se è di oggi ma non corretto
+  }
 
   const labels = puntiStorico.map((p) =>
     new Date(p.data).toLocaleDateString(document.documentElement.lang || "it", {
@@ -1056,6 +1089,8 @@ function aggiornaGraficoAndamentoVSR() {
           ticks: {
             maxRotation: 45,
             minRotation: 45,
+            // Limita il numero di etichette per mantenere l'asse pulito
+            maxTicksLimit: 12,
           },
         },
       },

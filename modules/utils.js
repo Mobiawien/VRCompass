@@ -20,9 +20,9 @@ export function formatNumber(num, decimalPlaces = 0) {
   }
 }
 
-export function calcolaMesiTrascorsi(dataGaraString) {
+export function calcolaMesiTrascorsi(dataGaraString, dataRiferimento) {
   const dataGara = new Date(dataGaraString);
-  const oggi = new Date();
+  const oggi = dataRiferimento || new Date();
   dataGara.setHours(0, 0, 0, 0);
   oggi.setHours(0, 0, 0, 0);
   let mesi = (oggi.getFullYear() - dataGara.getFullYear()) * 12;

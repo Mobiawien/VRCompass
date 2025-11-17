@@ -305,6 +305,7 @@
   "DASHBOARD_IMPORT_DATA_BUTTON": "Importa Dati",
   "DASHBOARD_CURRENT_VSR_SCORE_LABEL": "Punteggio VSR Attuale:",
   "DASHBOARD_RADAR_CHART_TITLE": "Radar Punti VSR",
+  "DASHBOARD_TREND_CHART_TITLE": "Andamento Punteggio VSR",
 
   "DASHBOARD_WELCOME_TITLE": "Benvenuto in VRCompass!",
   "DASHBOARD_WELCOME_P1": "VRCompass è il tuo alleato strategico per Virtual Regatta Offshore. Più che una bussola per la navigazione in mare, è uno strumento progettato per aiutarti a gestire al meglio la tua strategia di gioco, ottimizzare la classifica VSR, amministrare i crediti e pianificare le tue regate con maggiore consapevolezza.",

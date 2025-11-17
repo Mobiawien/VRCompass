@@ -198,14 +198,13 @@ const btnToggleRecentEvents = document.getElementById(
 );
 const recentEventsSummary = document.getElementById("recent-events-summary");
 
-// Grafico Radar Dashboard
-const canvasGraficoRadar = document.getElementById("graficoRadarSaluteSlot");
-let graficoRadarIstanza = null;
-
 // Grafico Torta Strategia
 const canvasGraficoTorta = document.getElementById(
   "graficoTortaComposizioneVSR"
 );
+
+// Grafico Andamento VSR Dashboard
+let graficoAndamentoIstanza = null;
 
 // --- Stato Applicazione ---
 const livelliVsrStoricoMap = {
@@ -298,7 +297,7 @@ function handleNavClick(event) {
       switch (targetViewId) {
         case "dashboard-view":
           aggiornaInfoClassificaView();
-          aggiornaGraficoRadarSaluteSlot();
+          aggiornaGraficoAndamentoVSR();
           break;
         case "gestione-crediti-view":
           break;
@@ -327,20 +326,19 @@ function handleNavClick(event) {
  * Funzione di callback per aggiornare tutti i componenti UI quando cambia la lingua.
  */
 function updateAllUIComponents() {
+  // Inizializza il grafico
+
   aggiornaInfoClassificaView();
-  aggiornaTabellaGare();
-  aggiornaSezioneAnalisi();
   aggiornaSezioneStrategia();
   aggiornaGraficoTortaStatoStrategia();
-  aggiornaGraficoRadarSaluteSlot();
 }
 
 /**
  * Inizializza l'applicazione.
  */
 async function init() {
-  // 1. Inizializza i18n e passa il callback per aggiornare l'UI al cambio lingua
-  await initI18n(updateAllUIComponents);
+  // 1. Inizializza i18n senza callback iniziale per evitare esecuzioni premature
+  await initI18n(null);
 
   // 2. Controlla le variazioni di VSR dovute al tempo trascorso
   caricaStatoVSRPrecedente();
@@ -352,6 +350,7 @@ async function init() {
 
   if (vsrPrecedente !== null && vsrCorrenteCalcolato !== vsrPrecedente) {
     mostraNotificaCambiamento(vsrPrecedente, vsrCorrenteCalcolato);
+    registraPuntoStoricoVSR(vsrCorrenteCalcolato); // Registra il nuovo punto
   }
 
   // Aggiorna lo stato VSR corrente nel localStorage per i prossimi avvii
@@ -363,18 +362,23 @@ async function init() {
     "statoVSRPrecedente",
     JSON.stringify(statoCorrenteDaSalvare)
   );
+
+  // 3. Aggiorna il punteggio VSR nel localStorage
   localStorage.setItem("classificaVsrAttuale", vsrCorrenteCalcolato.toString());
 
-  // 3. Inizializza i componenti UI con i dati corretti
+  // 4. Inizializza i moduli UI (che ora possono usare i dati aggiornati)
   initializeUI();
 
-  // 4. Imposta gli event listeners
+  // 5. Imposta gli event listeners globali
   setupEventListeners();
 
-  // 5. Aggiorna tutte le viste con i dati caricati e processati
+  // Ora che tutto è inizializzato, applichiamo le traduzioni e aggiorniamo l'UI
+  getTranslation("PAGE_TITLE"); // Chiamata fittizia per forzare l'applicazione delle traduzioni
+
+  // 6. Aggiorna tutte le viste con i dati caricati e processati
   updateAllUIComponents();
 
-  // Imposta la vista di default sulla Dashboard
+  // 7. Imposta la vista di default sulla Dashboard
   document.getElementById("btn-show-dashboard").click();
 }
 
@@ -606,7 +610,6 @@ function handleDataChange() {
   aggiornaSezioneAnalisi();
   aggiornaSezioneStrategia();
   aggiornaGraficoTortaStatoStrategia();
-  aggiornaGraficoRadarSaluteSlot();
   recalcolaEAggiornaVsrUI();
 }
 
@@ -904,6 +907,160 @@ function dismissVSRChangeModal() {
       statoVSRPrecedente.timestampSalvataggio
     );
   }
+}
+
+// --- Funzioni per lo Storico Punteggio VSR e Grafico Andamento ---
+function registraPuntoStoricoVSR(punteggio) {
+  if (typeof punteggio !== "number") {
+    console.error(
+      "Tentativo di registrare un punteggio non valido:",
+      punteggio
+    );
+    return;
+  }
+
+  const timestamp = new Date().toISOString();
+  let storico = JSON.parse(localStorage.getItem("storicoPunteggioVSR")) || [];
+
+  // Controlla se l'ultimo punto registrato ha lo stesso punteggio. Se sì, non fare nulla.
+  if (
+    storico.length > 0 &&
+    storico[storico.length - 1].punteggio === punteggio
+  ) {
+    return;
+  }
+
+  // Aggiunge il nuovo punto
+  storico.push({ data: timestamp, punteggio: punteggio });
+
+  // Mantiene solo gli ultimi 20 punti per non appesantire troppo il localStorage
+  if (storico.length > 20) {
+    storico = storico.slice(storico.length - 20);
+  }
+
+  localStorage.setItem("storicoPunteggioVSR", JSON.stringify(storico));
+}
+
+function aggiornaGraficoAndamentoVSR() {
+  const canvas = document.getElementById("graficoAndamentoVSR");
+  if (!canvas) return;
+
+  if (graficoAndamentoIstanza) {
+    graficoAndamentoIstanza.destroy();
+  }
+
+  const gareSalvate = JSON.parse(localStorage.getItem("gareSalvate")) || [];
+
+  if (gareSalvate.length === 0) {
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#6c757d";
+    ctx.font = "16px Arial";
+    ctx.fillText(
+      getTranslation("TEXT_NO_DATA_AVAILABLE"),
+      canvas.width / 2,
+      canvas.height / 2
+    );
+    return;
+  }
+
+  // 1. Raccogli tutte le date chiave (fine gara, dimezzamento, scadenza) e assicurati che "oggi" sia incluso
+  const dateEventi = new Set();
+  const oggi = new Date();
+  dateEventi.add(oggi.toISOString().split("T")[0]); // Aggiunge la data di oggi
+
+  gareSalvate.forEach((gara) => {
+    const dataFine = new Date(gara.data);
+    dateEventi.add(dataFine.toISOString().split("T")[0]);
+
+    const dataDimezzamento = new Date(dataFine);
+    dataDimezzamento.setFullYear(dataDimezzamento.getFullYear() + 1);
+    dateEventi.add(dataDimezzamento.toISOString().split("T")[0]);
+
+    const dataScadenza = new Date(dataFine);
+    dataScadenza.setFullYear(dataScadenza.getFullYear() + 2);
+    dateEventi.add(dataScadenza.toISOString().split("T")[0]);
+  });
+
+  // Trova la data della gara valida più vecchia per rendere il grafico più leggibile
+  const gareContributive = selezionaGareContributive(gareSalvate, oggi);
+  let primaDataGaraValida = null;
+  for (const tipo in gareContributive) {
+    gareContributive[tipo].forEach((gara) => {
+      const dataCorrente = new Date(gara.data);
+      if (!primaDataGaraValida || dataCorrente < primaDataGaraValida) {
+        primaDataGaraValida = dataCorrente;
+      }
+    });
+  }
+  // Se non ci sono gare valide, usa la data di oggi come fallback per evitare errori
+  const dataInizioGrafico = primaDataGaraValida || oggi;
+
+  // 2. Filtra le date future, ordinale e assicurati che siano uniche
+  const dateStoricoUniche = Array.from(dateEventi)
+    .map((d) => new Date(d))
+    .filter((d) => d <= oggi && d >= dataInizioGrafico) // Parte dalla prima gara valida
+    .sort((a, b) => a - b)
+    .filter(
+      (date, index, self) =>
+        index === 0 || date.getTime() !== self[index - 1].getTime()
+    );
+
+  // 3. Per ogni data chiave, ricalcola il punteggio VSR
+  const puntiStorico = dateStoricoUniche.map((dataOriginale) => {
+    // Crea una copia della data per non modificare l'originale nell'array
+    const dataCalcolo = new Date(dataOriginale);
+    dataCalcolo.setHours(23, 59, 59, 999); // Usa la fine del giorno per i calcoli
+    const punteggio = getVsrScoreCalcolato(gareSalvate, dataCalcolo);
+    return {
+      data: dataCalcolo.toISOString().split("T")[0],
+      punteggio: punteggio,
+    };
+  });
+
+  const labels = puntiStorico.map((p) =>
+    new Date(p.data).toLocaleDateString(document.documentElement.lang || "it", {
+      day: "numeric",
+      month: "short",
+      year: "2-digit",
+    })
+  );
+
+  const dataPoints = puntiStorico.map((p) => p.punteggio);
+
+  const data = {
+    labels: labels,
+    datasets: [
+      {
+        label: getTranslation("DASHBOARD_CURRENT_VSR_SCORE_LABEL"),
+        data: dataPoints,
+        fill: true,
+        borderColor: "rgb(13, 110, 253)",
+        backgroundColor: "rgba(13, 110, 253, 0.1)",
+        tension: 0.1,
+        pointRadius: 4,
+        pointBackgroundColor: "rgb(13, 110, 253)",
+      },
+    ],
+  };
+
+  graficoAndamentoIstanza = new Chart(canvas, {
+    type: "line",
+    data: data,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          ticks: {
+            maxRotation: 45,
+            minRotation: 45,
+          },
+        },
+      },
+    },
+  });
 }
 
 // --- Funzioni per lo Stato VSR Precedente ---
@@ -1274,6 +1431,8 @@ function popolaTabellaElencoRegateSuggerite(regateProposte) {
     const inputClassifica = document.createElement("input");
     inputClassifica.type = "number";
     inputClassifica.min = "1";
+    inputClassifica.id = `classifica-suggerita-${regata.idDatabase}`; // ID dinamico e univoco
+    inputClassifica.name = `classifica-suggerita-${regata.idDatabase}`; // Name dinamico e univoco
     inputClassifica.placeholder = getTranslation("PLACEHOLDER_POSITION");
     inputClassifica.style.width = "60px";
     inputClassifica.style.textAlign = "center";
@@ -1351,92 +1510,6 @@ function getGareContributiveConDettagli(sourceGare) {
   const gareSalvate =
     sourceGare || JSON.parse(localStorage.getItem("gareSalvate")) || [];
   return selezionaGareContributive(gareSalvate, new Date());
-}
-
-// --- Funzioni Grafico Radar Dashboard ---
-function aggiornaGraficoRadarSaluteSlot() {
-  console.log(
-    "aggiornaGraficoRadarSaluteSlot called. canvasGraficoRadar:",
-    canvasGraficoRadar
-  );
-  if (!canvasGraficoRadar) return;
-
-  const gareContributive = getGareContributiveConDettagli();
-  const datiPercentualePotenziale = [];
-  const categorieRadar = [
-    RACE_TYPES.HC,
-    RACE_TYPES.L1,
-    RACE_TYPES.L2,
-    RACE_TYPES.L3,
-  ];
-  const etichetteRadar = [];
-
-  categorieRadar.forEach((tipoGara) => {
-    const gareCat = gareContributive[tipoGara] || [];
-    const maxSlotPerFascia = LIMITI_GARE_PER_CATEGORIA[tipoGara];
-    const infoLivelloDaMappa = Object.values(livelliVsrStoricoMap).find(
-      (l) => l.tipo === tipoGara
-    );
-    const livelloValoreNumerico = infoLivelloDaMappa?.valoreNumerico;
-    etichetteRadar.push(
-      infoLivelloDaMappa
-        ? getTranslation(infoLivelloDaMappa.chiaveTraduzione)
-        : tipoGara
-    );
-
-    const totaleSlotCategoria = maxSlotPerFascia * 2;
-    if (totaleSlotCategoria === 0 || !livelloValoreNumerico) {
-      datiPercentualePotenziale.push(0);
-      return;
-    }
-    const puntiAttuali = gareCat.reduce((sum, g) => sum + g.puntiEffettivi, 0);
-    const potenzialeMaxCategoria =
-      livelloValoreNumerico * maxSlotPerFascia * 1.5;
-    const percentualeRaggiunta =
-      potenzialeMaxCategoria > 0
-        ? (puntiAttuali / potenzialeMaxCategoria) * 100
-        : 0;
-    datiPercentualePotenziale.push(
-      Math.min(100, Math.max(0, percentualeRaggiunta))
-    );
-  });
-
-  const data = {
-    labels: etichetteRadar,
-    datasets: [
-      {
-        label: getTranslation("DASHBOARD_RADAR_CHART_TITLE"),
-        data: datiPercentualePotenziale,
-        fill: true,
-        backgroundColor: "rgba(54, 162, 235, 0.2)",
-        borderColor: "rgb(54, 162, 235)",
-        pointBackgroundColor: "rgb(54, 162, 235)",
-        pointBorderColor: "#fff",
-        pointHoverBackgroundColor: "#fff",
-        pointHoverBorderColor: "rgb(54, 162, 235)",
-      },
-    ],
-  };
-  if (graficoRadarIstanza) {
-    graficoRadarIstanza.destroy();
-  }
-  graficoRadarIstanza = new Chart(canvasGraficoRadar, {
-    type: "radar",
-    data: data,
-    options: {
-      scales: {
-        r: {
-          angleLines: { display: true },
-          suggestedMin: 0,
-          suggestedMax: 100,
-          pointLabels: { font: { size: 13 } },
-          ticks: { callback: (value) => value + "%" },
-        },
-      },
-      elements: { line: { borderWidth: 2 } },
-      plugins: { legend: { display: false } },
-    },
-  });
 }
 
 // --- Inizializzazione ---

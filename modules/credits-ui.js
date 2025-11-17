@@ -89,6 +89,8 @@ function aggiornaTabella3() {
   const cellaClassifica = row.insertCell(1);
   dom.inputClassificaTab3Ref = document.createElement("input");
   dom.inputClassificaTab3Ref.type = "number";
+  dom.inputClassificaTab3Ref.id = "input-classifica-simulazione"; // Aggiunto ID univoco
+  dom.inputClassificaTab3Ref.name = "classifica-simulazione"; // Aggiunto name
   dom.inputClassificaTab3Ref.value =
     stato.classificaFinale > 0 ? stato.classificaFinale : "";
   dom.inputClassificaTab3Ref.min = "1";

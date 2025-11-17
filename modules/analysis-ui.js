@@ -4,6 +4,7 @@ import { formatNumber } from "./utils.js";
 // Riferimenti agli elementi DOM e alle funzioni di callback globali
 let dom = {};
 let callbacks = {};
+let graficoRadarIstanza = null;
 
 function popolaCategoriaSlot(
   tipoGara,
@@ -178,6 +179,89 @@ function popolaCategoriaSlot(
   }
 }
 
+function aggiornaGraficoRadarSaluteSlot() {
+  // Ottiene il canvas qui, quando la sezione è visibile, invece che all'init.
+  const canvasGraficoRadar = document.getElementById("graficoRadarSaluteSlot");
+  if (!canvasGraficoRadar) return;
+
+  const gareContributive = callbacks.getGareContributiveConDettagli();
+  const datiPercentualePotenziale = [];
+  // Usa le costanti RACE_TYPES e LIMITI_GARE_PER_CATEGORIA salvate nell'oggetto dom locale
+  const categorieRadar = Object.values(dom.RACE_TYPES).filter(
+    (t) => t !== "N/D"
+  );
+  const etichetteRadar = [];
+
+  categorieRadar.forEach((tipoGara) => {
+    const gareCat = gareContributive[tipoGara] || [];
+    const maxSlotPerFascia = dom.LIMITI_GARE_PER_CATEGORIA[tipoGara] || 0;
+    const infoLivelloDaMappa = Object.values(dom.livelliVsrStoricoMap).find(
+      (l) => l.tipo === tipoGara
+    );
+    const livelloValoreNumerico = infoLivelloDaMappa?.valoreNumerico;
+    etichetteRadar.push(
+      infoLivelloDaMappa
+        ? getTranslation(infoLivelloDaMappa.chiaveTraduzione)
+        : tipoGara
+    );
+
+    const totaleSlotCategoria = maxSlotPerFascia * 2;
+    if (totaleSlotCategoria === 0 || !livelloValoreNumerico) {
+      datiPercentualePotenziale.push(0);
+      return;
+    }
+    const puntiAttuali = gareCat.reduce((sum, g) => sum + g.puntiEffettivi, 0);
+    const potenzialeMaxCategoria =
+      livelloValoreNumerico * maxSlotPerFascia * 1.5;
+    const percentualeRaggiunta =
+      potenzialeMaxCategoria > 0
+        ? (puntiAttuali / potenzialeMaxCategoria) * 100
+        : 0;
+    datiPercentualePotenziale.push(
+      Math.min(100, Math.max(0, percentualeRaggiunta))
+    );
+  });
+
+  const data = {
+    labels: etichetteRadar,
+    datasets: [
+      {
+        label: getTranslation("DASHBOARD_RADAR_CHART_TITLE"),
+        data: datiPercentualePotenziale,
+        fill: true,
+        backgroundColor: "rgba(54, 162, 235, 0.2)",
+        borderColor: "rgb(54, 162, 235)",
+        pointBackgroundColor: "rgb(54, 162, 235)",
+        pointBorderColor: "#fff",
+        pointHoverBackgroundColor: "#fff",
+        pointHoverBorderColor: "rgb(54, 162, 235)",
+      },
+    ],
+  };
+  if (graficoRadarIstanza) {
+    graficoRadarIstanza.destroy();
+  }
+  graficoRadarIstanza = new Chart(canvasGraficoRadar, {
+    type: "radar",
+    data: data,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        r: {
+          angleLines: { display: true },
+          suggestedMin: 0,
+          suggestedMax: 100,
+          pointLabels: { font: { size: 12 } },
+          ticks: { callback: (value) => value + "%" },
+        },
+      },
+      elements: { line: { borderWidth: 2 } },
+      plugins: { legend: { display: false } },
+    },
+  });
+}
+
 function aggiornaPanoramicaSlotVSR() {
   const gareContributive = callbacks.getGareContributiveConDettagli();
 
@@ -254,9 +338,15 @@ function aggiornaPanoramicaSlotVSR() {
 export function initAnalysisUI(domElements, globalCallbacks) {
   dom = domElements;
   callbacks = globalCallbacks;
+  // Salva le costanti necessarie nell'oggetto dom locale per un uso futuro
+  dom.livelliVsrStoricoMap = domElements.livelliVsrStoricoMap;
+  dom.LIMITI_GARE_PER_CATEGORIA = domElements.LIMITI_GARE_PER_CATEGORIA;
+  // Definiamo RACE_TYPES qui per coerenza, anche se non passato direttamente
+  dom.RACE_TYPES = { HC: "HC", L1: "LIV1", L2: "LIV2", L3: "LIV3", ND: "N/D" };
   // La prima chiamata per popolare la UI viene fatta da script.js quando si naviga alla sezione
 }
 
 export function aggiornaSezioneAnalisi() {
   aggiornaPanoramicaSlotVSR();
+  aggiornaGraficoRadarSaluteSlot();
 }

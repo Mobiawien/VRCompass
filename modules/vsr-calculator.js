@@ -25,6 +25,15 @@ const LIMITI_GARE_PER_CATEGORIA = { HC: 1, LIV1: 3, LIV2: 6, LIV3: 10 };
  * @returns {Object} Un oggetto con le gare contributive raggruppate per tipo.
  */
 export function selezionaGareContributive(gareSalvateRaw, dataRiferimento) {
+  // Se non viene fornita una data di riferimento valida, non procedere.
+  // Questo previene il calcolo errato basato sulla data odierna quando non dovrebbe.
+  if (!dataRiferimento || !(dataRiferimento instanceof Date)) {
+    console.error(
+      "selezionaGareContributive: dataRiferimento non valida.",
+      dataRiferimento
+    );
+    return { HC: [], LIV1: [], LIV2: [], LIV3: [] };
+  }
   const gareConDettagli = gareSalvateRaw
     .map((gara) => {
       const mesiTrascorsi = calcolaMesiTrascorsi(gara.data, dataRiferimento);

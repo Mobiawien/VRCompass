@@ -120,6 +120,7 @@
   "VSR_GUIDE_INTRO_P1": "This section allows you to store your race results and automatically calculate the VSR Points earned. VRCompass helps you monitor the validity of your scores and understand how they contribute to your VSR ranking.",
   "VSR_GUIDE_DATA_INSERTION_TITLE": "<strong>Data Entry:</strong>",
   "VSR_GUIDE_DATA_INSERTION_STEP1": "<strong>Date:</strong> Enter the race's <strong>closing</strong> date. Dates can be found in VR's historical calendar.",
+  "VSR_GUIDE_DATA_INSERTION_STEP2": "<strong>Race Name:</strong> Enter an identifying name for the race.",
   "VSR_GUIDE_DATA_INSERTION_STEP3": "<strong>Race Level (VSR):</strong> Select the correct race level from the dropdown menu. These levels correspond to the official VRO categories.",
   "VSR_GUIDE_DATA_INSERTION_STEP4": "<strong>Final Ranking:</strong> Enter your final position in the race.",
   "VSR_GUIDE_DATA_INSERTION_STEP5": "<strong>VSR Points:</strong> Automatically calculated and displayed by VRCompass based on the Race Level and Final Ranking (using the formula <code>CategoryMaxPoints / (Ranking<sup>0.125</sup>)</code>, rounded).",
@@ -215,7 +216,6 @@
   "STRATEGY_SUGGESTION_HC_OK_SLOT_BASE": "✅ <strong>Optimal Off-Category Status:</strong> Slot covered with {{points}} points.",
   "STRATEGY_SUGGESTION_HC_IMPROVEMENT_ACTION": "Aim for a better result in the next available HC race.",
   "STRATEGY_SUGGESTION_HC_PRE_WARNING": "<strong class=\"text-danger\">Important: this race is undergoing {{eventType}} on {{eventDate}}!</strong>",
-  "STRATEGY_SUGGESTION_HC_URGENT_HALVING_WARNING": "<strong class=\"text-danger\">❗URGENT: {{remainingDays}} {{daysText}} left until this race's {{eventType}} ({{eventDate}})! You will lose {{impactPoints}} points.</strong>",
   "STRATEGY_SUGGESTION_HC_URGENT_EXPIRY_WARNING": "<strong class=\"text-danger\">❗URGENT: {{remainingDays}} {{daysText}} left until this race's {{eventType}} ({{eventDate}})! This slot will be reset.</strong>",
 
   "STRATEGY_SUGGESTION_LIV1_ICON": "🎯",

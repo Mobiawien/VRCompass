@@ -21,8 +21,8 @@
             <option value="it">Italiano</option>
             <option value="fr">Français</option>
         </select>
-        <!-- Spostato qui il badge versione -->
-        <span class="version-badge">VRCompass v1.6.0</span>
+        <!-- Badge versione -->
+        <span class="version-badge">VRCompass v1.7.0</span>
     </nav>
 
     <div id="dashboard-view" class="view-section">
@@ -55,11 +55,11 @@
                         </div>
                     </div>
 
-                    <!-- Card: Grafico Radar -->
-                    <div class="dashboard-card" id="grafico-radar-card">
-                        <h3 data-i18n-key="DASHBOARD_RADAR_CHART_TITLE">Radar Punti VSR</h3>
-                        <div id="grafico-radar-container" style="max-width: 500px; margin-left:auto; margin-right:auto;">
-                            <canvas id="graficoRadarSaluteSlot"></canvas>
+                    <!-- Card: Grafico Andamento VSR (Nuovo) -->
+                    <div class="dashboard-card" id="grafico-andamento-vsr-card">
+                        <h3 data-i18n-key="DASHBOARD_TREND_CHART_TITLE">Andamento Punteggio VSR</h3>
+                        <div id="grafico-andamento-container" style="position: relative; height:280px; width:100%;">
+                            <canvas id="graficoAndamentoVSR"></canvas>
                         </div>
                     </div>
                 </div>
@@ -67,7 +67,6 @@
                 <!-- Colonna Destra -->
                 <div class="dashboard-column-right">
                     <div class="dashboard-card" id="info-gestione-card">
-                        <!-- <h3>VRCompass: Info & Strumenti</h3> --> <!-- Titolo rimosso come richiesto -->
 
                         <div class="info-gestione-sezione">
                             <h3 data-i18n-key="DASHBOARD_WELCOME_TITLE">Benvenuto in VRCompass!</h3>
@@ -272,15 +271,17 @@
                     <button id="btn-storico-liv2" class="nav-button filtro-btn" data-i18n-key="VSR_FILTER_BTN_L2">Liv. 2</button>
                     <button id="btn-storico-liv3" class="nav-button filtro-btn" data-i18n-key="VSR_FILTER_BTN_L3">Liv. 3</button>
                 </div>
+                <!-- Suggerimento per l'ordinamento, visibile solo nelle viste "storico" -->
+                <p id="vsr-sort-hint" class="sort-hint" data-i18n-key="VSR_SORT_HINT" style="display: none;"></p>
                 <!-- Tabella per visualizzare le gare salvate -->
                 <table id="tabella-classifica-vsr">
                     <thead>
                         <tr>
-                            <th data-i18n-key="VSR_TABLE_HEADER_DATE">Data</th>
-                            <th style="width: 35%;" data-i18n-key="VSR_TABLE_HEADER_RACE_NAME">Nome Regata</th>
-                            <th data-i18n-key="VSR_TABLE_HEADER_LEVEL">Livello</th>
-                            <th style="width: 15%;" data-i18n-key="VSR_TABLE_HEADER_FINAL_RANKING">Classifica Finale</th>
-                            <th style="width: 15%;" data-i18n-key="VSR_TABLE_HEADER_VSR_POINTS">Punti VSR</th>
+                            <th data-i18n-key="VSR_TABLE_HEADER_DATE" class="sortable-header" data-sort="data">Data</th>
+                            <th style="width: 35%;" data-i18n-key="VSR_TABLE_HEADER_RACE_NAME" class="sortable-header" data-sort="nome">Nome Regata</th>
+                            <th data-i18n-key="VSR_TABLE_HEADER_LEVEL" class="sortable-header" data-sort="livello">Livello</th>
+                            <th style="width: 15%;" data-i18n-key="VSR_TABLE_HEADER_FINAL_RANKING" class="sortable-header" data-sort="classificaFinale">Classifica Finale</th>
+                            <th style="width: 15%;" data-i18n-key="VSR_TABLE_HEADER_VSR_POINTS" class="sortable-header" data-sort="puntiVSR">Punti VSR</th>
                             <th data-i18n-key="VSR_TABLE_HEADER_POINTS_STATUS">Stato Punti</th> <!-- Nuova intestazione colonna -->
                             <th id="header-colonna-azioni" data-i18n-key="VSR_TABLE_HEADER_ACTIONS">Azioni</th>
                         </tr>
@@ -392,33 +393,41 @@
                 </div>
                 
                 <div id="slot-vsr-container">
-                    <div class="slot-categoria" id="slot-hc-container">
-                        <h3 data-i18n-key="ANALYSIS_SLOT_CATEGORY_HC">Fuori Categoria</h3>
-                        <div class="slot-info">
-                            <div class="slot-info-header">
-                                <p class="slot-occupati-info"><strong data-i18n-key="ANALYSIS_SLOT_LABEL_OCCUPIED">Slot Occupati:</strong> <span id="hc-occupati">0</span>/2</p> <!-- Aggiornato il totale qui -->
-                                <p class="slot-punti-categoria"><strong data-i18n-key="ANALYSIS_SLOT_LABEL_CATEGORY_POINTS">Punti Categoria:</strong> <span id="hc-punti-categoria">N/A</span></p>
+                    <!-- Nuovo wrapper per la colonna sinistra (HC + Radar) -->
+                    <div class="colonna-hc-radar-wrapper">
+                        <div class="slot-categoria" id="slot-hc-container">
+                            <h3 data-i18n-key="ANALYSIS_SLOT_CATEGORY_HC">Fuori Categoria</h3>
+                            <div class="slot-info">
+                                <div class="slot-info-header">
+                                    <p class="slot-occupati-info"><strong data-i18n-key="ANALYSIS_SLOT_LABEL_OCCUPIED">Slot Occupati:</strong> <span id="hc-occupati">0</span>/2</p>
+                                    <p class="slot-punti-categoria"><strong data-i18n-key="ANALYSIS_SLOT_LABEL_CATEGORY_POINTS">Punti Categoria:</strong> <span id="hc-punti-categoria">N/A</span></p>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" id="hc-progress-bar" title="Riempimento Slot"></div>
+                                </div>
+                                <p class="stacked-bar-label">Composizione Punti VSR:</p>
+                                <div class="stacked-points-bar-container" id="hc-stacked-points-bar-container">
+                                    <div class="points-bar-segment points-bar-100" id="hc-points-bar-100"></div>
+                                    <div class="points-bar-segment points-bar-50" id="hc-points-bar-50"></div>
+                                    <div class="points-bar-segment points-bar-empty" id="hc-points-bar-empty"></div>
+                                </div>
+                                <p><strong data-i18n-key="ANALYSIS_SLOT_LABEL_CURRENT_RACE_SCORE">Punteggio Gara Attuale (Migliore):</strong> <span id="hc-punti-attuali">N/A</span></p>
+                                <div class="gare-slot" id="hc-gare-slot"></div>
                             </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" id="hc-progress-bar" title="Riempimento Slot"></div>
-                            </div>
-                            <p class="stacked-bar-label">Composizione Punti VSR:</p>
-                            <div class="stacked-points-bar-container" id="hc-stacked-points-bar-container">
-                                <div class="points-bar-segment points-bar-100" id="hc-points-bar-100"></div>
-                                <div class="points-bar-segment points-bar-50" id="hc-points-bar-50"></div>
-                                <div class="points-bar-segment points-bar-empty" id="hc-points-bar-empty"></div>
-                            </div>
-                            <p><strong data-i18n-key="ANALYSIS_SLOT_LABEL_CURRENT_RACE_SCORE">Punteggio Gara Attuale (Migliore):</strong> <span id="hc-punti-attuali">N/A</span></p> <!-- Testo aggiornato per chiarezza -->
-                            <div class="gare-slot" id="hc-gare-slot">
-                                <!-- Dettaglio gara HC -->
+                        </div>
+                        <div class="slot-categoria" id="grafico-radar-card-analisi">
+                            <h3 data-i18n-key="DASHBOARD_RADAR_CHART_TITLE">Radar Punti VSR</h3>
+                            <div id="grafico-radar-container-analisi">
+                                <canvas id="graficoRadarSaluteSlot"></canvas>
                             </div>
                         </div>
                     </div>
+
                     <div class="slot-categoria" id="slot-liv1-container">
                         <h3 data-i18n-key="ANALYSIS_SLOT_CATEGORY_L1">Livello 1</h3>
                         <div class="slot-info">
                             <div class="slot-info-header">
-                                <p class="slot-occupati-info"><strong data-i18n-key="ANALYSIS_SLOT_LABEL_OCCUPIED">Slot Occupati:</strong> <span id="liv1-occupati">0</span>/6</p> <!-- Aggiornato il totale qui -->
+                                <p class="slot-occupati-info"><strong data-i18n-key="ANALYSIS_SLOT_LABEL_OCCUPIED">Slot Occupati:</strong> <span id="liv1-occupati">0</span>/6</p>
                                 <p class="slot-punti-categoria"><strong data-i18n-key="ANALYSIS_SLOT_LABEL_CATEGORY_POINTS">Punti Categoria:</strong> <span id="liv1-punti-categoria">N/A</span></p>
                             </div>
                             <div class="progress-bar-container">
@@ -431,16 +440,16 @@
                                 <div class="points-bar-segment points-bar-empty" id="liv1-points-bar-empty"></div>
                             </div>
                             <p><strong data-i18n-key="ANALYSIS_SLOT_LABEL_MIN_CONTRIBUTING_SCORE">Punteggio Minimo Contributivo:</strong> <span id="liv1-min-punti">N/A</span></p>
-                            <div class="gare-slot" id="liv1-gare-slot">
-                                <!-- Dettaglio gare Livello 1 -->
-                            </div>
+                            <p><strong data-i18n-key="ANALYSIS_SLOT_LABEL_MAX_CONTRIBUTING_SCORE">Punteggio massimo contributivo:</strong> <span id="liv1-max-punti">N/A</span></p>
+                            <p><strong data-i18n-key="ANALYSIS_SLOT_LABEL_MIN_SCORE_TO_BEAT_100">Punteggio minimo da battere (gare 100%):</strong> <span id="liv1-min-punti-100">N/A</span></p>
+                            <div class="gare-slot" id="liv1-gare-slot"></div>
                         </div>
                     </div>
                     <div class="slot-categoria" id="slot-liv2-container">
                         <h3 data-i18n-key="ANALYSIS_SLOT_CATEGORY_L2">Livello 2</h3>
                         <div class="slot-info">
                             <div class="slot-info-header">
-                                <p class="slot-occupati-info"><strong data-i18n-key="ANALYSIS_SLOT_LABEL_OCCUPIED">Slot Occupati:</strong> <span id="liv2-occupati">0</span>/12</p> <!-- Aggiornato il totale qui -->
+                                <p class="slot-occupati-info"><strong data-i18n-key="ANALYSIS_SLOT_LABEL_OCCUPIED">Slot Occupati:</strong> <span id="liv2-occupati">0</span>/12</p>
                                 <p class="slot-punti-categoria"><strong data-i18n-key="ANALYSIS_SLOT_LABEL_CATEGORY_POINTS">Punti Categoria:</strong> <span id="liv2-punti-categoria">N/A</span></p>
                             </div>
                             <div class="progress-bar-container">
@@ -453,16 +462,16 @@
                                 <div class="points-bar-segment points-bar-empty" id="liv2-points-bar-empty"></div>
                             </div>
                             <p><strong data-i18n-key="ANALYSIS_SLOT_LABEL_MIN_CONTRIBUTING_SCORE">Punteggio Minimo Contributivo:</strong> <span id="liv2-min-punti">N/A</span></p>
-                            <div class="gare-slot" id="liv2-gare-slot">
-                                <!-- Dettaglio gare Livello 2 -->
-                            </div>
+                            <p><strong data-i18n-key="ANALYSIS_SLOT_LABEL_MAX_CONTRIBUTING_SCORE">Punteggio massimo contributivo:</strong> <span id="liv2-max-punti">N/A</span></p>
+                            <p><strong data-i18n-key="ANALYSIS_SLOT_LABEL_MIN_SCORE_TO_BEAT_100">Punteggio minimo da battere (gare 100%):</strong> <span id="liv2-min-punti-100">N/A</span></p>
+                            <div class="gare-slot" id="liv2-gare-slot"></div>
                         </div>
                     </div>
                     <div class="slot-categoria" id="slot-liv3-container">
                         <h3 data-i18n-key="ANALYSIS_SLOT_CATEGORY_L3">Livello 3</h3>
                         <div class="slot-info">
                             <div class="slot-info-header">
-                                <p class="slot-occupati-info"><strong data-i18n-key="ANALYSIS_SLOT_LABEL_OCCUPIED">Slot Occupati:</strong> <span id="liv3-occupati">0</span>/20</p> <!-- Aggiornato il totale qui -->
+                                <p class="slot-occupati-info"><strong data-i18n-key="ANALYSIS_SLOT_LABEL_OCCUPIED">Slot Occupati:</strong> <span id="liv3-occupati">0</span>/20</p>
                                 <p class="slot-punti-categoria"><strong data-i18n-key="ANALYSIS_SLOT_LABEL_CATEGORY_POINTS">Punti Categoria:</strong> <span id="liv3-punti-categoria">N/A</span></p>
                             </div>
                             <div class="progress-bar-container">
@@ -475,9 +484,9 @@
                                 <div class="points-bar-segment points-bar-empty" id="liv3-points-bar-empty"></div>
                             </div>
                             <p><strong data-i18n-key="ANALYSIS_SLOT_LABEL_MIN_CONTRIBUTING_SCORE">Punteggio Minimo Contributivo:</strong> <span id="liv3-min-punti">N/A</span></p>
-                            <div class="gare-slot" id="liv3-gare-slot">
-                                <!-- Dettaglio gare Livello 3 -->
-                            </div>
+                            <p><strong data-i18n-key="ANALYSIS_SLOT_LABEL_MAX_CONTRIBUTING_SCORE">Punteggio massimo contributivo:</strong> <span id="liv3-max-punti">N/A</span></p>
+                            <p><strong data-i18n-key="ANALYSIS_SLOT_LABEL_MIN_SCORE_TO_BEAT_100">Punteggio minimo da battere (gare 100%):</strong> <span id="liv3-min-punti-100">N/A</span></p>
+                            <div class="gare-slot" id="liv3-gare-slot"></div>
                         </div>
                     </div>
                 </div>
@@ -602,6 +611,6 @@
     </div>
 
 
-    <script src="script.js"></script>
+    <script src="script.js" type="module"></script>
 </body>
 </html>

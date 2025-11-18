@@ -1,2 +1,4 @@
 .DS_Store
-.vscode/settings.json
+.vscode/
+node_modules/
+GEMINI.md

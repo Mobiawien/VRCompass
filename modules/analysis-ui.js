@@ -117,17 +117,24 @@ function popolaCategoriaSlot(
     elProgressBar.setAttribute("title", tooltipText.trim());
   }
 
+  // Calcolo e visualizzazione del punteggio massimo e minimo contributivo
   if (gareCat.length > 0) {
-    if (elMinPunti)
+    if (elMaxPunti) {
+      elMaxPunti.textContent = formatNumber(gareCat[0].puntiEffettivi, 0);
+    }
+    if (elMinPunti) {
       elMinPunti.textContent = formatNumber(
         gareCat[gareCat.length - 1].puntiEffettivi,
         0
       );
-    else if (tipoGara === "HC" && dom.hcPuntiAttuali)
-      dom.hcPuntiAttuali.textContent =
-        gareCat.length > 0
-          ? formatNumber(gareCat[0].puntiEffettivi, 0)
-          : getTranslation("TEXT_NA_DETAILED");
+    }
+    // Gestione speciale per HC
+    if (tipoGara === "HC" && dom.hcPuntiAttuali) {
+      const puntiGaraHC = gareCat.length > 0 ? gareCat[0].puntiEffettivi : 0;
+      dom.hcPuntiAttuali.textContent = formatNumber(puntiGaraHC, 0);
+    }
+
+    // Popola l'elenco dettagliato delle gare
     gareCat.forEach((g) => {
       if (elGareSlot) {
         const p = document.createElement("p");
@@ -147,34 +154,44 @@ function popolaCategoriaSlot(
       }
     });
   } else {
+    // Se non ci sono gare, imposta i valori a N/A
+    if (elMaxPunti) elMaxPunti.textContent = getTranslation("TEXT_NA_DETAILED");
     if (elMinPunti) elMinPunti.textContent = getTranslation("TEXT_NA_DETAILED");
-    else if (tipoGara === "HC" && dom.hcPuntiAttuali)
+    // Gestione speciale per HC
+    if (tipoGara === "HC" && dom.hcPuntiAttuali) {
       dom.hcPuntiAttuali.textContent = getTranslation("TEXT_NA_DETAILED");
-    if (elGareSlot)
+    }
+    if (elGareSlot) {
       elGareSlot.innerHTML = `<p class="no-data">${getTranslation(
         "TEXT_NO_VALID_RACES_IN_SLOT"
       )}</p>`;
-  }
-
-  // Calcolo e visualizzazione del punteggio massimo contributivo
-  if (elMaxPunti) {
-    if (gareCat.length > 0) {
-      elMaxPunti.textContent = formatNumber(gareCat[0].puntiEffettivi, 0);
-    } else {
-      elMaxPunti.textContent = getTranslation("TEXT_NA_DETAILED");
     }
   }
 
   // Calcolo e visualizzazione del punteggio minimo da battere (solo gare 100%)
   if (elMinPunti100) {
     const gare100 = gareCat.filter((g) => g.fattoreDecadimento === 1.0);
-    if (gare100.length > 0) {
-      elMinPunti100.textContent = formatNumber(
-        gare100[gare100.length - 1].puntiEffettivi,
-        0
+    const minPunti100Val =
+      gare100.length > 0 ? gare100[gare100.length - 1].puntiEffettivi : 0;
+
+    if (minPunti100Val > 0 && livelloValoreNumerico) {
+      const targetRank = callbacks.calcolaClassificaPerPuntiTarget(
+        livelloValoreNumerico,
+        minPunti100Val
       );
+      elMinPunti100.innerHTML = targetRank
+        ? `&lt; ${targetRank}°`
+        : getTranslation("TEXT_NA_DETAILED");
+      // Aggiungiamo la classe per l'evidenziazione e il tooltip
+      elMinPunti100.classList.add("target-rank-highlight");
+      elMinPunti100.title = `${getTranslation(
+        "ANALYSIS_SLOT_TOOLTIP_TARGET_SCORE"
+      )} ${formatNumber(minPunti100Val, 0)} pts`;
     } else {
+      // Se non c'è un valore, pulisci l'elemento e rimuovi la classe
       elMinPunti100.textContent = getTranslation("TEXT_NA_DETAILED");
+      elMinPunti100.title = "";
+      elMinPunti100.classList.remove("target-rank-highlight");
     }
   }
 }
@@ -262,14 +279,14 @@ function aggiornaGraficoRadarSaluteSlot() {
   });
 }
 
-function aggiornaPanoramicaSlotVSR() {
+function aggiornaPanoramicaSlot() {
   const gareContributive = callbacks.getGareContributiveConDettagli();
 
   popolaCategoriaSlot(
     "HC",
     gareContributive["HC"] || [],
-    null, // elMaxPunti non applicabile per HC
-    null, // elMinPunti100 non applicabile per HC
+    null,
+    dom.hcMinPunti100, // Usiamo il nuovo elemento corretto
     dom.LIMITI_GARE_PER_CATEGORIA["HC"],
     dom.hcOccupati,
     null,
@@ -343,10 +360,11 @@ export function initAnalysisUI(domElements, globalCallbacks) {
   dom.LIMITI_GARE_PER_CATEGORIA = domElements.LIMITI_GARE_PER_CATEGORIA;
   // Definiamo RACE_TYPES qui per coerenza, anche se non passato direttamente
   dom.RACE_TYPES = { HC: "HC", L1: "LIV1", L2: "LIV2", L3: "LIV3", ND: "N/D" };
+
   // La prima chiamata per popolare la UI viene fatta da script.js quando si naviga alla sezione
 }
 
 export function aggiornaSezioneAnalisi() {
-  aggiornaPanoramicaSlotVSR();
+  aggiornaPanoramicaSlot();
   aggiornaGraficoRadarSaluteSlot();
 }

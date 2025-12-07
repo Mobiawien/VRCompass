@@ -1666,3 +1666,15 @@ input[type="number"] {
   border-radius: 3px; /* Bordi arrotondati per effetto etichetta */
   border: 1px solid #ced4da; /* Bordo sottile per definire meglio l'etichetta */
 }
+
+/* Stile per evidenziare l'obiettivo di classifica nella sezione Analisi */
+.target-rank-highlight {
+  background-color: #cfe2ff; /* Azzurrino (Bootstrap 'info-subtle') */
+  color: #052c65; /* Testo blu scuro per contrasto */
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block; /* Necessario per applicare padding e background correttamente */
+  margin-left: 5px; /* Piccolo spazio dall'etichetta a sinistra */
+  font-style: normal; /* Assicura che non sia in corsivo se ereditato */
+}

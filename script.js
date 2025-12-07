@@ -118,6 +118,7 @@ let fileSelezionatoPerRegateSuggerite = null;
 // Analisi
 const hcOccupati = document.getElementById("hc-occupati");
 const hcPuntiCategoria = document.getElementById("hc-punti-categoria");
+const hcMinPunti100 = document.getElementById("hc-min-punti-100"); // Nuovo elemento
 const hcPuntiAttuali = document.getElementById("hc-punti-attuali");
 const hcGareSlot = document.getElementById("hc-gare-slot");
 const hcProgressBar = document.getElementById("hc-progress-bar");
@@ -430,6 +431,7 @@ function initializeUI() {
     {
       hcOccupati,
       hcPuntiCategoria,
+      hcMinPunti100, // Passiamo il nuovo elemento
       hcPuntiAttuali,
       hcGareSlot,
       hcProgressBar,
@@ -475,6 +477,7 @@ function initializeUI() {
     },
     {
       getGareContributiveConDettagli,
+      calcolaClassificaPerPuntiTarget, // Passiamo la funzione
     }
   );
 
@@ -625,6 +628,7 @@ function simulaImpattoNettoEVariazioneClassifica(
       vsrCorrente: 0,
       vsrDopoSimulazione: 0,
       gareBeneficiarie: [],
+      garaBeneficiaria: null,
       laGaraSimulataContribuisceAncora: false,
     };
   }
@@ -633,10 +637,11 @@ function simulaImpattoNettoEVariazioneClassifica(
   const garaDaSimulare = gareSimulate.find((g) => g.id === garaCheCambia.id);
 
   if (!garaDaSimulare) {
-    return { impattoNettoEffettivo: 0 };
+    return { impattoNettoEffettivo: 0, garaBeneficiaria: null };
   }
 
   const vsrCorrente = getVsrScoreCalcolato(gareSalvate, oggi);
+  const contributingIdsPrima = getContributingGareIds(gareSalvate, oggi);
 
   const dataSimulata = new Date(garaDaSimulare.data);
   if (nuovoFattoreDecadimentoSimulato === 0.5) {
@@ -648,6 +653,7 @@ function simulaImpattoNettoEVariazioneClassifica(
 
   const vsrDopoSimulazione = getVsrScoreCalcolato(gareSimulate, oggi);
 
+  const contributingIdsDopo = getContributingGareIds(gareSimulate, oggi);
   const gareContributiveDopoSimulazione = selezionaGareContributive(
     gareSimulate,
     oggi
@@ -664,9 +670,20 @@ function simulaImpattoNettoEVariazioneClassifica(
     }
   }
 
+  const idBeneficiari = [...contributingIdsDopo].filter(
+    (id) => !contributingIdsPrima.has(id)
+  );
+  let garaBeneficiaria = null;
+  if (idBeneficiari.length > 0) {
+    // Troviamo l'oggetto completo della gara beneficiaria dalle gare simulate
+    garaBeneficiaria =
+      gareSimulate.find((g) => g.id === idBeneficiari[0]) || null;
+  }
+
   return {
     impattoNettoEffettivo: vsrDopoSimulazione - vsrCorrente,
     laGaraSimulataContribuisceAncora: laGaraSimulataContribuisceAncora,
+    garaBeneficiaria: garaBeneficiaria,
   };
 }
 
@@ -785,22 +802,43 @@ function popolaERendiVisibileRiepilogoEventi() {
   dataLimite.setDate(oggi.getDate() - DURATA_RIEPILOGO_GIORNI);
 
   // 1. Trova eventi di scadenza/dimezzamento
-  const eventiScadenza = getGareConScadenzeImminenti();
-  eventiScadenza.forEach((evento) => {
-    const dataEvento = new Date(evento.dataEvento);
-    dataEvento.setHours(0, 0, 0, 0);
+  const gareSalvate = JSON.parse(localStorage.getItem("gareSalvate")) || [];
+  gareSalvate.forEach((gara) => {
+    const dataGaraDate = new Date(gara.data);
+    dataGaraDate.setHours(0, 0, 0, 0);
 
-    if (dataEvento >= dataLimite && dataEvento <= oggi) {
+    const dataDimezzamento = new Date(dataGaraDate);
+    dataDimezzamento.setFullYear(dataDimezzamento.getFullYear() + 1);
+
+    const dataScadenza = new Date(dataGaraDate);
+    dataScadenza.setFullYear(dataScadenza.getFullYear() + 2);
+
+    // Controlla se il dimezzamento è avvenuto negli ultimi 30 giorni
+    if (dataDimezzamento >= dataLimite && dataDimezzamento <= oggi) {
+      const simulazione = simulaImpattoNettoEVariazioneClassifica(gara, 0.5);
       eventiRecenti.push({
-        ...evento,
-        dataEventoEffettiva: dataEvento,
-        impattoNettoStimato: evento.simulazioneRisultato.impattoNettoEffettivo,
+        ...gara,
+        tipoEvento: EVENT_TYPES.HALVING,
+        dataEventoEffettiva: dataDimezzamento,
+        impattoNettoStimato: simulazione.impattoNettoEffettivo,
+        garaBeneficiaria: simulazione.garaBeneficiaria,
+      });
+    }
+
+    // Controlla se la scadenza è avvenuta negli ultimi 30 giorni
+    if (dataScadenza >= dataLimite && dataScadenza <= oggi) {
+      const simulazione = simulaImpattoNettoEVariazioneClassifica(gara, 0);
+      eventiRecenti.push({
+        ...gara,
+        tipoEvento: EVENT_TYPES.EXPIRY,
+        dataEventoEffettiva: dataScadenza,
+        impattoNettoStimato: simulazione.impattoNettoEffettivo,
+        garaBeneficiaria: simulazione.garaBeneficiaria,
       });
     }
   });
 
   // 2. Trova gare aggiunte di recente
-  const gareSalvate = JSON.parse(localStorage.getItem("gareSalvate")) || [];
   gareSalvate.forEach((gara) => {
     const dataAggiunta = new Date(gara.id);
     dataAggiunta.setHours(0, 0, 0, 0);
@@ -814,7 +852,9 @@ function popolaERendiVisibileRiepilogoEventi() {
     }
   });
 
-  eventiRecenti.sort((a, b) => new Date(b.dataEvento) - new Date(a.dataEvento));
+  eventiRecenti.sort(
+    (a, b) => new Date(b.dataEventoEffettiva) - new Date(a.dataEventoEffettiva)
+  );
 
   let htmlContent = `<h4>${getTranslation("SUMMARY_RECENT_EVENTS_TITLE")}</h4>`;
 
@@ -836,6 +876,8 @@ function popolaERendiVisibileRiepilogoEventi() {
         eventDate: displayDate,
         netImpact: formatNumber(evento.impattoNettoStimato, 0),
       };
+      let testoRiga = "";
+
       let chiaveTraduzione = "";
       if (evento.tipoEvento === EVENT_TYPES.HALVING) {
         chiaveTraduzione = "SUMMARY_EVENT_ITEM_HALVED";
@@ -846,9 +888,19 @@ function popolaERendiVisibileRiepilogoEventi() {
       }
 
       if (chiaveTraduzione) {
-        let testoRiga = getTranslation(chiaveTraduzione, params);
+        // Assicura che ci sia una chiave valida
+        // Controlla se c'è una gara beneficiaria e l'impatto è positivo
+        if (evento.garaBeneficiaria && evento.impattoNettoStimato >= 0) {
+          testoRiga = getTranslation("SUMMARY_EVENT_ITEM_REBALANCE_POSITIVE", {
+            ...params,
+            beneficiaryRaceName: evento.garaBeneficiaria.nome,
+          });
+        } else {
+          // Messaggio standard per tutti gli altri casi
+          testoRiga = getTranslation(chiaveTraduzione, params);
+        }
 
-        // Aggiungi l'impatto solo per eventi di scadenza/dimezzamento
+        // Aggiungi l'impatto netto alla fine della riga per eventi di scadenza/dimezzamento
         if (
           evento.tipoEvento === EVENT_TYPES.HALVING ||
           evento.tipoEvento === EVENT_TYPES.EXPIRY

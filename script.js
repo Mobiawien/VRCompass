@@ -275,8 +275,12 @@ function calcolaClassificaPerPuntiTarget(
 ) {
   if (!livelloValoreNumerico || puntiVsrTarget <= 0) return null;
   if (puntiVsrTarget >= livelloValoreNumerico) return 1;
-  const rapporto = livelloValoreNumerico / puntiVsrTarget;
+  // Per "superare" il punteggio target, dobbiamo calcolare la classifica
+  // necessaria per ottenere un punteggio che, una volta arrotondato, sia maggiore.
+  // Usiamo +0.5 per trovare il limite inferiore dell'intervallo di arrotondamento.
+  const rapporto = livelloValoreNumerico / (puntiVsrTarget + 0.5);
   const classificaCalcolata = Math.pow(rapporto, 8);
+  // Usiamo Math.floor perché una classifica migliore è un numero più basso.
   return Math.max(1, Math.floor(classificaCalcolata));
 }
 

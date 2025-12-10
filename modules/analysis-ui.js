@@ -174,7 +174,10 @@ function popolaCategoriaSlot(
     const minPunti100Val =
       gare100.length > 0 ? gare100[gare100.length - 1].puntiEffettivi : 0;
 
-    if (minPunti100Val > 0 && livelloValoreNumerico) {
+    // Mostra l'obiettivo solo se la fascia 100% è piena.
+    const isFascia100Piena = gare100.length === maxSlotPerFascia;
+
+    if (isFascia100Piena && minPunti100Val > 0 && livelloValoreNumerico) {
       const targetRank = callbacks.calcolaClassificaPerPuntiTarget(
         livelloValoreNumerico,
         minPunti100Val
@@ -189,7 +192,7 @@ function popolaCategoriaSlot(
       )} ${formatNumber(minPunti100Val, 0)} pts`;
     } else {
       // Se non c'è un valore, pulisci l'elemento e rimuovi la classe
-      elMinPunti100.textContent = getTranslation("TEXT_NA_DETAILED");
+      elMinPunti100.textContent = getTranslation("ANALYSIS_FILL_SLOT_TARGET");
       elMinPunti100.title = "";
       elMinPunti100.classList.remove("target-rank-highlight");
     }

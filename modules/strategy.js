@@ -54,12 +54,9 @@ function aggiornaMonitoraggioScadenze() {
         );
 
         const impattoDirettoGaraVal = g.isContributing
-          ? Math.round(
-              g.puntiVSR *
-                (g.tipoEvento === dom.EVENT_TYPES.HALVING
-                  ? 0.5
-                  : g.fattoreDecadimento || 0.5)
-            )
+          ? g.tipoEvento === dom.EVENT_TYPES.HALVING
+            ? Math.floor(g.puntiRaw) - Math.floor(g.puntiRaw * 0.5)
+            : Math.floor(g.puntiRaw)
           : 0;
 
         let params = {
@@ -576,7 +573,7 @@ export function aggiornaGraficoTortaStatoStrategia() {
     categorieOrdineTooltip.forEach((tipoGara) => {
       const gareCat = gareContributive[tipoGara] || [];
       puntiAttualiPerCategoriaGrafico[tipoGara] = gareCat.reduce(
-        (sum, g) => sum + g.puntiEffettivi,
+        (sum, g) => sum + (g.puntiRaw || g.puntiEffettivi),
         0
       );
     });
@@ -797,10 +794,9 @@ export function aggiornaGraficoTortaStatoStrategia() {
                       punti50 = 0;
                     (gareContributive[tipoGaraPerTooltip] || []).forEach(
                       (g) => {
-                        if (g.fattoreDecadimento === 1.0)
-                          punti100 += g.puntiEffettivi;
-                        else if (g.fattoreDecadimento === 0.5)
-                          punti50 += g.puntiEffettivi;
+                        const punti = g.puntiRaw || g.puntiEffettivi;
+                        if (g.fattoreDecadimento === 1.0) punti100 += punti;
+                        else if (g.fattoreDecadimento === 0.5) punti50 += punti;
                       }
                     );
                     if (

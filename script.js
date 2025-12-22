@@ -621,7 +621,8 @@ function handleDataChange() {
 
 function simulaImpattoNettoEVariazioneClassifica(
   garaCheCambia,
-  nuovoFattoreDecadimentoSimulato
+  nuovoFattoreDecadimentoSimulato,
+  anniDaAggiungere = 0 // Nuovo parametro per viaggiare nel tempo (negativo = futuro, positivo = passato)
 ) {
   const gareSalvate = JSON.parse(localStorage.getItem("gareSalvate")) || [];
   const oggi = new Date();
@@ -648,10 +649,16 @@ function simulaImpattoNettoEVariazioneClassifica(
   const contributingIdsPrima = getContributingGareIds(gareSalvate, oggi);
 
   const dataSimulata = new Date(garaDaSimulare.data);
-  if (nuovoFattoreDecadimentoSimulato === 0.5) {
-    dataSimulata.setFullYear(dataSimulata.getFullYear() - 1);
-  } else if (nuovoFattoreDecadimentoSimulato === 0) {
-    dataSimulata.setFullYear(dataSimulata.getFullYear() - 2);
+
+  if (anniDaAggiungere !== 0) {
+    dataSimulata.setFullYear(dataSimulata.getFullYear() + anniDaAggiungere);
+  } else {
+    // Logica legacy per Strategy (simulazione futuro)
+    if (nuovoFattoreDecadimentoSimulato === 0.5) {
+      dataSimulata.setFullYear(dataSimulata.getFullYear() - 1);
+    } else if (nuovoFattoreDecadimentoSimulato === 0) {
+      dataSimulata.setFullYear(dataSimulata.getFullYear() - 2);
+    }
   }
   garaDaSimulare.data = dataSimulata.toISOString().split("T")[0];
 
@@ -703,6 +710,27 @@ function getGareConScadenzeImminenti(serializzabile = false) {
     const dataGaraDate = new Date(gara.data);
     dataGaraDate.setHours(0, 0, 0, 0);
 
+    // Calcolo punti precisi per coerenza con strategy.js
+    const infoLivello = livelliVsrStoricoMap[gara.livello];
+    let puntiRaw = 0;
+    let puntiEffettivi = 0;
+    if (
+      infoLivello &&
+      infoLivello.valoreNumerico &&
+      gara.classificaFinale > 0
+    ) {
+      const puntiNonArrotondati =
+        infoLivello.valoreNumerico / Math.pow(gara.classificaFinale, 0.125);
+      const puntiPieniArrotondati = Math.round(puntiNonArrotondati);
+      const mesiTrascorsi = calcolaMesiTrascorsi(gara.data, oggiLocale);
+      let fattoreDecadimento = 0;
+      if (mesiTrascorsi < 12) fattoreDecadimento = 1.0;
+      else if (mesiTrascorsi < 24) fattoreDecadimento = 0.5;
+
+      puntiRaw = puntiPieniArrotondati * fattoreDecadimento;
+      puntiEffettivi = Math.floor(puntiRaw);
+    }
+
     const dataDimezzamento = new Date(dataGaraDate);
     dataDimezzamento.setFullYear(dataDimezzamento.getFullYear() + 1);
     const dataScadenza = new Date(dataGaraDate);
@@ -734,6 +762,8 @@ function getGareConScadenzeImminenti(serializzabile = false) {
       );
       scadenze.push({
         ...gara,
+        puntiRaw,
+        puntiEffettivi,
         tipoEvento,
         dataEvento: serializzabile
           ? dataEventoObj.toISOString()
@@ -819,7 +849,10 @@ function popolaERendiVisibileRiepilogoEventi() {
 
     // Controlla se il dimezzamento è avvenuto negli ultimi 30 giorni
     if (dataDimezzamento >= dataLimite && dataDimezzamento <= oggi) {
-      const simulazione = simulaImpattoNettoEVariazioneClassifica(gara, 0.5);
+      // Simuliamo lo stato PRECEDENTE (100%) per vedere quanto abbiamo perso.
+      // Passiamo +1 anno per far tornare la gara "giovane" (< 12 mesi).
+      // L'impatto sarà: VSR_Attuale (50%) - VSR_Simulato (100%) = Valore Negativo corretto.
+      const simulazione = simulaImpattoNettoEVariazioneClassifica(gara, 1.0, 1);
       eventiRecenti.push({
         ...gara,
         tipoEvento: EVENT_TYPES.HALVING,
@@ -831,7 +864,9 @@ function popolaERendiVisibileRiepilogoEventi() {
 
     // Controlla se la scadenza è avvenuta negli ultimi 30 giorni
     if (dataScadenza >= dataLimite && dataScadenza <= oggi) {
-      const simulazione = simulaImpattoNettoEVariazioneClassifica(gara, 0);
+      // Simuliamo lo stato PRECEDENTE (50%) per vedere quanto abbiamo perso.
+      // Passiamo +1 anno per far tornare la gara "meno vecchia" (12-24 mesi).
+      const simulazione = simulaImpattoNettoEVariazioneClassifica(gara, 0.5, 1);
       eventiRecenti.push({
         ...gara,
         tipoEvento: EVENT_TYPES.EXPIRY,

@@ -217,8 +217,6 @@
   "STRATEGY_SUGGESTION_HC_WEAK_SLOT_BASE": "<strong>Critical Off-Category Action:</strong> Your current result of {{points}} points is below the optimal threshold.",
   "STRATEGY_SUGGESTION_HC_OK_SLOT_BASE": "✅ <strong>Optimal Off-Category Status:</strong> Slot covered with {{points}} points.",
   "STRATEGY_SUGGESTION_HC_IMPROVEMENT_ACTION": "Aim for a better result in the next available HC race.",
-  "STRATEGY_SUGGESTION_HC_PRE_WARNING": "<strong class=\"text-danger\">Important: this race is undergoing {{eventType}} on {{eventDate}}!</strong>",
-  "STRATEGY_SUGGESTION_HC_URGENT_EXPIRY_WARNING": "<strong class=\"text-danger\">❗URGENT: {{remainingDays}} {{daysText}} left until this race's {{eventType}} ({{eventDate}})! This slot will be reset.</strong>",
 
   "STRATEGY_SUGGESTION_LIV1_ICON": "🎯",
   "STRATEGY_SUGGESTION_LIV1_EMPTY_SLOT": "<strong>{{categoryName}} Action:</strong> To optimize your 100% band, you should add {{numRacesToAdd}} {{raceWord}}. {{examplePointsText}} {{noteHalvingText}} <em>This category offers a good balance of points/accessibility. Aim for solid results.</em>",
@@ -226,9 +224,6 @@
   "STRATEGY_SUGGESTION_LIV1_WEAK_SLOT_BASE": "<strong>Level 1 Action:</strong> Improve your lowest-performing result ({{points}} points).",
   "STRATEGY_SUGGESTION_LIV1_OK_SLOT_BASE": "✅ <strong>Optimal Level 1 Status:</strong> Slot covered with solid results (minimum {{points}} points).",
   "STRATEGY_SUGGESTION_LIV1_IMPROVEMENT_ACTION": "Aim for a ranking of {{targetRank}}th or better to replace the lowest-performing race.",
-  "STRATEGY_SUGGESTION_LIV1_PRE_WARNING": "<strong class=\"text-danger\">Important: this race is undergoing {{eventType}} on {{eventDate}}! It will lose {{impactPoints}} points.</strong>",
-  "STRATEGY_SUGGESTION_LIV1_URGENT_HALVING_WARNING": "<strong class=\"text-danger\">❗URGENT: {{remainingDays}} {{daysText}} left until this race's {{eventType}} ({{eventDate}})! You will lose {{impactPoints}} points.</strong>",
-  "STRATEGY_SUGGESTION_LIV1_URGENT_EXPIRY_WARNING": "<strong class=\"text-danger\">❗URGENT: {{remainingDays}} {{daysText}} left until this race's {{eventType}} ({{eventDate}})! This slot will be reset.</strong>",
 
   "STRATEGY_SUGGESTION_LIV2_ICON": "🎯",
   "STRATEGY_SUGGESTION_LIV2_EMPTY_SLOT": "<strong>{{categoryName}} Action:</strong> To optimize your 100% band, you should add {{numRacesToAdd}} {{raceWord}}. {{examplePointsText}} {{noteHalvingText}} <em>Useful for completing the ranking and adding \"volume\". Don't neglect it and aim for solid results.</em>",
@@ -236,9 +231,6 @@
   "STRATEGY_SUGGESTION_LIV2_WEAK_SLOT_BASE": "<strong>Level 2 Action:</strong> Improve your lowest-performing result ({{points}} points).",
   "STRATEGY_SUGGESTION_LIV2_OK_SLOT_BASE": "✅ <strong>Optimal Level 2 Status:</strong> Slot covered with solid results (minimum {{points}} points).",
   "STRATEGY_SUGGESTION_LIV2_IMPROVEMENT_ACTION": "Aim for a ranking of {{targetRank}}th or better to replace the lowest-performing race.",
-  "STRATEGY_SUGGESTION_LIV2_PRE_WARNING": "<strong class=\"text-danger\">Important: this race is undergoing {{eventType}} on {{eventDate}}! It will lose {{impactPoints}} points.</strong>",
-  "STRATEGY_SUGGESTION_LIV2_URGENT_HALVING_WARNING": "<strong class=\"text-danger\">❗URGENT: {{remainingDays}} {{daysText}} left until this race's {{eventType}} ({{eventDate}})! You will lose {{impactPoints}} points.</strong>",
-  "STRATEGY_SUGGESTION_LIV2_URGENT_EXPIRY_WARNING": "<strong class=\"text-danger\">❗URGENT: {{remainingDays}} {{daysText}} left until this race's {{eventType}} ({{eventDate}})! This slot will be reset.</strong>",
 
   "STRATEGY_SUGGESTION_LIV3_ICON": "🎯",
   "STRATEGY_SUGGESTION_LIV3_EMPTY_SLOT": "<strong>{{categoryName}} Action:</strong> To optimize your 100% band, you should add {{numRacesToAdd}} {{raceWord}}. {{examplePointsText}} {{noteHalvingText}} <em>The main goal is to have {{totalSlots}} contributing races. Even modest scores are useful.</em>",
@@ -246,14 +238,9 @@
   "STRATEGY_SUGGESTION_LIV3_WEAK_SLOT_BASE": "<strong>Level 3 Action:</strong> Improve your lowest-performing result ({{points}} points).",
   "STRATEGY_SUGGESTION_LIV3_OK_SLOT_BASE": "✅ <strong>Optimal Level 3 Status:</strong> Slot covered with solid results (minimum {{points}} points).",
   "STRATEGY_SUGGESTION_LIV3_IMPROVEMENT_ACTION": "Aim for a ranking of {{targetRank}}th or better to replace the lowest-performing race.",
-  "STRATEGY_SUGGESTION_LIV3_PRE_WARNING": "<strong class=\"text-danger\">Important: this race is undergoing {{eventType}} on {{eventDate}}! It will lose {{impactPoints}} points.</strong>",
-  "STRATEGY_SUGGESTION_LIV3_URGENT_HALVING_WARNING": "<strong class=\"text-danger\">❗URGENT: {{remainingDays}} {{daysText}} left until this race's {{eventType}} ({{eventDate}})! You will lose {{impactPoints}} points.</strong>",
-  "STRATEGY_SUGGESTION_LIV3_URGENT_EXPIRY_WARNING": "<strong class=\"text-danger\">❗URGENT: {{remainingDays}} {{daysText}} left until this race's {{eventType}} ({{eventDate}})! This slot will be reset.</strong>",
 
   "STRATEGY_SUGGESTION_IMPORTANT_DEADLINES_BASE": "Remember to monitor your races approaching expiry/halving. Replacing them promptly is crucial, especially if they contribute significantly to your VSR.",
   "STRATEGY_SUGGESTION_IMPORTANT_DEADLINES_PRIORITY": "<strong>Deadline Priority:</strong> You have important races (HC/Lvl.1) undergoing {{eventType}} {{remainingTimeText}}. Replacing them should be a high priority to avoid losing valuable points! Check \"Deadline Monitoring\" for details.",
-  "STRATEGY_SUGGESTION_DAYS_PLURAL_SUFFIX_O": "",
-  "STRATEGY_SUGGESTION_DAYS_PLURAL_SUFFIX_I": "",
   "STRATEGY_SUGGESTION_DAY_SINGLE": "day",
   "STRATEGY_SUGGESTION_DAYS_PLURAL": "days",
   "STRATEGY_SUGGESTION_RACE_SINGLE": "new race",

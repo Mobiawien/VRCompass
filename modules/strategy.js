@@ -403,78 +403,11 @@ function aggiornaValutazioneStrategicaSlot() {
         }
       }
 
-      if (gareCat.length > 0) {
-        const garaMenoPerformante = gareCat[gareCat.length - 1];
-        if (
-          garaMenoPerformante &&
-          idsGareConScadenze.has(garaMenoPerformante.id)
-        ) {
-          const garaInScadenza = gareConScadenze.find(
-            (g) => g.id === garaMenoPerformante.id
-          );
-          if (garaInScadenza) {
-            const { tipoEvento, dataEvento, isUrgente } = garaInScadenza;
-            const dataEventoDate = new Date(dataEvento);
-            const giorniRimanentiEffettivi = calcolaGiorniTraDate(
-              new Date(),
-              dataEventoDate
-            );
-
-            let warningParams = {
-              eventType: tipoEvento.toLowerCase(),
-              eventDate: new Date(dataEvento).toLocaleDateString(
-                document.documentElement.lang || "it"
-              ),
-              impactPoints: formatNumber(
-                garaInScadenza.simulazioneRisultato.impattoNettoEffettivo,
-                0
-              ),
-              remainingDays: giorniRimanentiEffettivi,
-              daysText: "",
-            };
-            warningParams.daysText =
-              Math.abs(warningParams.remainingDays) === 1
-                ? getTranslation("STRATEGY_SUGGESTION_DAY_SINGLE")
-                : getTranslation("STRATEGY_SUGGESTION_DAYS_PLURAL");
-
-            let verboMancareItWarning = "";
-            const currentLanguage = document.documentElement.lang || "it";
-            if (currentLanguage === "it") {
-              verboMancareItWarning =
-                Math.abs(warningParams.remainingDays) === 1
-                  ? "Manca"
-                  : "Mancano";
-            }
-
-            let warningKey = "";
-            const translatedEventTypeForWarning =
-              tipoEvento === dom.EVENT_TYPES.HALVING
-                ? getTranslation("EVENT_TYPE_HALVING")
-                : getTranslation("EVENT_TYPE_EXPIRY");
-            if (isUrgente)
-              warningKey =
-                tipoEvento === dom.EVENT_TYPES.HALVING
-                  ? `STRATEGY_SUGGESTION_${tipoGara}_URGENT_HALVING_WARNING`
-                  : `STRATEGY_SUGGESTION_${tipoGara}_URGENT_EXPIRY_WARNING`;
-            else warningKey = `STRATEGY_SUGGESTION_${tipoGara}_PRE_WARNING`;
-
-            let finalWarningParams = {
-              ...warningParams,
-              eventType: translatedEventTypeForWarning.toLowerCase(),
-            };
-            if (currentLanguage === "it") {
-              finalWarningParams.verboMancareIt = verboMancareItWarning;
-            }
-            if (warningKey)
-              suggerimentoTestoCompleto += ` ${getTranslation(
-                warningKey,
-                finalWarningParams
-              )}`;
-          }
-        }
-      }
       if (suggerimentoTestoCompleto)
-        suggerimentiStrategici.push(suggerimentoTestoCompleto);
+        suggerimentiStrategici.push({
+          html: suggerimentoTestoCompleto,
+          type: "normal",
+        });
     });
 
     if (gareConScadenze.length > 0) {
@@ -521,16 +454,24 @@ function aggiornaValutazioneStrategicaSlot() {
           }
         );
       }
-      suggerimentiStrategici.unshift(
-        `<span class="warning-triangle calendar-icon">🗓️</span> ${testoScadenzeImportanti}`
-      );
+      suggerimentiStrategici.unshift({
+        html: `<span class="warning-triangle calendar-icon">🗓️</span> ${testoScadenzeImportanti}`,
+        type: "priority",
+      });
     }
 
     dom.listaSuggerimentiStrategiciSlot.innerHTML = "";
     if (suggerimentiStrategici.length > 0) {
-      suggerimentiStrategici.forEach((sugg) => {
+      suggerimentiStrategici.forEach((item) => {
         const li = document.createElement("li");
-        li.innerHTML = sugg;
+        li.innerHTML = item.html;
+        if (item.type === "priority") {
+          li.style.backgroundColor = "rgba(255, 193, 7, 0.15)"; // Sfondo giallo chiaro
+          li.style.borderLeft = "4px solid #ffc107"; // Bordo sinistro giallo scuro
+          li.style.padding = "10px";
+          li.style.marginBottom = "8px";
+          li.style.borderRadius = "4px";
+        }
         dom.listaSuggerimentiStrategiciSlot.appendChild(li);
       });
     } else

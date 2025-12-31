@@ -275,9 +275,12 @@
   "SUMMARY_EVENT_ITEM_EXPIRED": "<strong>Ablauf:</strong> Das Rennen '{{raceName}}' ist am {{eventDate}} abgelaufen.",
   "SUMMARY_EVENT_ITEM_ADDED": "<strong>Hinzugefügt:</strong> Das Rennen '{{raceName}}' wurde Ihrem Verlauf am {{eventDate}} hinzugefügt.",
   "SUMMARY_EVENT_ITEM_REBALANCE_POSITIVE": "<strong>Neugewichtung:</strong> Das Rennen '{{raceName}}' ist abgelaufen/wurde halbiert am {{eventDate}}, aber '{{beneficiaryRaceName}}' ist wieder in das Ranking eingetreten.",
+  "SUMMARY_EVENT_ITEM_HALVED_IMPROVED": "<strong>Jahreswechsel:</strong> Das Rennen '{{raceName}}' ist am {{eventDate}} auf 50% gewechselt und in das Ranking der zweiten Stufe eingetreten.",
+  "SUMMARY_EVENT_ITEM_REBALANCE_HALVED": "<strong>Neugewichtung:</strong> Das Rennen '{{raceName}}' wurde am {{eventDate}} halbiert, aber '{{beneficiaryRaceName}}' ist wieder in das Ranking eingetreten.",
+  "SUMMARY_EVENT_ITEM_REBALANCE_EXPIRED": "<strong>Neugewichtung:</strong> Das Rennen '{{raceName}}' ist am {{eventDate}} abgelaufen, aber '{{beneficiaryRaceName}}' ist wieder in das Ranking eingetreten.",
   "SUMMARY_EVENT_IMPACT_TEXT": "Netto-VSR-Einfluss: {{netImpact}} Pkt.",
   "SUMMARY_EVENT_IMPACT_TEXT_INCREASE": "Netto-VSR-Einfluss: <span style='color: green;'>+{{netImpact}}</span> Pkt.",
-  "SUMMARY_EVENT_IMPACT_TEXT_DECREASE": "Netto-VSR-Einfluss: <span style='color: red;'>{{netImpact}}</span> Pkt.",
+  "SUMMARY_EVENT_IMPACT_TEXT_DECREASE": "Netto-VSR-Einfluss: <span style='color: red;'>-{{netImpact}}</span> Pkt.",
   "SUMMARY_LOG_NOTE": "<strong>Hinweis:</strong> Diese Zusammenfassung zeigt die Ereignisse der letzten {{days}} Tage.",
   "STRATEGY_AUTHOR_TEXT": "Strategie von Velatopiano-La Casa di Hilde",
 

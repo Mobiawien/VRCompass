@@ -26,9 +26,8 @@ import {
   aggiornaGraficoTortaStatoStrategia,
 } from "./modules/strategy.js";
 
-// --- Configurazione Data Simulata ---
-const DATA_SIMULATA_ISO = "2025-12-30T23:34:00";
-const getOggi = () => new Date(DATA_SIMULATA_ISO);
+// --- Configurazione Data ---
+const getOggi = () => new Date();
 
 // --- Elementi DOM ---
 // Navigazione
@@ -879,7 +878,7 @@ function popolaERendiVisibileRiepilogoEventi() {
       const contributingIdsCorrente = getContributingGareIds(gareSalvate, oggi);
       const contributingIdsPassato = getContributingGareIds(gareSimulate, oggi);
       const idBeneficiari = [...contributingIdsCorrente].filter(
-        (id) => !contributingIdsPassato.has(id)
+        (id) => !contributingIdsPassato.has(id) && id !== gara.id
       );
       eventiRecenti.push({
         ...gara,
@@ -909,7 +908,7 @@ function popolaERendiVisibileRiepilogoEventi() {
       const contributingIdsCorrente = getContributingGareIds(gareSalvate, oggi);
       const contributingIdsPassato = getContributingGareIds(gareSimulate, oggi);
       const idBeneficiari = [...contributingIdsCorrente].filter(
-        (id) => !contributingIdsPassato.has(id)
+        (id) => !contributingIdsPassato.has(id) && id !== gara.id
       );
       eventiRecenti.push({
         ...gara,
@@ -973,11 +972,36 @@ function popolaERendiVisibileRiepilogoEventi() {
         chiaveTraduzione = "SUMMARY_EVENT_ITEM_ADDED";
       }
 
+      // Gestione specifica per Dimezzamenti con impatto positivo (es. entrano in classifica al 50%)
+      // Copre sia il caso di auto-miglioramento che il caso di sostituzione con gara omonima
+      const isPositiveHalving =
+        evento.tipoEvento === EVENT_TYPES.HALVING &&
+        evento.impattoNettoStimato > 0;
+      const isSameNameRebalance =
+        evento.garaBeneficiaria && evento.garaBeneficiaria.nome === evento.nome;
+
+      if (
+        isPositiveHalving &&
+        (!evento.garaBeneficiaria || isSameNameRebalance)
+      ) {
+        chiaveTraduzione = "SUMMARY_EVENT_ITEM_HALVED_IMPROVED";
+      }
+
       if (chiaveTraduzione) {
         // Assicura che ci sia una chiave valida
-        // Controlla se c'è una gara beneficiaria (mostra anche se l'impatto è negativo)
-        if (evento.garaBeneficiaria) {
-          testoRiga = getTranslation("SUMMARY_EVENT_ITEM_REBALANCE_POSITIVE", {
+        // Controlla se c'è una gara beneficiaria (diversa dalla gara stessa/omonima)
+        if (
+          evento.garaBeneficiaria &&
+          !isSameNameRebalance &&
+          chiaveTraduzione !== "SUMMARY_EVENT_ITEM_HALVED_IMPROVED"
+        ) {
+          let chiaveRibilanciamento = "SUMMARY_EVENT_ITEM_REBALANCE_POSITIVE";
+          if (evento.tipoEvento === EVENT_TYPES.HALVING) {
+            chiaveRibilanciamento = "SUMMARY_EVENT_ITEM_REBALANCE_HALVED";
+          } else if (evento.tipoEvento === EVENT_TYPES.EXPIRY) {
+            chiaveRibilanciamento = "SUMMARY_EVENT_ITEM_REBALANCE_EXPIRED";
+          }
+          testoRiga = getTranslation(chiaveRibilanciamento, {
             ...params,
             beneficiaryRaceName: evento.garaBeneficiaria.nome,
           });

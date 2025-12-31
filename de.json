@@ -6,7 +6,7 @@
   "NAV_ANALYSIS": "Analyse",
   "NAV_STRATEGY": "Strategie",
   "BTN_SUPPORT_TEXT": "Unterstützen",
-  "BTN_SUPPORT_TITLE": "Dem Kapitän einen Kaffee spendieren",
+  "BTN_SUPPORT_TITLE": "Hilft Ihnen VRCompass, Budget und Zeit zu sparen? Unterstützen Sie das Projekt!",
 
   "ALERT_SELECT_CATEGORY_FIRST": "Bitte wählen Sie zuerst eine Wirtschaftskategorie!",
   "CONFIRM_DELETE_RACE": "Sind Sie sicher, dass Sie dieses Rennen löschen möchten?",
@@ -215,7 +215,7 @@
   "STRATEGY_PIE_CHART_LABEL_IMPROVABLE": "Verbesserungsfähig",
 
   "STRATEGY_SUGGESTION_HC_ICON": "🎯",
-  "STRATEGY_SUGGESTION_HC_EMPTY_SLOT": "<strong>Chance Außer Kategorie:</strong> Der beitragende Slot ist leer. HC-Rennen bieten viele Punkte. Die Teilnahme an einem solchen Rennen ist entscheidend für ein wettbewerbsfähiges VSR. <em>Identifizieren Sie das nächste HC-Rennen im Kalender und planen Sie Ihre Teilnahme. Optimieren Sie in der Zwischenzeit die Slots von Level 1, 2 und 3 vollständig.</em>",
+  "STRATEGY_SUGGESTION_HC_EMPTY_SLOT": "<strong>Chance Außer Kategorie:</strong> Der beitragende Slot ist leer. HC-Rennen bieten viele Punkte. Die Teilnahme an einem solchen Rennen ist entscheidend für ein wettbewerbsfähiges VSR. <em>Identifizieren Sie das nächste HC-Rennen im Kalender und planen Sie Ihre Teilnahme. Optimieren Sie in der Zwischenzeit die Slots von Level 1, 2 und 3.</em>",
   "STRATEGY_SUGGESTION_HC_WEAK_SLOT_BASE": "<strong>Kritische Aktion Außer Kategorie:</strong> Ihr aktuelles Ergebnis von {{points}} Punkten liegt unter dem optimalen Schwellenwert.",
   "STRATEGY_SUGGESTION_HC_OK_SLOT_BASE": "✅ <strong>Status Außer Kategorie Optimal:</strong> Slot mit {{points}} Punkten abgedeckt.",
   "STRATEGY_SUGGESTION_HC_IMPROVEMENT_ACTION": "Zielen Sie auf ein besseres Ergebnis im nächsten verfügbaren HC-Rennen ab.",
@@ -274,7 +274,7 @@
   "SUMMARY_EVENT_ITEM_HALVED": "<strong>Halbierung:</strong> Das Rennen '{{raceName}}' wurde am {{eventDate}} halbiert.",
   "SUMMARY_EVENT_ITEM_EXPIRED": "<strong>Ablauf:</strong> Das Rennen '{{raceName}}' ist am {{eventDate}} abgelaufen.",
   "SUMMARY_EVENT_ITEM_ADDED": "<strong>Hinzugefügt:</strong> Das Rennen '{{raceName}}' wurde Ihrem Verlauf am {{eventDate}} hinzugefügt.",
-  "SUMMARY_EVENT_ITEM_REBALANCE_POSITIVE": "<strong>Neugewichtung:</strong> Das Rennen '{{raceName}}' ist abgelaufen/wurde halbiert, aber '{{beneficiaryRaceName}}' ist wieder in das Ranking eingetreten.",
+  "SUMMARY_EVENT_ITEM_REBALANCE_POSITIVE": "<strong>Neugewichtung:</strong> Das Rennen '{{raceName}}' ist abgelaufen/wurde halbiert am {{eventDate}}, aber '{{beneficiaryRaceName}}' ist wieder in das Ranking eingetreten.",
   "SUMMARY_EVENT_IMPACT_TEXT": "Netto-VSR-Einfluss: {{netImpact}} Pkt.",
   "SUMMARY_EVENT_IMPACT_TEXT_INCREASE": "Netto-VSR-Einfluss: <span style='color: green;'>+{{netImpact}}</span> Pkt.",
   "SUMMARY_EVENT_IMPACT_TEXT_DECREASE": "Netto-VSR-Einfluss: <span style='color: red;'>{{netImpact}}</span> Pkt.",
@@ -304,7 +304,7 @@
   "DASHBOARD_WELCOME_P3": "Erkunden Sie die Abschnitte über das Navigationsmenü, um auf alle Funktionen zuzugreifen.",
 
   "DASHBOARD_USER_DATA_TITLE": "Benutzerdatenverwaltung",
-  "DASHBOARD_USER_DATA_P1": "Ihre Daten (Bootsname, VSR-Score und Rennverlauf) werden ausschließlich in Ihrem Browser (via <code>localStorage</code>) gespeichert.",
+  "DASHBOARD_USER_DATA_P1": "Ihre Daten (Bootsname, VSR-Score und Rennverlauf) werden ausschließlich in Ihrem Browser (via <code>localStorage</code>).",
   "DASHBOARD_USER_DATA_P2": "Zur Sicherheit oder um Daten auf ein anderes Gerät/einen anderen Browser zu übertragen, können Sie sie in eine Datei exportieren und anschließend importieren.",
   "DASHBOARD_USER_DATA_HOW_TO_TITLE": "<strong>Verwendung:</strong>",
   "DASHBOARD_USER_DATA_HOW_TO_LI1": "- <strong>Daten exportieren:</strong> Klicken Sie auf die Schaltfläche \"Daten exportieren\" (in der Karte \"Aktueller Status\"), um eine Datei (<code>VRCompass_backup.json</code>) herunterzuladen, die alle Ihre aktuellen Daten enthält. Bewahren Sie diese Datei an einem sicheren Ort auf.",
@@ -314,7 +314,7 @@
 
   "DASHBOARD_INFO_DISCLAIMER_TITLE": "Information und Haftungsausschluss",
   "DASHBOARD_INFO_DISCLAIMER_DATA_MANAGEMENT_P1": "<strong>Datenverwaltung:</strong> Diese Anwendung speichert die eingegebenen Daten (Bootsname, VSR-Score, Renndetails) nur im <code>localStorage</code> Ihres Browsers. Es werden keine Daten an externe Server übertragen oder dort gespeichert. Der Benutzer hat die volle Kontrolle über seine Daten und kann sie jederzeit über die Browsereinstellungen oder mithilfe der bereitgestellten Export-/Importfunktionen löschen.",
-  "DASHBOARD_INFO_DISCLAIMER_ACCURACY_P1": "<strong>Genauigkeit und Zweck:</strong> VR Compass ist ein Hilfsmittel, das \"wie besehen\" bereitgestellt wird, ohne ausdrückliche oder stillschweigende Garantien hinsichtlich seiner Genauigkeit oder Vollständigkeit. Sein Hauptzweck ist es, Ihnen zu helfen, <strong>Ihr VSR-Ranking zu verfolgen und zu organisieren und eine Orientierung für Ihre zukünftigen Rennstrategien zu bieten</strong>. Die Berechnungen basieren auf bekannten Formeln. Wenn Sie signifikante Abweichungen feststellen, könnte dies ein Zeichen für einen Dateneingabefehler bei einem oder mehreren Rennen sein oder eine vorübergehende Verzögerung bei der Aktualisierung des Verlaufs durch Virtual Regatta (eine Situation, die sich normalerweise schnell löst).",
+  "DASHBOARD_INFO_DISCLAIMER_ACCURACY_P1": "<strong>Genauigkeit und Zweck:</strong> VR Compass ist ein Hilfsmittel, das \"wie besehen\" bereitgestellt wird, ohne ausdrückliche oder stillschweigende Garantien hinsichtlich seiner Genauigkeit oder Vollständigkeit. Sein Hauptzweck ist es, Ihnen zu helfen, <strong>Ihr VSR-Ranking zu verfolgen und zu organisieren und eine Orientierung für Ihre zukünftigen Rennstrategien zu bieten</strong>. Die Berechnungen basieren auf bekannten Formeln. Wenn Sie signifikante Abweichungen feststellen, könnte dies ein Zeichen für einen Dateneingabefehler bei einem oder mehreren Rennen sein oder eine vorübergehende Abweichung beim Rennabschlussdatum in Virtual Regatta (eine Situation, die sich normalerweise schnell löst).",
   "DASHBOARD_INFO_DISCLAIMER_ACCURACY_P2": "<strong>Warnung vor nicht VSR-gültigen Rennen:</strong> Virtual Regatta Offshore organisiert gelegentlich Werberennen oder Sonderveranstaltungen, die keine gültigen Punkte für das offizielle VSR-Ranking vergeben. Da VRCompass diese Rennen nicht unterscheiden kann, berechnet es Punkte für jedes eingegebene Rennen. Es liegt in der Verantwortung des Benutzers sicherzustellen, dass die seinem Verlauf hinzugefügten Rennen tatsächlich Teil der VSR-Meisterschaft sind, um eine falsche Berechnung der Gesamtpunktzahl zu vermeiden.",
   "DASHBOARD_FOOTER_RESPONSIBILITY_P1": "<strong>Haftung:</strong> Die Entwickler von VR Compass sind nicht verantwortlich für Datenverluste, Schäden oder andere Probleme, die sich aus der Nutzung dieser Anwendung ergeben. Es wird empfohlen, die Exportfunktion zu nutzen, um regelmäßige Backups Ihrer Daten zu erstellen.",
   "DASHBOARD_FOOTER_COPYRIGHT_P1": "<strong>Urheberrecht und Lizenz:</strong> Der Quellcode dieser Anwendung wird unter den Bedingungen der <a href=\"https://raw.githubusercontent.com/mobiawien/VRCompass/main/LICENSE\" target=\"_blank\">MIT-Lizenz</a> veröffentlicht, die ihre Nutzungs-, Änderungs- und Verbreitungsbedingungen definiert.",

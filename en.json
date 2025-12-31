@@ -6,7 +6,7 @@
   "NAV_ANALYSIS": "Analysis",
   "NAV_STRATEGY": "Strategy",
   "BTN_SUPPORT_TEXT": "Support",
-  "BTN_SUPPORT_TITLE": "Buy the Captain a coffee",
+  "BTN_SUPPORT_TITLE": "Does VRCompass help you save budget and time? Support the project!",
 
   "ALERT_SELECT_CATEGORY_FIRST": "Please select an economic category first!",
   "CONFIRM_DELETE_RACE": "Are you sure you want to delete this race?",
@@ -274,7 +274,7 @@
   "SUMMARY_EVENT_ITEM_HALVED": "<strong>Halving:</strong> The race '{{raceName}}' was halved on {{eventDate}}.",
   "SUMMARY_EVENT_ITEM_EXPIRED": "<strong>Expiry:</strong> The race '{{raceName}}' expired on {{eventDate}}.",
   "SUMMARY_EVENT_ITEM_ADDED": "<strong>Added:</strong> The race '{{raceName}}' was added to your history on {{eventDate}}.",
-  "SUMMARY_EVENT_ITEM_REBALANCE_POSITIVE": "<strong>Rebalance:</strong> The race '{{raceName}}' expired/was halved, but '{{beneficiaryRaceName}}' has re-entered the ranking.",
+  "SUMMARY_EVENT_ITEM_REBALANCE_POSITIVE": "<strong>Rebalance:</strong> The race '{{raceName}}' expired/was halved on {{eventDate}}, but '{{beneficiaryRaceName}}' has re-entered the ranking.",
   "SUMMARY_EVENT_IMPACT_TEXT": "Net VSR impact: {{netImpact}} pts.",
   "SUMMARY_EVENT_IMPACT_TEXT_INCREASE": "Net VSR impact: <span style='color: green;'>+{{netImpact}}</span> pts.",
   "SUMMARY_EVENT_IMPACT_TEXT_DECREASE": "Net VSR impact: <span style='color: red;'>{{netImpact}}</span> pts.",
@@ -312,7 +312,7 @@
 
   "DASHBOARD_INFO_DISCLAIMER_TITLE": "Information and Disclaimer",
   "DASHBOARD_INFO_DISCLAIMER_DATA_MANAGEMENT_P1": "<strong>Data Management:</strong> This application saves the entered data (boat name, VSR score, race details) only within your browser's <code>localStorage</code>. No data is transmitted or stored on external servers. The user has full control over their data and can delete it at any time through their browser settings or by using the provided export/import features.",
-  "DASHBOARD_INFO_DISCLAIMER_ACCURACY_P1": "<strong>Accuracy and Purpose:</strong> VR Compass is a helper tool provided \"as is\", without express or implied warranties regarding its accuracy or completeness. Its main purpose is to help you <strong>track and organize your VSR ranking, providing guidance for your future racing strategies</strong>. Calculations are based on known formulas. If you notice significant discrepancies, it might be a sign of a data entry error for one or more races, or a temporary delay in the history update by Virtual Regatta (a situation that usually resolves quickly).",
+  "DASHBOARD_INFO_DISCLAIMER_ACCURACY_P1": "<strong>Accuracy and Purpose:</strong> VR Compass is a helper tool provided \"as is\", without express or implied warranties regarding its accuracy or completeness. Its main purpose is to help you <strong>track and organize your VSR ranking, providing guidance for your future racing strategies</strong>. Calculations are based on known formulas. If you notice significant discrepancies, it might be a sign of a data entry error for one or more races, or a temporary discrepancy with the race closing date in Virtual Regatta (a situation that usually resolves quickly).",
   "DASHBOARD_INFO_DISCLAIMER_ACCURACY_P2": "<strong>Warning about non-VSR Races:</strong> Virtual Regatta Offshore occasionally organizes promotional races or special events that do not award valid points for the official VSR ranking. VRCompass, unable to distinguish these races, will calculate points for any race entered. It is the user's responsibility to ensure that the races added to their history are indeed part of the VSR championship to avoid an incorrect calculation of the total score.",
   "DASHBOARD_FOOTER_RESPONSIBILITY_P1": "<strong>Liability:</strong> The developers of VR Compass are not responsible for any data loss, damages, or other issues arising from the use of this application. It is recommended to use the export function to create regular backups of your data.",
   "DASHBOARD_FOOTER_COPYRIGHT_P1": "<strong>Copyright and License:</strong> The source code of this application is released under the terms of the <a href=\"https://raw.githubusercontent.com/mobiawien/VRCompass/main/LICENSE\" target=\"_blank\">MIT License</a>, which defines its conditions of use, modification, and distribution.",

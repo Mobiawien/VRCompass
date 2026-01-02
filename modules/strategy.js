@@ -62,7 +62,7 @@ function aggiornaMonitoraggioScadenze() {
         let params = {
           raceName: g.nome,
           raceLevel: livelloTesto,
-          eventType: getTranslation(g.tipoEvento).toLowerCase(),
+          eventType: getTranslation(g.tipoEvento),
           eventDate: dataEventoString,
           directImpactPoints: formatNumber(Math.abs(impattoDirettoGaraVal), 0),
           netImpactPoints: formatNumber(impattoNettoStimatoVal, 0),
@@ -200,7 +200,7 @@ function aggiornaMonitoraggioScadenze() {
             tipoEvento === dom.EVENT_TYPES.HALVING
               ? "EVENT_TYPE_HALVING"
               : "EVENT_TYPE_EXPIRY"
-          ).toLowerCase(),
+          ),
         }
       )}</li>`;
     }
@@ -449,7 +449,7 @@ function aggiornaValutazioneStrategicaSlot() {
         testoScadenzeImportanti = getTranslation(
           "STRATEGY_SUGGESTION_IMPORTANT_DEADLINES_PRIORITY",
           {
-            eventType: translatedDeadlineEventType.toLowerCase(),
+            eventType: translatedDeadlineEventType,
             remainingTimeText: remainingTimeText,
           }
         );

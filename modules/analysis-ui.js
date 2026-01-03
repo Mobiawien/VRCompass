@@ -42,7 +42,9 @@ function popolaCategoriaSlot(
     : null;
 
   let totalePuntiCategoria = 0;
-  gareCat.forEach((g) => (totalePuntiCategoria += g.puntiEffettivi));
+  gareCat.forEach(
+    (g) => (totalePuntiCategoria += g.puntiRaw || g.puntiEffettivi)
+  );
   if (elPuntiCategoria)
     elPuntiCategoria.textContent = formatNumber(totalePuntiCategoria, 0);
 
@@ -56,8 +58,9 @@ function popolaCategoriaSlot(
     let punti100 = 0,
       punti50 = 0;
     gareCat.forEach((g) => {
-      if (g.fattoreDecadimento === 1.0) punti100 += g.puntiEffettivi;
-      else if (g.fattoreDecadimento === 0.5) punti50 += g.puntiEffettivi;
+      const punti = g.puntiRaw || g.puntiEffettivi;
+      if (g.fattoreDecadimento === 1.0) punti100 += punti;
+      else if (g.fattoreDecadimento === 0.5) punti50 += punti;
     });
     const potenzialeMaxPuntiCategoria =
       livelloValoreNumerico * maxSlotPerFascia * 1.5;
@@ -103,7 +106,7 @@ function popolaCategoriaSlot(
       gareCat.forEach(
         (g) =>
           (sommaQualitaPercentuale +=
-            (g.puntiEffettivi /
+            ((g.puntiRaw || g.puntiEffettivi) /
               (livelloValoreNumerico * g.fattoreDecadimento)) *
             100)
       );
@@ -230,7 +233,10 @@ function aggiornaGraficoRadarSaluteSlot() {
       datiPercentualePotenziale.push(0);
       return;
     }
-    const puntiAttuali = gareCat.reduce((sum, g) => sum + g.puntiEffettivi, 0);
+    const puntiAttuali = gareCat.reduce(
+      (sum, g) => sum + (g.puntiRaw || g.puntiEffettivi),
+      0
+    );
     const potenzialeMaxCategoria =
       livelloValoreNumerico * maxSlotPerFascia * 1.5;
     const percentualeRaggiunta =

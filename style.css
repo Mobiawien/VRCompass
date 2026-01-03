@@ -76,6 +76,29 @@ nav {
   border-color: #adb5bd;
 }
 
+/* Stili per il pulsante Supporta Ko-fi */
+.btn-supporta {
+  background-color: #eec14b; /* Oro morbido (meno saturo) */
+  color: #333; /* Testo scuro per leggibilità */
+  padding: 4px 10px;
+  border-radius: 20px; /* Bordo arrotondato "a pillola" moderna */
+  text-decoration: none;
+  font-weight: bold;
+  font-family: sans-serif;
+  font-size: 0.8em;
+  transition: transform 0.2s ease; /* Effetto animato al passaggio del mouse */
+  display: inline-flex;
+  align-items: center;
+  gap: 5px; /* Spazio tra tazzina e testo */
+  margin-right: 10px; /* Spazio a destra per staccarlo dal bottone Lingua */
+}
+
+.btn-supporta:hover {
+  background-color: #f2cf70; /* Oro morbido più chiaro */
+  transform: scale(1.05); /* Si ingrandisce leggermente per invitare al click */
+  color: #333; /* Mantiene il testo scuro per leggibilità */
+}
+
 /* Stili per il placeholder della lingua */
 .language-placeholder {
   padding: 8px 15px;

@@ -26,6 +26,9 @@ import {
   aggiornaGraficoTortaStatoStrategia,
 } from "./modules/strategy.js";
 
+// --- Configurazione Data ---
+const getOggi = () => new Date();
+
 // --- Elementi DOM ---
 // Navigazione
 const mainNavButtons = document.querySelectorAll("nav > button.nav-button"); // Seleziona solo i .nav-button diretti figli di nav
@@ -198,6 +201,7 @@ const btnToggleRecentEvents = document.getElementById(
   "btn-toggle-recent-events"
 );
 const recentEventsSummary = document.getElementById("recent-events-summary");
+const languageSelector = document.getElementById("language-selector");
 
 // Grafico Torta Strategia
 const canvasGraficoTorta = document.getElementById(
@@ -336,6 +340,12 @@ function updateAllUIComponents() {
   aggiornaInfoClassificaView();
   aggiornaSezioneStrategia();
   aggiornaGraficoTortaStatoStrategia();
+
+  // Aggiorna manualmente il tooltip del pulsante supporta
+  const btnSupporta = document.querySelector(".btn-supporta");
+  if (btnSupporta) {
+    btnSupporta.title = getTranslation("BTN_SUPPORT_TITLE");
+  }
 }
 
 /**
@@ -350,7 +360,7 @@ async function init() {
   const vsrPrecedente = statoVSRPrecedente?.punteggio;
   const gareSalvateCorrenti =
     JSON.parse(localStorage.getItem("gareSalvate")) || [];
-  const oggi = new Date();
+  const oggi = getOggi();
   const vsrCorrenteCalcolato = getVsrScoreCalcolato(gareSalvateCorrenti, oggi);
 
   if (vsrPrecedente !== null && vsrCorrenteCalcolato !== vsrPrecedente) {
@@ -360,7 +370,7 @@ async function init() {
   // Aggiorna lo stato VSR corrente nel localStorage per i prossimi avvii
   const statoCorrenteDaSalvare = {
     punteggio: vsrCorrenteCalcolato,
-    timestampSalvataggio: new Date().toISOString(),
+    timestampSalvataggio: getOggi().toISOString(),
   };
   localStorage.setItem(
     "statoVSRPrecedente",
@@ -553,6 +563,10 @@ function setupEventListeners() {
       "click",
       popolaERendiVisibileRiepilogoEventi
     );
+
+  if (languageSelector) {
+    languageSelector.addEventListener("change", updateAllUIComponents);
+  }
 }
 
 // --- Funzioni Dashboard ---
@@ -606,7 +620,7 @@ function getContributingGareIds(gareSalvate, dataRiferimento) {
 
 function recalcolaEAggiornaVsrUI() {
   const gareSalvate = JSON.parse(localStorage.getItem("gareSalvate")) || [];
-  const oggi = new Date();
+  const oggi = getOggi();
   const vsrAttualeCalcolato = getVsrScoreCalcolato(gareSalvate, oggi);
   localStorage.setItem("classificaVsrAttuale", vsrAttualeCalcolato.toString());
   aggiornaInfoClassificaView();
@@ -621,10 +635,11 @@ function handleDataChange() {
 
 function simulaImpattoNettoEVariazioneClassifica(
   garaCheCambia,
-  nuovoFattoreDecadimentoSimulato
+  nuovoFattoreDecadimentoSimulato,
+  anniDaAggiungere = 0 // Nuovo parametro per viaggiare nel tempo (negativo = futuro, positivo = passato)
 ) {
   const gareSalvate = JSON.parse(localStorage.getItem("gareSalvate")) || [];
-  const oggi = new Date();
+  const oggi = getOggi();
 
   if (gareSalvate.length === 0) {
     return {
@@ -648,10 +663,16 @@ function simulaImpattoNettoEVariazioneClassifica(
   const contributingIdsPrima = getContributingGareIds(gareSalvate, oggi);
 
   const dataSimulata = new Date(garaDaSimulare.data);
-  if (nuovoFattoreDecadimentoSimulato === 0.5) {
-    dataSimulata.setFullYear(dataSimulata.getFullYear() - 1);
-  } else if (nuovoFattoreDecadimentoSimulato === 0) {
-    dataSimulata.setFullYear(dataSimulata.getFullYear() - 2);
+
+  if (anniDaAggiungere !== 0) {
+    dataSimulata.setFullYear(dataSimulata.getFullYear() + anniDaAggiungere);
+  } else {
+    // Logica legacy per Strategy (simulazione futuro)
+    if (nuovoFattoreDecadimentoSimulato === 0.5) {
+      dataSimulata.setFullYear(dataSimulata.getFullYear() - 1);
+    } else if (nuovoFattoreDecadimentoSimulato === 0) {
+      dataSimulata.setFullYear(dataSimulata.getFullYear() - 2);
+    }
   }
   garaDaSimulare.data = dataSimulata.toISOString().split("T")[0];
 
@@ -694,14 +715,35 @@ function simulaImpattoNettoEVariazioneClassifica(
 function getGareConScadenzeImminenti(serializzabile = false) {
   const gareSalvate = JSON.parse(localStorage.getItem("gareSalvate")) || [];
   const scadenze = [];
-  const oggi = new Date();
+  const oggi = getOggi();
   const contributingIds = getContributingGareIds(gareSalvate, oggi);
 
   gareSalvate.forEach((gara) => {
-    const oggiLocale = new Date();
+    const oggiLocale = getOggi();
     oggiLocale.setHours(0, 0, 0, 0);
     const dataGaraDate = new Date(gara.data);
     dataGaraDate.setHours(0, 0, 0, 0);
+
+    // Calcolo punti precisi per coerenza con strategy.js
+    const infoLivello = livelliVsrStoricoMap[gara.livello];
+    let puntiRaw = 0;
+    let puntiEffettivi = 0;
+    if (
+      infoLivello &&
+      infoLivello.valoreNumerico &&
+      gara.classificaFinale > 0
+    ) {
+      const puntiNonArrotondati =
+        infoLivello.valoreNumerico / Math.pow(gara.classificaFinale, 0.125);
+      const puntiPieniArrotondati = Math.round(puntiNonArrotondati);
+      const mesiTrascorsi = calcolaMesiTrascorsi(gara.data, oggiLocale);
+      let fattoreDecadimento = 0;
+      if (mesiTrascorsi < 12) fattoreDecadimento = 1.0;
+      else if (mesiTrascorsi < 24) fattoreDecadimento = 0.5;
+
+      puntiRaw = puntiPieniArrotondati * fattoreDecadimento;
+      puntiEffettivi = Math.floor(puntiRaw);
+    }
 
     const dataDimezzamento = new Date(dataGaraDate);
     dataDimezzamento.setFullYear(dataDimezzamento.getFullYear() + 1);
@@ -734,6 +776,8 @@ function getGareConScadenzeImminenti(serializzabile = false) {
       );
       scadenze.push({
         ...gara,
+        puntiRaw,
+        puntiEffettivi,
         tipoEvento,
         dataEvento: serializzabile
           ? dataEventoObj.toISOString()
@@ -800,9 +844,9 @@ function popolaERendiVisibileRiepilogoEventi() {
   }
 
   const eventiRecenti = [];
-  const oggi = new Date();
+  const oggi = getOggi();
   oggi.setHours(0, 0, 0, 0);
-  const dataLimite = new Date();
+  const dataLimite = getOggi();
   dataLimite.setDate(oggi.getDate() - DURATA_RIEPILOGO_GIORNI);
 
   // 1. Trova eventi di scadenza/dimezzamento
@@ -819,25 +863,62 @@ function popolaERendiVisibileRiepilogoEventi() {
 
     // Controlla se il dimezzamento è avvenuto negli ultimi 30 giorni
     if (dataDimezzamento >= dataLimite && dataDimezzamento <= oggi) {
-      const simulazione = simulaImpattoNettoEVariazioneClassifica(gara, 0.5);
+      // Simuliamo lo stato PRECEDENTE (100%) per vedere quanto abbiamo perso.
+      // Passiamo +1 anno per far tornare la gara "giovane" (< 12 mesi).
+      // L'impatto sarà: VSR_Attuale (50%) - VSR_Simulato (100%) = Valore Negativo corretto.
+      const gareSimulate = JSON.parse(JSON.stringify(gareSalvate));
+      const garaSimulata = gareSimulate.find((g) => g.id === gara.id);
+      if (garaSimulata) {
+        const d = new Date(garaSimulata.data);
+        d.setFullYear(d.getFullYear() + 1);
+        garaSimulata.data = d.toISOString().split("T")[0];
+      }
+      const vsrCorrente = getVsrScoreCalcolato(gareSalvate, oggi);
+      const vsrPassato = getVsrScoreCalcolato(gareSimulate, oggi);
+      const contributingIdsCorrente = getContributingGareIds(gareSalvate, oggi);
+      const contributingIdsPassato = getContributingGareIds(gareSimulate, oggi);
+      const idBeneficiari = [...contributingIdsCorrente].filter(
+        (id) => !contributingIdsPassato.has(id) && id !== gara.id
+      );
       eventiRecenti.push({
         ...gara,
         tipoEvento: EVENT_TYPES.HALVING,
         dataEventoEffettiva: dataDimezzamento,
-        impattoNettoStimato: simulazione.impattoNettoEffettivo,
-        garaBeneficiaria: simulazione.garaBeneficiaria,
+        impattoNettoStimato: vsrCorrente - vsrPassato,
+        garaBeneficiaria:
+          idBeneficiari.length > 0
+            ? gareSalvate.find((g) => g.id === idBeneficiari[0])
+            : null,
       });
     }
 
     // Controlla se la scadenza è avvenuta negli ultimi 30 giorni
     if (dataScadenza >= dataLimite && dataScadenza <= oggi) {
-      const simulazione = simulaImpattoNettoEVariazioneClassifica(gara, 0);
+      // Simuliamo lo stato PRECEDENTE (50%) per vedere quanto abbiamo perso.
+      // Passiamo +1 anno per far tornare la gara "meno vecchia" (12-24 mesi).
+      const gareSimulate = JSON.parse(JSON.stringify(gareSalvate));
+      const garaSimulata = gareSimulate.find((g) => g.id === gara.id);
+      if (garaSimulata) {
+        const d = new Date(garaSimulata.data);
+        d.setFullYear(d.getFullYear() + 1);
+        garaSimulata.data = d.toISOString().split("T")[0];
+      }
+      const vsrCorrente = getVsrScoreCalcolato(gareSalvate, oggi);
+      const vsrPassato = getVsrScoreCalcolato(gareSimulate, oggi);
+      const contributingIdsCorrente = getContributingGareIds(gareSalvate, oggi);
+      const contributingIdsPassato = getContributingGareIds(gareSimulate, oggi);
+      const idBeneficiari = [...contributingIdsCorrente].filter(
+        (id) => !contributingIdsPassato.has(id) && id !== gara.id
+      );
       eventiRecenti.push({
         ...gara,
         tipoEvento: EVENT_TYPES.EXPIRY,
         dataEventoEffettiva: dataScadenza,
-        impattoNettoStimato: simulazione.impattoNettoEffettivo,
-        garaBeneficiaria: simulazione.garaBeneficiaria,
+        impattoNettoStimato: vsrCorrente - vsrPassato,
+        garaBeneficiaria:
+          idBeneficiari.length > 0
+            ? gareSalvate.find((g) => g.id === idBeneficiari[0])
+            : null,
       });
     }
   });
@@ -891,11 +972,36 @@ function popolaERendiVisibileRiepilogoEventi() {
         chiaveTraduzione = "SUMMARY_EVENT_ITEM_ADDED";
       }
 
+      // Gestione specifica per Dimezzamenti con impatto positivo (es. entrano in classifica al 50%)
+      // Copre sia il caso di auto-miglioramento che il caso di sostituzione con gara omonima
+      const isPositiveHalving =
+        evento.tipoEvento === EVENT_TYPES.HALVING &&
+        evento.impattoNettoStimato > 0;
+      const isSameNameRebalance =
+        evento.garaBeneficiaria && evento.garaBeneficiaria.nome === evento.nome;
+
+      if (
+        isPositiveHalving &&
+        (!evento.garaBeneficiaria || isSameNameRebalance)
+      ) {
+        chiaveTraduzione = "SUMMARY_EVENT_ITEM_HALVED_IMPROVED";
+      }
+
       if (chiaveTraduzione) {
         // Assicura che ci sia una chiave valida
-        // Controlla se c'è una gara beneficiaria e l'impatto è positivo
-        if (evento.garaBeneficiaria && evento.impattoNettoStimato >= 0) {
-          testoRiga = getTranslation("SUMMARY_EVENT_ITEM_REBALANCE_POSITIVE", {
+        // Controlla se c'è una gara beneficiaria (diversa dalla gara stessa/omonima)
+        if (
+          evento.garaBeneficiaria &&
+          !isSameNameRebalance &&
+          chiaveTraduzione !== "SUMMARY_EVENT_ITEM_HALVED_IMPROVED"
+        ) {
+          let chiaveRibilanciamento = "SUMMARY_EVENT_ITEM_REBALANCE_POSITIVE";
+          if (evento.tipoEvento === EVENT_TYPES.HALVING) {
+            chiaveRibilanciamento = "SUMMARY_EVENT_ITEM_REBALANCE_HALVED";
+          } else if (evento.tipoEvento === EVENT_TYPES.EXPIRY) {
+            chiaveRibilanciamento = "SUMMARY_EVENT_ITEM_REBALANCE_EXPIRED";
+          }
+          testoRiga = getTranslation(chiaveRibilanciamento, {
             ...params,
             beneficiaryRaceName: evento.garaBeneficiaria.nome,
           });
@@ -948,12 +1054,12 @@ function dismissVSRChangeModal() {
     vsrChangeModal.style.display = "none";
   }
   const gareSalvate = JSON.parse(localStorage.getItem("gareSalvate")) || [];
-  const oggi = new Date();
+  const oggi = getOggi();
   const vsrCorrente = getVsrScoreCalcolato(gareSalvate, oggi);
 
   const statoDaSalvare = {
     punteggio: vsrCorrente,
-    timestampSalvataggio: new Date().toISOString(),
+    timestampSalvataggio: getOggi().toISOString(),
   };
   localStorage.setItem("statoVSRPrecedente", JSON.stringify(statoDaSalvare));
   statoVSRPrecedente = JSON.parse(JSON.stringify(statoDaSalvare));
@@ -974,7 +1080,7 @@ function registraPuntoStoricoVSR(punteggio) {
     return;
   }
 
-  const timestamp = new Date().toISOString();
+  const timestamp = getOggi().toISOString();
   let storico = JSON.parse(localStorage.getItem("storicoPunteggioVSR")) || [];
 
   // Controlla se l'ultimo punto registrato ha lo stesso punteggio. Se sì, non fare nulla.
@@ -1022,7 +1128,7 @@ function aggiornaGraficoAndamentoVSR() {
 
   // 1. Raccogli tutte le date chiave (fine gara, dimezzamento, scadenza) e assicurati che "oggi" sia incluso
   const dateEventi = new Set();
-  const oggi = new Date();
+  const oggi = getOggi();
   dateEventi.add(oggi.toISOString().split("T")[0]); // Aggiunge la data di oggi
 
   gareSalvate.forEach((gara) => {
@@ -1039,7 +1145,7 @@ function aggiornaGraficoAndamentoVSR() {
   });
 
   // Imposta la data di inizio del grafico a un anno fa per migliorare la leggibilità.
-  const dataInizioGrafico = new Date();
+  const dataInizioGrafico = getOggi();
   dataInizioGrafico.setFullYear(dataInizioGrafico.getFullYear() - 1);
 
   // 2. Filtra le date per l'ultimo anno, ordinale e assicurati che siano uniche
@@ -1381,11 +1487,11 @@ async function caricaDatiElencoRegate() {
   const isValidISODate = (s) =>
     typeof s === "string" && /^\d{4}-\d{2}-\d{2}/.test(s);
   const toISODate = (v) => {
-    if (!v) return new Date().toISOString().split("T")[0];
+    if (!v) return getOggi().toISOString().split("T")[0];
     if (isValidISODate(v)) return v.slice(0, 10);
     const d = new Date(v);
     return isNaN(d.getTime())
-      ? new Date().toISOString().split("T")[0]
+      ? getOggi().toISOString().split("T")[0]
       : d.toISOString().split("T")[0];
   };
   const parsePoints = (x) => {
@@ -1600,7 +1706,7 @@ function aggiungiRegataDaElencoAlloStorico(
 function getGareContributiveConDettagli(sourceGare) {
   const gareSalvate =
     sourceGare || JSON.parse(localStorage.getItem("gareSalvate")) || [];
-  return selezionaGareContributive(gareSalvate, new Date());
+  return selezionaGareContributive(gareSalvate, getOggi());
 }
 
 // --- Inizializzazione ---

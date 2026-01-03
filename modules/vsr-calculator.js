@@ -55,12 +55,19 @@ export function selezionaGareContributive(gareSalvateRaw, dataRiferimento) {
       ) {
         const puntiNonArrotondati =
           infoLivello.valoreNumerico / Math.pow(gara.classificaFinale, 0.125);
-        const puntiEffettivi = Math.round(
-          puntiNonArrotondati * fattoreDecadimento
-        );
+
+        // VR Logic: Arrotonda il punteggio pieno all'intero PRIMA del decadimento
+        const puntiPieniArrotondati = Math.round(puntiNonArrotondati);
+
+        // Calcola i punti raw (che saranno interi o finiranno con .5)
+        const puntiRaw = puntiPieniArrotondati * fattoreDecadimento;
+
+        // VR Display Logic: Tronca il decimale per la visualizzazione (es. 4357.5 -> 4357)
+        const puntiEffettivi = Math.floor(puntiRaw);
         return {
           ...gara,
           puntiEffettivi,
+          puntiRaw,
           fattoreDecadimento,
           mesiTrascorsi,
           tipoGara: infoLivello.tipo,
@@ -111,15 +118,15 @@ export function selezionaGareContributive(gareSalvateRaw, dataRiferimento) {
       const limite = LIMITI_GARE_PER_CATEGORIA[tipo];
       const miglioriRecenti = (gareRecentiRaggruppate[tipo] || [])
         .sort((a, b) =>
-          b.puntiEffettivi !== a.puntiEffettivi
-            ? b.puntiEffettivi - a.puntiEffettivi
+          b.puntiRaw !== a.puntiRaw
+            ? b.puntiRaw - a.puntiRaw
             : new Date(b.data) - new Date(a.data)
         )
         .slice(0, limite);
       const miglioriMenoRecenti = (gareMenoRecentiRaggruppate[tipo] || [])
         .sort((a, b) =>
-          b.puntiEffettivi !== a.puntiEffettivi
-            ? b.puntiEffettivi - a.puntiEffettivi
+          b.puntiRaw !== a.puntiRaw
+            ? b.puntiRaw - a.puntiRaw
             : new Date(b.data) - new Date(a.data)
         )
         .slice(0, limite);
@@ -130,9 +137,7 @@ export function selezionaGareContributive(gareSalvateRaw, dataRiferimento) {
 
   for (const tipo in gareContributiveFinali) {
     if (Object.prototype.hasOwnProperty.call(gareContributiveFinali, tipo))
-      gareContributiveFinali[tipo].sort(
-        (a, b) => b.puntiEffettivi - a.puntiEffettivi
-      );
+      gareContributiveFinali[tipo].sort((a, b) => b.puntiRaw - a.puntiRaw);
   }
 
   return gareContributiveFinali;
@@ -148,7 +153,7 @@ export function calcolaVsrTotaleDaContributive(gareContributive) {
   for (const tipoGara in gareContributive) {
     if (Object.prototype.hasOwnProperty.call(gareContributive, tipoGara)) {
       punteggioFinaleTotale += gareContributive[tipoGara].reduce(
-        (sum, gara) => sum + gara.puntiEffettivi,
+        (sum, gara) => sum + (gara.puntiRaw || gara.puntiEffettivi),
         0
       );
     }

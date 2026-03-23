@@ -37,7 +37,7 @@ const viewSections = document.querySelectorAll(".view-section");
 // Dashboard
 const nomeBarcaInput = document.getElementById("nome-barca");
 const classificaVsrAttualeInput = document.getElementById(
-  "classifica-vsr-attuale"
+  "classifica-vsr-attuale",
 );
 
 // Gestione Crediti (ex Calcolatrice Gara)
@@ -54,18 +54,18 @@ const outputPosRecupero = document.getElementById("output-pos-recupero");
 const formAggiungiGara = document.getElementById("form-aggiungi-gara");
 const dataGaraInput = document.getElementById("data-gara");
 const livelloGaraVsrStoricoSelect = document.getElementById(
-  "livello-gara-vsr-storico"
+  "livello-gara-vsr-storico",
 );
 const nomeRegataInput = document.getElementById("nome-regata");
 const classificaFinaleStoricoInput = document.getElementById(
-  "classifica-finale-storico"
+  "classifica-finale-storico",
 );
 const puntiVsrCalcolatiInput = document.getElementById("punti-vsr-calcolati");
 const classificaVsrtbody = document.getElementById("classifica-vsr-tbody");
 const tabellaClassificaVsr = document.getElementById("tabella-classifica-vsr");
 const nomeBarcaDisplay = document.getElementById("nome-barca-display");
 const classificaVsrAttualeDisplay = document.getElementById(
-  "classifica-vsr-attuale-display"
+  "classifica-vsr-attuale-display",
 );
 
 // Pulsanti Filtro Storico Gare
@@ -79,17 +79,17 @@ const vsrSortHint = document.getElementById("vsr-sort-hint");
 
 // Nuovi elementi per Caricamento Elenco Regate
 const btnApriModalElencoRegate = document.getElementById(
-  "btn-apri-modal-elenco-regate"
+  "btn-apri-modal-elenco-regate",
 );
 const modalElencoRegate = document.getElementById("modal-elenco-regate");
 const btnChiudiModalElencoRegate = document.getElementById(
-  "btn-chiudi-modal-elenco-regate"
+  "btn-chiudi-modal-elenco-regate",
 );
 const infoAggiornamentoElencoRegate = document.getElementById(
-  "info-aggiornamento-elenco-regate"
+  "info-aggiornamento-elenco-regate",
 );
 const tbodyElencoRegateSuggerite = document.getElementById(
-  "tbody-elenco-regate-suggerite"
+  "tbody-elenco-regate-suggerite",
 );
 
 // Titoli dinamici
@@ -99,22 +99,22 @@ const titoloFormGara = document.getElementById("titolo-form-gara");
 const btnEsportaDati = document.getElementById("btn-esporta-dati");
 const fileImportaDatiInput = document.getElementById("file-importa-dati");
 const fileImportaRegateSuggeriteInput = document.getElementById(
-  "file-importa-regate-suggerite"
+  "file-importa-regate-suggerite",
 );
 const modaleAvvisoCaricamentoRegate = document.getElementById(
-  "modale-avviso-caricamento-regate"
+  "modale-avviso-caricamento-regate",
 );
 const btnChiudiModaleAvvisoRegate = document.getElementById(
-  "btn-chiudi-modale-avviso-regate"
+  "btn-chiudi-modale-avviso-regate",
 );
 const btnConfermaCaricamentoRegate = document.getElementById(
-  "btn-conferma-caricamento-regate"
+  "btn-conferma-caricamento-regate",
 );
 const btnAnnullaCaricamentoRegate = document.getElementById(
-  "btn-annulla-caricamento-regate"
+  "btn-annulla-caricamento-regate",
 );
 const dataAggiornamentoFileRegateSpan = document.getElementById(
-  "data-aggiornamento-file-regate"
+  "data-aggiornamento-file-regate",
 );
 let fileSelezionatoPerRegateSuggerite = null;
 
@@ -126,7 +126,7 @@ const hcPuntiAttuali = document.getElementById("hc-punti-attuali");
 const hcGareSlot = document.getElementById("hc-gare-slot");
 const hcProgressBar = document.getElementById("hc-progress-bar");
 const hcStackedPointsBarContainer = document.getElementById(
-  "hc-stacked-points-bar-container"
+  "hc-stacked-points-bar-container",
 );
 const hcPointsBar100 = document.getElementById("hc-points-bar-100");
 const hcPointsBar50 = document.getElementById("hc-points-bar-50");
@@ -140,7 +140,7 @@ const liv1MinPunti100 = document.getElementById("liv1-min-punti-100");
 const liv1GareSlot = document.getElementById("liv1-gare-slot");
 const liv1ProgressBar = document.getElementById("liv1-progress-bar");
 const liv1StackedPointsBarContainer = document.getElementById(
-  "liv1-stacked-points-bar-container"
+  "liv1-stacked-points-bar-container",
 );
 const liv1PointsBar100 = document.getElementById("liv1-points-bar-100");
 const liv1PointsBar50 = document.getElementById("liv1-points-bar-50");
@@ -154,7 +154,7 @@ const liv2MinPunti100 = document.getElementById("liv2-min-punti-100");
 const liv2GareSlot = document.getElementById("liv2-gare-slot");
 const liv2ProgressBar = document.getElementById("liv2-progress-bar");
 const liv2StackedPointsBarContainer = document.getElementById(
-  "liv2-stacked-points-bar-container"
+  "liv2-stacked-points-bar-container",
 );
 const liv2PointsBar100 = document.getElementById("liv2-points-bar-100");
 const liv2PointsBar50 = document.getElementById("liv2-points-bar-50");
@@ -168,19 +168,19 @@ const liv3MinPunti100 = document.getElementById("liv3-min-punti-100");
 const liv3GareSlot = document.getElementById("liv3-gare-slot");
 const liv3ProgressBar = document.getElementById("liv3-progress-bar");
 const liv3StackedPointsBarContainer = document.getElementById(
-  "liv3-stacked-points-bar-container"
+  "liv3-stacked-points-bar-container",
 );
 const liv3PointsBar100 = document.getElementById("liv3-points-bar-100");
 const liv3PointsBar50 = document.getElementById("liv3-points-bar-50");
 const liv3PointsBarEmpty = document.getElementById("liv3-points-bar-empty");
 
 const listaGareDimezzamento = document.getElementById(
-  "lista-gare-dimezzamento"
+  "lista-gare-dimezzamento",
 );
 const listaGareScadenza = document.getElementById("lista-gare-scadenza");
 // Strategia
 const listaSuggerimentiStrategiciSlot = document.getElementById(
-  "lista-suggerimenti-strategici-slot"
+  "lista-suggerimenti-strategici-slot",
 );
 
 // Nuovi elementi per la finestra modale di notifica VSR
@@ -188,24 +188,24 @@ const vsrChangeModal = document.getElementById("vsr-change-modal");
 const vsrChangeModalTitle = document.getElementById("vsr-change-modal-title");
 const vsrChangeModalBody = document.getElementById("vsr-change-modal-body");
 const vsrChangeModalInstruction = document.getElementById(
-  "vsr-change-modal-instruction"
+  "vsr-change-modal-instruction",
 );
 const vsrChangeModalPrimaryButton = document.getElementById(
-  "vsr-change-modal-primary-btn"
+  "vsr-change-modal-primary-btn",
 );
 const vsrChangeModalSecondaryButton = document.getElementById(
-  "vsr-change-modal-secondary-btn"
+  "vsr-change-modal-secondary-btn",
 );
 
 const btnToggleRecentEvents = document.getElementById(
-  "btn-toggle-recent-events"
+  "btn-toggle-recent-events",
 );
 const recentEventsSummary = document.getElementById("recent-events-summary");
 const languageSelector = document.getElementById("language-selector");
 
 // Grafico Torta Strategia
 const canvasGraficoTorta = document.getElementById(
-  "graficoTortaComposizioneVSR"
+  "graficoTortaComposizioneVSR",
 );
 
 // Grafico Andamento VSR Dashboard
@@ -247,7 +247,7 @@ const livelliVsrStoricoMap = {
 
 const LIMITI_GARE_PER_CATEGORIA = { HC: 1, LIV1: 3, LIV2: 6, LIV3: 10 };
 const URL_ELENCO_REGATE =
-  "https://cert.civis.net/LSV-Dash/api?context=api&context_type=allrace";
+  "https://vro.civis.net/LSV-Dash/api?context=api&context_type=allrace";
 
 const SOGLIA_DEBOLEZZA = { 15000: 0.5, 10000: 0.4, 5000: 0.3, 3000: 0.25 };
 
@@ -275,7 +275,7 @@ const DURATA_RIEPILOGO_GIORNI = 30;
 // --- Funzioni Helper Globali per Calcoli VSR ---
 function calcolaClassificaPerPuntiTarget(
   livelloValoreNumerico,
-  puntiVsrTarget
+  puntiVsrTarget,
 ) {
   if (!livelloValoreNumerico || puntiVsrTarget <= 0) return null;
   if (puntiVsrTarget >= livelloValoreNumerico) return 1;
@@ -325,7 +325,7 @@ function handleNavClick(event) {
     } catch (error) {
       console.error(
         `Errore durante l'aggiornamento della sezione ${targetViewId}:`,
-        error
+        error,
       );
     }
   }
@@ -374,7 +374,7 @@ async function init() {
   };
   localStorage.setItem(
     "statoVSRPrecedente",
-    JSON.stringify(statoCorrenteDaSalvare)
+    JSON.stringify(statoCorrenteDaSalvare),
   );
 
   // 3. Aggiorna il punteggio VSR nel localStorage
@@ -412,7 +412,7 @@ function initializeUI() {
       outputSpesaEffettiva,
       outputPosRecupero,
     },
-    livelliVsrStoricoMap
+    livelliVsrStoricoMap,
   );
 
   initVsrRankingUI(
@@ -438,7 +438,7 @@ function initializeUI() {
     {
       onDataChange: handleDataChange,
       getContributingGareIds: getContributingGareIds,
-    }
+    },
   );
 
   initAnalysisUI(
@@ -492,7 +492,7 @@ function initializeUI() {
     {
       getGareContributiveConDettagli,
       calcolaClassificaPerPuntiTarget, // Passiamo la funzione
-    }
+    },
   );
 
   initStrategyUI(
@@ -513,7 +513,7 @@ function initializeUI() {
       calcolaPuntiPerClassifica,
       calcolaClassificaPerPuntiTarget,
       getTranslation,
-    }
+    },
   );
 }
 
@@ -522,7 +522,7 @@ function initializeUI() {
  */
 function setupEventListeners() {
   mainNavButtons.forEach((button) =>
-    button.addEventListener("click", handleNavClick)
+    button.addEventListener("click", handleNavClick),
   );
   setupDashboardListeners();
   if (btnEsportaDati) btnEsportaDati.addEventListener("click", esportaDati);
@@ -531,18 +531,18 @@ function setupEventListeners() {
   if (fileImportaRegateSuggeriteInput)
     fileImportaRegateSuggeriteInput.addEventListener(
       "change",
-      preparaImportazioneRegateSuggerite
+      preparaImportazioneRegateSuggerite,
     );
   setupModaleAvvisoRegateListeners();
   if (btnApriModalElencoRegate)
     btnApriModalElencoRegate.addEventListener(
       "click",
-      apriEPopolaModalElencoRegate
+      apriEPopolaModalElencoRegate,
     );
   if (btnChiudiModalElencoRegate)
     btnChiudiModalElencoRegate.addEventListener(
       "click",
-      chiudiModalElencoRegate
+      chiudiModalElencoRegate,
     );
   if (modalElencoRegate)
     modalElencoRegate.addEventListener("click", (event) => {
@@ -551,17 +551,17 @@ function setupEventListeners() {
   if (vsrChangeModalPrimaryButton)
     vsrChangeModalPrimaryButton.addEventListener(
       "click",
-      handleVSRChangeModalPrimaryClick
+      handleVSRChangeModalPrimaryClick,
     );
   if (vsrChangeModalSecondaryButton)
     vsrChangeModalSecondaryButton.addEventListener(
       "click",
-      dismissVSRChangeModal
+      dismissVSRChangeModal,
     );
   if (btnToggleRecentEvents)
     btnToggleRecentEvents.addEventListener(
       "click",
-      popolaERendiVisibileRiepilogoEventi
+      popolaERendiVisibileRiepilogoEventi,
     );
 
   if (languageSelector) {
@@ -606,13 +606,13 @@ function getContributingGareIds(gareSalvate, dataRiferimento) {
   if (gareSalvate.length === 0) return new Set();
   const gareContributive = selezionaGareContributive(
     gareSalvate,
-    dataRiferimento
+    dataRiferimento,
   );
   const contributingIds = new Set();
   for (const tipoGara in LIMITI_GARE_PER_CATEGORIA) {
     if (Object.prototype.hasOwnProperty.call(gareContributive, tipoGara))
       gareContributive[tipoGara].forEach((gara) =>
-        contributingIds.add(gara.id)
+        contributingIds.add(gara.id),
       );
   }
   return contributingIds;
@@ -636,7 +636,7 @@ function handleDataChange() {
 function simulaImpattoNettoEVariazioneClassifica(
   garaCheCambia,
   nuovoFattoreDecadimentoSimulato,
-  anniDaAggiungere = 0 // Nuovo parametro per viaggiare nel tempo (negativo = futuro, positivo = passato)
+  anniDaAggiungere = 0, // Nuovo parametro per viaggiare nel tempo (negativo = futuro, positivo = passato)
 ) {
   const gareSalvate = JSON.parse(localStorage.getItem("gareSalvate")) || [];
   const oggi = getOggi();
@@ -681,13 +681,13 @@ function simulaImpattoNettoEVariazioneClassifica(
   const contributingIdsDopo = getContributingGareIds(gareSimulate, oggi);
   const gareContributiveDopoSimulazione = selezionaGareContributive(
     gareSimulate,
-    oggi
+    oggi,
   );
   let laGaraSimulataContribuisceAncora = false;
   for (const tipo in gareContributiveDopoSimulazione) {
     if (
       gareContributiveDopoSimulazione[tipo].some(
-        (g) => g.id === garaDaSimulare.id
+        (g) => g.id === garaDaSimulare.id,
       )
     ) {
       laGaraSimulataContribuisceAncora = true;
@@ -696,7 +696,7 @@ function simulaImpattoNettoEVariazioneClassifica(
   }
 
   const idBeneficiari = [...contributingIdsDopo].filter(
-    (id) => !contributingIdsPrima.has(id)
+    (id) => !contributingIdsPrima.has(id),
   );
   let garaBeneficiaria = null;
   if (idBeneficiari.length > 0) {
@@ -772,7 +772,7 @@ function getGareConScadenzeImminenti(serializzabile = false) {
     if (tipoEvento && dataEventoObj) {
       const simulazioneRisultato = simulaImpattoNettoEVariazioneClassifica(
         gara,
-        fattoreDecadimentoSimulato
+        fattoreDecadimentoSimulato,
       );
       scadenze.push({
         ...gara,
@@ -814,7 +814,7 @@ function mostraNotificaCambiamento(oldScore, newScore) {
     newScore: formatNumber(newScore, 0),
   });
   vsrChangeModalInstruction.textContent = getTranslation(
-    "VSR_CHANGE_MODAL_INSTRUCTION"
+    "VSR_CHANGE_MODAL_INSTRUCTION",
   );
 
   vsrChangeModal.style.display = "flex";
@@ -835,10 +835,10 @@ function popolaERendiVisibileRiepilogoEventi() {
     recentEventsSummary.style.display = "none";
     btnToggleRecentEvents.setAttribute(
       "data-i18n-key",
-      "STRATEGY_CHANGES_BUTTON_TEXT"
+      "STRATEGY_CHANGES_BUTTON_TEXT",
     );
     btnToggleRecentEvents.textContent = getTranslation(
-      "STRATEGY_CHANGES_BUTTON_TEXT"
+      "STRATEGY_CHANGES_BUTTON_TEXT",
     );
     return;
   }
@@ -878,7 +878,7 @@ function popolaERendiVisibileRiepilogoEventi() {
       const contributingIdsCorrente = getContributingGareIds(gareSalvate, oggi);
       const contributingIdsPassato = getContributingGareIds(gareSimulate, oggi);
       const idBeneficiari = [...contributingIdsCorrente].filter(
-        (id) => !contributingIdsPassato.has(id) && id !== gara.id
+        (id) => !contributingIdsPassato.has(id) && id !== gara.id,
       );
       eventiRecenti.push({
         ...gara,
@@ -908,7 +908,7 @@ function popolaERendiVisibileRiepilogoEventi() {
       const contributingIdsCorrente = getContributingGareIds(gareSalvate, oggi);
       const contributingIdsPassato = getContributingGareIds(gareSimulate, oggi);
       const idBeneficiari = [...contributingIdsCorrente].filter(
-        (id) => !contributingIdsPassato.has(id) && id !== gara.id
+        (id) => !contributingIdsPassato.has(id) && id !== gara.id,
       );
       eventiRecenti.push({
         ...gara,
@@ -938,7 +938,7 @@ function popolaERendiVisibileRiepilogoEventi() {
   });
 
   eventiRecenti.sort(
-    (a, b) => new Date(b.dataEventoEffettiva) - new Date(a.dataEventoEffettiva)
+    (a, b) => new Date(b.dataEventoEffettiva) - new Date(a.dataEventoEffettiva),
   );
 
   let htmlContent = `<h4>${getTranslation("SUMMARY_RECENT_EVENTS_TITLE")}</h4>`;
@@ -953,7 +953,7 @@ function popolaERendiVisibileRiepilogoEventi() {
       if (currentLanguage === "it") dateLocale = "it-IT";
       else if (currentLanguage === "fr") dateLocale = "fr-FR";
       const displayDate = new Date(
-        evento.dataEventoEffettiva
+        evento.dataEventoEffettiva,
       ).toLocaleDateString(dateLocale);
 
       const params = {
@@ -1032,7 +1032,7 @@ function popolaERendiVisibileRiepilogoEventi() {
     htmlContent += "</ul>";
     htmlContent += `<p class="summary-note">${getTranslation(
       "SUMMARY_LOG_NOTE",
-      { days: DURATA_RIEPILOGO_GIORNI }
+      { days: DURATA_RIEPILOGO_GIORNI },
     )}</p>`;
   }
 
@@ -1042,10 +1042,10 @@ function popolaERendiVisibileRiepilogoEventi() {
   // Se lo apriamo, cambiamo il testo del pulsante
   btnToggleRecentEvents.setAttribute(
     "data-i18n-key",
-    "STRATEGY_HIDE_CHANGES_BUTTON_TEXT"
+    "STRATEGY_HIDE_CHANGES_BUTTON_TEXT",
   );
   btnToggleRecentEvents.textContent = getTranslation(
-    "STRATEGY_HIDE_CHANGES_BUTTON_TEXT"
+    "STRATEGY_HIDE_CHANGES_BUTTON_TEXT",
   );
 }
 
@@ -1065,7 +1065,7 @@ function dismissVSRChangeModal() {
   statoVSRPrecedente = JSON.parse(JSON.stringify(statoDaSalvare));
   if (statoVSRPrecedente.timestampSalvataggio) {
     statoVSRPrecedente.timestampSalvataggio = new Date(
-      statoVSRPrecedente.timestampSalvataggio
+      statoVSRPrecedente.timestampSalvataggio,
     );
   }
 }
@@ -1075,7 +1075,7 @@ function registraPuntoStoricoVSR(punteggio) {
   if (typeof punteggio !== "number") {
     console.error(
       "Tentativo di registrare un punteggio non valido:",
-      punteggio
+      punteggio,
     );
     return;
   }
@@ -1121,7 +1121,7 @@ function aggiornaGraficoAndamentoVSR() {
     ctx.fillText(
       getTranslation("TEXT_NO_DATA_AVAILABLE"),
       canvas.width / 2,
-      canvas.height / 2
+      canvas.height / 2,
     );
     return;
   }
@@ -1155,7 +1155,7 @@ function aggiornaGraficoAndamentoVSR() {
     .sort((a, b) => a - b)
     .filter(
       (date, index, self) =>
-        index === 0 || date.getTime() !== self[index - 1].getTime()
+        index === 0 || date.getTime() !== self[index - 1].getTime(),
     );
 
   // 3. Raggruppa gli eventi troppo ravvicinati per pulire il grafico
@@ -1187,7 +1187,7 @@ function aggiornaGraficoAndamentoVSR() {
 
     // Filtra le gare per includere solo quelle concluse entro la data di calcolo
     const gareDisponibiliInData = gareSalvate.filter(
-      (g) => new Date(g.data) <= dataCalcolo
+      (g) => new Date(g.data) <= dataCalcolo,
     );
     const punteggio = getVsrScoreCalcolato(gareDisponibiliInData, dataCalcolo);
 
@@ -1219,7 +1219,7 @@ function aggiornaGraficoAndamentoVSR() {
       day: "numeric",
       month: "short",
       year: "2-digit",
-    })
+    }),
   );
 
   const dataPoints = puntiStorico.map((p) => p.punteggio);
@@ -1268,7 +1268,7 @@ function caricaStatoVSRPrecedente() {
       statoVSRPrecedente = JSON.parse(statoSalvato);
       if (statoVSRPrecedente.timestampSalvataggio) {
         statoVSRPrecedente.timestampSalvataggio = new Date(
-          statoVSRPrecedente.timestampSalvataggio
+          statoVSRPrecedente.timestampSalvataggio,
         );
       }
     } catch (e) {
@@ -1320,11 +1320,11 @@ function importaDati(event) {
         localStorage.setItem("nomeBarca", datiImportati.nomeBarca);
         localStorage.setItem(
           "classificaVsrAttuale",
-          datiImportati.classificaVsrAttuale
+          datiImportati.classificaVsrAttuale,
         );
         localStorage.setItem(
           "gareSalvate",
-          JSON.stringify(datiImportati.gareSalvate)
+          JSON.stringify(datiImportati.gareSalvate),
         );
         caricaDatiDashboard();
         handleDataChange();
@@ -1361,7 +1361,7 @@ function setupModaleAvvisoRegateListeners() {
   if (btnConfermaCaricamentoRegate)
     btnConfermaCaricamentoRegate.addEventListener(
       "click",
-      importaRegateSuggeriteConfermate
+      importaRegateSuggeriteConfermate,
     );
 }
 
@@ -1380,7 +1380,7 @@ function preparaImportazioneRegateSuggerite(event) {
     } catch (error) {
       console.error(
         "Errore durante la lettura del file delle regate suggerite:",
-        error
+        error,
       );
       alert(getTranslation("ALERT_ERROR_READING_SUGGESTED_RACES_FILE"));
       if (fileImportaRegateSuggeriteInput)
@@ -1403,7 +1403,7 @@ function importaRegateSuggeriteConfermate() {
       if (Array.isArray(datiImportati.gareSalvate)) {
         localStorage.setItem(
           "gareSalvate",
-          JSON.stringify(datiImportati.gareSalvate)
+          JSON.stringify(datiImportati.gareSalvate),
         );
         handleDataChange();
         alert(getTranslation("ALERT_SUGGESTED_RACES_IMPORTED_SUCCESSFULLY"));
@@ -1411,7 +1411,7 @@ function importaRegateSuggeriteConfermate() {
     } catch (error) {
       console.error(
         "Errore durante l'importazione confermata delle regate suggerite:",
-        error
+        error,
       );
       alert(getTranslation("ALERT_ERROR_IMPORTING_SUGGESTED_RACES_FILE"));
     } finally {
@@ -1445,10 +1445,10 @@ function chiudiModalElencoRegate() {
 
 async function caricaDatiElencoRegate() {
   infoAggiornamentoElencoRegate.textContent = getTranslation(
-    "TEXT_LOADING_RACE_LIST"
+    "TEXT_LOADING_RACE_LIST",
   );
   tbodyElencoRegateSuggerite.innerHTML = `<tr><td colspan="6" style="text-align:center;">${getTranslation(
-    "TEXT_WAIT"
+    "TEXT_WAIT",
   )}</td></tr>`;
 
   const categoryOrder = { HC: 1, LIV1: 2, LIV2: 3, LIV3: 4 };
@@ -1528,7 +1528,7 @@ async function caricaDatiElencoRegate() {
     const response = await fetch(URL_ELENCO_REGATE, { cache: "no-store" });
     if (!response.ok) {
       throw new Error(
-        `HTTP ${response.status} en chargeant la liste des régates.`
+        `HTTP ${response.status} en chargeant la liste des régates.`,
       );
     }
 
@@ -1539,7 +1539,7 @@ async function caricaDatiElencoRegate() {
       const textPeek = await response.text();
       throw new Error(
         "La ressource n’est pas un JSON valide. Aperçu: " +
-          textPeek.slice(0, 120)
+          textPeek.slice(0, 120),
       );
     }
 
@@ -1558,14 +1558,14 @@ async function caricaDatiElencoRegate() {
 
     if (!Array.isArray(elenco)) {
       throw new Error(
-        "Schéma JSON inattendu: la liste des régates n’est pas un tableau."
+        "Schéma JSON inattendu: la liste des régates n’est pas un tableau.",
       );
     }
 
     const dataAggiornamentoDatabase = toISODate(
       payload?.dataAggiornamentoDatabase ??
         payload?.updatedAt ??
-        payload?.lastUpdate
+        payload?.lastUpdate,
     );
 
     const parsedRegate = elenco
@@ -1588,10 +1588,10 @@ async function caricaDatiElencoRegate() {
   } catch (error) {
     console.error(
       "Erreur lors du chargement de l’elenco regate (JSON):",
-      error
+      error,
     );
     infoAggiornamentoElencoRegate.textContent = getTranslation(
-      "TEXT_ERROR_LOADING_RACE_LIST"
+      "TEXT_ERROR_LOADING_RACE_LIST",
     );
     tbodyElencoRegateSuggerite.innerHTML = `<tr><td colspan="6" style="text-align:center; color: red;">${error.message}</td></tr>`;
   }
@@ -1601,7 +1601,7 @@ function popolaTabellaElencoRegateSuggerite(regateProposte) {
   tbodyElencoRegateSuggerite.innerHTML = "";
   if (regateProposte.length === 0) {
     tbodyElencoRegateSuggerite.innerHTML = `<tr><td colspan="6" style="text-align:center;">${getTranslation(
-      "TEXT_NO_SUGGESTED_RACES"
+      "TEXT_NO_SUGGESTED_RACES",
     )}</td></tr>`;
     return;
   }
@@ -1610,18 +1610,18 @@ function popolaTabellaElencoRegateSuggerite(regateProposte) {
   const idGareSalvate = new Set(
     gareSalvateAttuali
       .filter((g) => g.idDatabaseMaster != null)
-      .map((g) => g.idDatabaseMaster)
+      .map((g) => g.idDatabaseMaster),
   );
   tbodyElencoRegateSuggerite.dataset.regateProposte =
     JSON.stringify(regateProposte);
   regateProposte.forEach((regata) => {
     const row = tbodyElencoRegateSuggerite.insertRow();
     row.insertCell().textContent = new Date(regata.data).toLocaleDateString(
-      "it-IT"
+      "it-IT",
     );
     row.insertCell().textContent = regata.nome;
     row.insertCell().textContent = getTranslation(
-      livelliVsrStoricoMap[regata.livello]?.chiaveTraduzione || regata.livello
+      livelliVsrStoricoMap[regata.livello]?.chiaveTraduzione || regata.livello,
     );
     row.insertCell().textContent = formatNumber(regata.puntiVSRBase, 0);
     const cellaClassifica = row.insertCell();
@@ -1652,7 +1652,7 @@ function popolaTabellaElencoRegateSuggerite(regateProposte) {
 
 function aggiungiRegataDaElencoAlloStorico(
   regataMaster,
-  classificaFinaleUtenteString
+  classificaFinaleUtenteString,
 ) {
   const classificaFinale = parseInt(classificaFinaleUtenteString, 10);
   if (isNaN(classificaFinale) || classificaFinale <= 0) {
@@ -1660,7 +1660,7 @@ function aggiungiRegataDaElencoAlloStorico(
     return;
   }
   const infoLivello = Object.values(livelliVsrStoricoMap).find(
-    (l) => l.tipo === regataMaster.livello
+    (l) => l.tipo === regataMaster.livello,
   );
   if (!infoLivello || infoLivello.valoreNumerico === null) {
     alert(getTranslation("ALERT_INVALID_RACE_LEVEL"));
@@ -1668,7 +1668,7 @@ function aggiungiRegataDaElencoAlloStorico(
   }
   const puntiVSRCalcolati = calcolaPuntiPerClassifica(
     infoLivello.valoreNumerico,
-    classificaFinale
+    classificaFinale,
   );
   const nuovaGara = {
     id: Date.now(),
@@ -1685,20 +1685,20 @@ function aggiungiRegataDaElencoAlloStorico(
   handleDataChange();
   try {
     const regateOriginali = JSON.parse(
-      tbodyElencoRegateSuggerite.dataset.regateProposte || "[]"
+      tbodyElencoRegateSuggerite.dataset.regateProposte || "[]",
     );
     popolaTabellaElencoRegateSuggerite(regateOriginali);
   } catch (e) {
     console.error(
       "Errore nel ripopolare la tabella delle regate suggerite:",
-      e
+      e,
     );
   }
   alert(
     getTranslation("MSG_RACE_ADDED_TO_HISTORY", {
       raceName: nuovaGara.nome,
       points: nuovaGara.puntiVSR,
-    })
+    }),
   );
 }
 
